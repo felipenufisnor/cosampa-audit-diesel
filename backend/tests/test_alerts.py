@@ -61,7 +61,7 @@ class TestPosDesmobilizacaoAlert:
         )
         alertas = PosDesmobilizacaoAlert().detectar(ctx)
         assert len(alertas) == 1
-        assert "dias apos desmobilizacao" in alertas[0].descricao
+        assert "dias após desmobilização" in alertas[0].descricao
 
     def test_nao_dispara_quando_sem_desmob(
         self, session, checklist_par, abastecimento_padrao, mobilizado_padrao

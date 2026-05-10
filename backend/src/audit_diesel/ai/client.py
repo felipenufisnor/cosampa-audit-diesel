@@ -103,6 +103,10 @@ class ChatClient:
     def provider(self) -> LLMProvider:
         return self._provider
 
+    @property
+    def settings(self) -> Settings:
+        return self._settings
+
     def chat(
         self,
         *,
@@ -111,10 +115,11 @@ class ChatClient:
         tool_choice: str | dict[str, Any] | None = None,
         temperature: float = 0.2,
         max_tokens: int | None = None,
+        model_override: str | None = None,
     ) -> ChatResponse:
         """Executa chat com retry/fallback. Levanta apos esgotar tentativas."""
-        primary = self._settings.llm_model
-        fallback = self._settings.llm_fallback_model
+        primary = model_override or self._settings.llm_model
+        fallback = None if model_override else self._settings.llm_fallback_model
 
         try:
             return self._chat_with_retry(

@@ -67,7 +67,7 @@ export function MetricCard({
             <Icon className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.09em] text-zinc-500">
+            <p className="text-[13px] font-bold uppercase tracking-[0.09em] text-zinc-500">
               {label}
             </p>
             <p
@@ -81,7 +81,7 @@ export function MetricCard({
           </div>
         </div>
         {hint && (
-          <p className="mt-3 text-center text-sm leading-5 text-zinc-500">{hint}</p>
+          <p className="mt-3 text-center text-[16px] leading-6 text-zinc-500">{hint}</p>
         )}
       </CardContent>
     </Card>

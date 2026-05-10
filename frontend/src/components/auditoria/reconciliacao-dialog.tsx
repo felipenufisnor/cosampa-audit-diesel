@@ -206,7 +206,7 @@ function SugestaoCard({
                 <span className="text-sm font-semibold text-zinc-950 tabular">
                   {cand.placa_ativo}
                 </span>
-                <Badge variant={variant}>conf {Math.round(conf * 100)}%</Badge>
+                <Badge variant={variant}>confiança {Math.round(conf * 100)}%</Badge>
                 <Badge variant="neutral">{cand.situacao}</Badge>
               </div>
               <p className="text-xs text-zinc-700 mt-1">

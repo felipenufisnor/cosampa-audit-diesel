@@ -16,6 +16,7 @@ class HealthzResponse(BaseModel):
     ai: str
     provider: str
     model: str
+    fallback_model: str | None
     offline: bool
     demo_mode: bool
 

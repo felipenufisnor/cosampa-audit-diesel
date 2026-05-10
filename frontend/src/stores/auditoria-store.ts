@@ -3,11 +3,11 @@
 import { create } from "zustand";
 
 interface AuditoriaSession {
-  /** Abastecimento alvo do modal de reconciliacao (null = modal fechado). */
+  /** Abastecimento alvo do modal de reconciliação (null = modal fechado). */
   reconciliacaoTargetAbastecimentoId: number | null;
   setReconciliacaoTarget: (id: number | null) => void;
 
-  /** Filtro ativo na lista de alertas da pagina /auditoria/[id]. */
+  /** Filtro ativo na lista de alertas da página /auditoria/[id]. */
   alertaFiltroTipo: "TODOS" | "NAO_CADASTRADO" | "POS_DESMOB" | "OUTLIER" | "DUPLICIDADE";
   setAlertaFiltroTipo: (
     tipo: AuditoriaSession["alertaFiltroTipo"],

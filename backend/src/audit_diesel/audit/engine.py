@@ -90,7 +90,7 @@ class AuditEngine:
         3. Filtra abastecimentos na janela.
         4. Calcula indicadores §4.
         5. Roda os 4 alertas.
-        6. Aplica regra de validacao §4.4.
+        6. Aplica regra de validação §4.4.
         7. Persiste e retorna.
         """
         ck_ant = self._carregar_checklist(nf_anterior)
@@ -110,10 +110,10 @@ class AuditEngine:
 
         indicadores = calcular_indicadores(ck_ant, ck_atu, list(abastecimentos))
 
-        # Aprovacoes de reconciliacao funcionam como "cadastro virtual": para os
-        # abastecimentos cobertos por uma aprovacao, sintetizamos um Mobilizado
-        # ja indexado pelo veiculo_normalizado do proprio abastecimento, fazendo
-        # o NaoCadastradoAlert nao disparar mais para eles.
+        # Aprovações de reconciliação funcionam como "cadastro virtual": para os
+        # abastecimentos cobertos por uma aprovação, sintetizamos um Mobilizado
+        # já indexado pelo veiculo_normalizado do próprio abastecimento, fazendo
+        # o NaoCadastradoAlert não disparar mais para eles.
         aprovacoes = self.session.exec(select(ReconciliacaoAprovada)).all()
         ab_index = {a.id: a for a in abastecimentos}
         for ap in aprovacoes:
@@ -207,5 +207,5 @@ class AuditEngine:
             select(Checklist).where(Checklist.nota_fiscal == str(nf))
         ).first()
         if ck is None:
-            raise ChecklistNaoEncontrado(f"NF {nf!r} nao encontrada no Checklist.")
+            raise ChecklistNaoEncontrado(f"NF {nf!r} não encontrada no Checklist.")
         return ck

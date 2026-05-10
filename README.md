@@ -1,20 +1,20 @@
 # audit-diesel — POC de auditoria automatizada de diesel
 
-POC para o consorcio **CLC / Rocha / Cosampa (ARCO Metropolitano JP)**. Demonstra
-como agentes deterministicos cruzam quatro sistemas (GLPI, Gestao de Projetos,
-Infleet, Auditoria Diesel) e identificam inconsistencias de abastecimento que
-hoje sao tratadas em planilhas Excel.
+POC para o consórcio **CLC / Rocha / Cosampa (ARCO Metropolitano JP)**. Demonstra
+como agentes determinísticos cruzam quatro sistemas (GLPI, Gestão de Projetos,
+Infleet, Auditoria Diesel) e identificam inconsistências de abastecimento que
+hoje são tratadas em planilhas Excel.
 
 ## Status atual
 
-- **Etapa 1 (concluido)**: ingestao + engine determinista + CLI.
-- **Etapa 2 (concluido)**: camada de IA provider-agnostica (OpenAI-compatible) +
+- **Etapa 1 (concluído)**: ingestão + engine determinista + CLI.
+- **Etapa 2 (concluído)**: camada de IA provider-agnóstica (OpenAI-compatible) +
   FastAPI + frontend Next.js com dashboard e tela de auditoria.
-- **Etapa 3 (concluido)**: gerador de PDF (WeasyPrint+Jinja2), tela `/consolidado`
-  cross-NF, modo `DEMO_MODE` com cache em disco para resiliencia da
-  apresentacao, polimento visual e roteiro de demo em `docs/roteiro_demo.md`.
+- **Etapa 3 (concluído)**: gerador de PDF (WeasyPrint+Jinja2), tela `/consolidado`
+  cross-NF, modo `DEMO_MODE` com cache em disco para resiliência da
+  apresentação, polimento visual e roteiro de demo em `docs/roteiro_demo.md`.
 
-Decisoes arquiteturais ficam registradas em [`docs/adr/`](docs/adr/).
+Decisões arquiteturais ficam registradas em [`docs/adr/`](docs/adr/).
 
 ## Stack
 
@@ -28,7 +28,7 @@ Backend:
 - tenacity (retry com backoff) + structlog (JSON logs).
 - pytest (83 testes verdes).
 
-Frontend (Dia 2):
+Frontend:
 - Next.js 16 (App Router) + TypeScript + Tailwind v4 (light-mode only, sem
   dark mode, sem emojis).
 - @tanstack/react-query para fetch/cache; zustand para estado de UI.
@@ -47,14 +47,14 @@ audit-diesel-poc/
     |-- scripts/postsync.sh
     |-- data/
     |   |-- raw/                       # xlsx originais (gitignored)
-    |   +-- audit.db                   # gerado pela ingestao (gitignored)
+    |   +-- audit.db                   # gerado pela ingestão (gitignored)
     |-- src/audit_diesel/
     |   |-- config.py
     |   |-- models.py
     |   |-- ingestion/                 # normalizers, infleet, mobilizados, checklist, pipeline
     |   |-- audit/
     |   |   |-- indicators.py          # formulas §4 do escopo
-    |   |   |-- alerts/                # 4 checagens deterministicas
+    |   |   |-- alerts/                # 4 checagens determinísticas
     |   |   +-- engine.py
     |   +-- cli.py
     +-- tests/                         # 69 testes
@@ -108,10 +108,10 @@ uv run audit-diesel listar-nfs
 # 3) Roda a auditoria entre duas NFs sequenciais:
 uv run audit-diesel auditar --nf-anterior 8108 --nf-atual 8187
 
-# 4) Mesma auditoria, mas em JSON (consumo programatico, p.ex. pelo front no Dia 2):
+# 4) Mesma auditoria, mas em JSON (consumo programático, p.ex. pelo front):
 uv run audit-diesel auditar --nf-anterior 8108 --nf-atual 8187 --json > out.json
 
-# 5) Estatisticas globais do banco:
+# 5) Estatísticas globais do banco:
 uv run audit-diesel stats
 ```
 
@@ -127,12 +127,12 @@ diferenca                       = saidas_registradas - saida_teorica
 diferenca_pct                   = diferenca / saida_teorica
 ```
 
-Regra de validacao final (§4.4): `APROVADO` se `abs(diferenca_pct) < 2%` **e**
-nenhum equipamento nao cadastrado; senao `INCONSISTENTE`.
+Regra de validação final (§4.4): `APROVADO` se `abs(diferenca_pct) < 2%` **e**
+nenhum equipamento não cadastrado; senão `INCONSISTENTE`.
 
-> TODO de validacao com cliente: o escopo §4.1 cita "Quantidade Descarregada"
-> como sinonimo da quantidade da NF; usamos `quantidade_nf_litros`. Confirmar
-> se ha cenarios em que `volume_conferido` deve substituir esse campo.
+> TODO de validação com cliente: o escopo §4.1 cita "Quantidade Descarregada"
+> como sinônimo da quantidade da NF; usamos `quantidade_nf_litros`. Confirmar
+> se há cenários em que `volume_conferido` deve substituir esse campo.
 
 ## Alertas implementados
 
@@ -151,7 +151,7 @@ arquivos; `CTA` esta vazia neste dataset; e `Auditoria`, `Controle de
 Combustiveis` e `Previsao` sao templates internos sem dados-fonte. A POC le
 direto das fontes originais.
 
-## API HTTP (Dia 2)
+## API HTTP
 
 ```bash
 cd backend
@@ -164,25 +164,25 @@ Endpoints principais (todos documentados via OpenAPI):
 | Metodo + path                          | Resumo |
 |----------------------------------------|--------|
 | `GET  /healthz`                        | Status do DB e do provider de LLM |
-| `GET  /stats`                          | Numeros agregados do dashboard |
-| `GET  /nfs`                            | Listagem de NFs com ultima auditoria |
-| `GET  /nfs/{nota_fiscal}`              | Detalhe + historico |
+| `GET  /stats`                          | Números agregados do dashboard |
+| `GET  /nfs`                            | Listagem de NFs com última auditoria |
+| `GET  /nfs/{nota_fiscal}`              | Detalhe + histórico |
 | `POST /auditorias`                     | Roda engine + parecer da IA |
 | `GET  /auditorias/{id}`                | Recupera auditoria persistida |
-| `POST /reconciliacao/sugerir`          | Pede sugestoes de match para nao-cadastrados |
-| `POST /reconciliacao/aprovar`          | Vincula abastec.->mobilizado, re-roda auditoria |
+| `POST /reconciliacao/sugerir`          | Pede sugestões de match para não cadastrados |
+| `POST /reconciliacao/aprovar`          | Vincula abastecimento a mobilizado e re-roda a auditoria |
 | `GET  /auditorias/{id}/pdf`            | Gera PDF oficial da auditoria (WeasyPrint) |
 | `GET  /auditorias/consolidado`         | Resumo cross-NF com agregados + alertas resumidos |
-| `GET  /auditorias/consolidado.csv`     | Mesmo conteudo em CSV (BOM UTF-8 para Excel) |
+| `GET  /auditorias/consolidado.csv`     | Mesmo conteúdo em CSV (BOM UTF-8 para Excel) |
 
-Curl realmente executado contra o backend (modo offline) esta em
+Curl realmente executado contra o backend (modo offline) está em
 `backend/scripts/manual_test.http`.
 
 ## Camada de IA
 
-Provider-agnostica: o codigo fala dialeto **OpenAI Chat Completions**, com
-`base_url` e `api_key` configuraveis. Compatibilidade futura com LangChain /
-Vercel AI SDK / LiteLLM eh natural porque todos seguem essa interface.
+Provider-agnóstica: o código fala dialeto **OpenAI Chat Completions**, com
+`base_url` e `api_key` configuráveis. Compatibilidade futura com LangChain /
+Vercel AI SDK / LiteLLM é natural porque todos seguem essa interface.
 
 Configuracao via `.env` (modelos exemplares):
 
@@ -194,52 +194,94 @@ LLM_MODEL=qwen/qwen3-32b
 LLM_FALLBACK_MODEL=
 LLM_REQUEST_TIMEOUT_S=60
 LLM_MAX_RETRIES=3
-AUDIT_AI_OFFLINE=1     # forca uso de fixtures determinisicas (sem rede)
+AUDIT_AI_OFFLINE=1     # força uso de fixtures determinísticas (sem rede)
 ```
 
-Dois servicos em cima do client:
+### Runbook: IA real com OpenRouter
+
+Use `backend/.env.openrouter.example` como base e copie para `backend/.env`.
+Nunca commite chaves; se uma chave aparecer em chat, print ou log, rotacione
+antes de usar em ambiente real.
+
+Modo demo/offline, recomendado para apresentação e CI:
+
+```bash
+AUDIT_AI_OFFLINE=1 DEMO_MODE=true \
+  uv run uvicorn audit_diesel.api.main:app --port 8000
+```
+
+Modo real, recomendado para calibração Qwen/DeepSeek:
+
+```bash
+AUDIT_AI_OFFLINE=0 DEMO_MODE=off \
+LLM_PROVIDER=openrouter \
+LLM_BASE_URL=https://openrouter.ai/api/v1 \
+LLM_API_KEY=<rotated_openrouter_key> \
+LLM_MODEL=qwen/qwen3-32b \
+LLM_FALLBACK_MODEL=deepseek/deepseek-chat \
+  uv run uvicorn audit_diesel.api.main:app --port 8000
+```
+
+Confirme o estado em `GET /healthz`:
+
+- `ai=offline_fixture` / `offline=true`: sem rede, usando fixtures.
+- `ai=configured` / `offline=false`: provider real configurado.
+- `model`: modelo primário ativo; `fallback_model`: fallback configurado.
+
+Smoke/calibração real:
+
+```bash
+cd backend
+AUDIT_AI_OFFLINE=0 DEMO_MODE=off LLM_API_KEY=<rotated_openrouter_key> \
+  uv run python scripts/calibrar_llm_real.py
+```
+
+O relatório sai em `backend/data/llm_calibration/` (gitignored), com latência,
+tokens, validação dos guardrails e contagem de sugestões sem match.
+
+Dois serviços em cima do client:
 
 - **ReconciliadorSemantico** (`audit_diesel.ai.reconciliador`): batches de
-  ate 20 abastecimentos por chamada, candidatos pre-filtrados por obra +
+  até 20 abastecimentos por chamada, candidatos pré-filtrados por obra +
   identificador, output via tool calling (`registrar_sugestoes`) com schema
   JSON estrito validado por pydantic.
 - **GeradorParecer** (`audit_diesel.ai.parecer`): markdown estruturado em 4
-  blocos (Resultado / Causa mais provavel / Recomendacao / Risco financeiro),
-  <= 220 palavras, pt-BR tecnico.
+  blocos (Resultado / Causa mais provável / Recomendação / Risco financeiro),
+  <= 220 palavras, pt-BR técnico.
 
-Modo offline usa fixtures que mimetizam um modelo Qwen razoavel (matching
-deterministico baseado em normalizacao de identificadores e em substring de
+Modo offline usa fixtures que mimetizam um modelo Qwen razoável (matching
+determinístico baseado em normalização de identificadores e em substring de
 apelido x equipamento). Usado em desenvolvimento e em CI; basta zerar
 `AUDIT_AI_OFFLINE` e setar `LLM_API_KEY` para chavear para um provider real.
 
-### Pareceres reais nas 3 NFs auditaveis
+### Pareceres reais nas 3 NFs auditáveis
 
-Saida completa em `backend/scripts/pareceres_3nfs.txt`. Exemplo (8108 -> 8187):
+Saída completa em `backend/scripts/pareceres_3nfs.txt`. Exemplo (8108 -> 8187):
 
 ```
 **Resultado**
-INCONSISTENTE: diferenca de +0.39% entre saidas Infleet e saida teorica;
+INCONSISTENTE: diferença de +0.39% entre saídas Infleet e saída teórica;
 36 equipamento(s) sem cadastro no GP.
 
-**Causa mais provavel**
-Situacao 3 (alta quantidade de nao-cadastrados). 36 abastecimentos da
+**Causa mais provável**
+Situação 3 (alta quantidade de não cadastrados). 36 abastecimentos da
 janela ocorreram em equipamentos sem cadastro correspondente no GP,
-dominando o sinal de inconsistencia (diferenca de 71.7 L / +0.39%).
+dominando o sinal de inconsistência (diferença de 71.7 L / +0.39%).
 
-**Recomendacao ao auditor**
-1. Cobre a insercao no GP dos 36 equipamento(s) abastecido(s) sem cadastro
+**Recomendação ao auditor**
+1. Cobre a inserção no GP dos 36 equipamento(s) abastecido(s) sem cadastro
    durante a janela.
-2. Solicite a obra a relacao de saidas de comboio nao registradas no
+2. Solicite à obra a relação de saídas de comboio não registradas no
    Infleet entre o descarregamento da NF anterior e a NF 8187.
 3. Confirme com o estoquista os valores de tanque e comboio informados no
-   checklist da NF 8187 antes de fechar o mes.
+   checklist da NF 8187 antes de fechar o mês.
 
 **Risco financeiro associado**
 R$ 32.924,16 em alertas de alta severidade na janela (custo dos
-abastecimentos nao cadastrados e pos-desmobilizacao).
+abastecimentos não cadastrados e pós-desmobilização).
 ```
 
-## Frontend (Dia 2)
+## Frontend
 
 ```bash
 cd frontend
@@ -251,54 +293,54 @@ pnpm lint                                  # ESLint estrito
 ```
 
 Telas:
-- `/` — Dashboard com 4 stat-cards (Total abastecido, Custo nao cadastrado,
-  NFs no periodo, Equipamentos cadastrados) + tabela das 4 NFs com badges
+- `/` — Dashboard com 4 stat-cards (Total abastecido, Custo não cadastrado,
+  NFs no período, Equipamentos cadastrados) + tabela das 4 NFs com badges
   de status. "Auditar" abre modal pra escolher a NF anterior; ao confirmar,
-  navega para `/auditoria/[id]` em ate ~2s.
+  navega para `/auditoria/[id]` em até ~2s.
 - `/auditoria/[id]` — Janela temporal NF anterior -> atual; bloco de
-  indicadores §4 com layout fiel a planilha original (duas colunas
-  comparando NF anterior vs atual, e bloco com saida teorica / saidas
-  registradas / diferenca); lista de alertas filtravel por tipo,
-  ordenavel por severidade ou impacto financeiro; sidebar fixa com o
+  indicadores §4 com layout fiel à planilha original (duas colunas
+  comparando NF anterior vs atual, e bloco com saída teórica / saídas
+  registradas / diferença); lista de alertas filtrável por tipo,
+  ordenável por severidade ou impacto financeiro; sidebar fixa com o
   parecer da IA renderizado em markdown.
-- Modal de Reconciliacao — disparado pelo botao "Reconciliar" num alerta
-  "Nao cadastrado". Lista sugestoes da IA com badge de confianca
+- Modal de Reconciliação — disparado pelo botão "Reconciliar" num alerta
+  "Não cadastrado". Lista sugestões da IA com badge de confiança
   (verde >=0.85 / ambar 0.65-0.84 / cinza < 0.65). Ao aprovar, fecha o
-  modal, faz re-fetch automatico da auditoria via react-query e os
-  contadores caem (engine reusa o vinculo aprovado como "cadastro virtual").
+  modal, faz re-fetch automático da auditoria via react-query e os
+  contadores caem (engine reusa o vínculo aprovado como "cadastro virtual").
 
-## Dia 3: PDF, visao consolidada e DEMO_MODE
+## PDF, visão consolidada e DEMO_MODE
 
 ### Gerador de PDF
 
 `GET /auditorias/{id}/pdf` retorna `application/pdf` com nome
 `auditoria_NF_{nf_atual}_{YYYYMMDD}.pdf`. Layout em A4 retrato, com:
 
-- Bloco de identificacao (obra, fornecedor, data, NF, valores).
-- Bloco de indicadores §4 com layout fiel a aba "AUDITORIA DO DIESEL_0"
+- Bloco de identificação (obra, fornecedor, data, NF, valores).
+- Bloco de indicadores §4 com layout fiel à aba "AUDITORIA DO DIESEL_0"
   da planilha original (duas colunas comparando NF anterior vs atual).
-- Bloco de validacao final em destaque (APROVADO / INCONSISTENTE).
+- Bloco de validação final em destaque (APROVADO / INCONSISTENTE).
 - Tabela de alertas agrupada por tipo, severidade em peso (B&W safe).
-- Bloco "Parecer Tecnico — IA" com markdown convertido em HTML simples.
-- Lista de reconciliacoes aprovadas no ciclo, com auditor, timestamp e
+- Bloco "Parecer Técnico — IA" com markdown convertido em HTML simples.
+- Lista de reconciliações aprovadas no ciclo, com auditor, timestamp e
   justificativa.
-- Rodape com paginacao + hash sha256 dos indicadores (rastreabilidade).
+- Rodapé com paginação + hash sha256 dos indicadores (rastreabilidade).
 
 Templates em `backend/src/audit_diesel/api/templates/`. Render em
-`backend/src/audit_diesel/api/pdf.py`. Decisoes em
+`backend/src/audit_diesel/api/pdf.py`. Decisões em
 [`docs/adr/0003-pdf-via-weasyprint.md`](docs/adr/0003-pdf-via-weasyprint.md).
 
 ### Tela `/consolidado`
 
-Visao cross-NF com 6 stats cards (Total auditado, Diferenca total
-detectada, Total de alertas, Aprovadas, Inconsistentes, Reconciliacoes
+Visão cross-NF com 6 stats cards (Total auditado, Diferença total
+detectada, Total de alertas, Aprovadas, Inconsistentes, Reconciliações
 pendentes) e tabela com todas as 4 NFs (filtros por status, busca por
-NF/obra, ordenacao por qualquer coluna numerica). Botao "Exportar CSV"
+NF/obra, ordenação por qualquer coluna numérica). Botão "Exportar CSV"
 chama `/auditorias/consolidado.csv`.
 
-### DEMO_MODE (resiliencia da apresentacao)
+### DEMO_MODE (resiliência da apresentação)
 
-Tres modos via env var `DEMO_MODE`:
+Três modos via env var `DEMO_MODE`:
 
 | Valor    | Comportamento |
 | -------- | ------------- |
@@ -323,7 +365,7 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib \
 
 O script:
 1. Roda as 3 auditorias da demo (8108→8187, 8187→8278, 8278→8328).
-2. Gera parecer + sugestoes de reconciliacao usando o offline provider.
+2. Gera parecer + sugestões de reconciliação usando o offline provider.
 3. Persiste cada resposta em `data/demo_cache/`.
 4. Gera os PDFs amostra em `data/pdfs_amostra/`.
 
@@ -339,24 +381,24 @@ DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib \
 ```
 
 Verifique `curl http://localhost:8000/healthz` retornando
-`"demo_mode": true`. O frontend exibira um badge discreto "Modo
-demonstracao" no canto inferior direito enquanto este modo estiver
+`"demo_mode": true`. O frontend exibirá um badge discreto "Modo
+demonstração" no canto inferior direito enquanto este modo estiver
 ativo.
 
 ### Screenshots para o roteiro
 
-Capturas a serem feitas (a sugestao e zoom 110% no Chrome, viewport
+Capturas a serem feitas (a sugestão é zoom 110% no Chrome, viewport
 ~1440x900) — guarde em `docs/screenshots/`:
 
 1. `01_dashboard.png` — Tela `/` com os 4 stats cards e tabela das NFs.
 2. `02_auditoria_indicadores.png` — Tela `/auditoria/{id}` mostrando o
    bloco de indicadores §4 e o parecer da IA na coluna direita.
-3. `03_auditoria_alertas.png` — Mesma tela, rolada ate a lista de
+3. `03_auditoria_alertas.png` — Mesma tela, rolada até a lista de
    alertas, com um alerta de tipo NAO_CADASTRADO em foco.
-4. `04_modal_reconciliacao.png` — Modal de reconciliacao aberto, com
-   sugestoes e seus chips de confianca.
+4. `04_modal_reconciliacao.png` — Modal de reconciliação aberto, com
+   sugestões e seus chips de confiança.
 5. `05_pdf_pagina_1.png` — Captura do PDF aberto numa nova aba (apenas
-   a primeira pagina, mostrando indicadores + validacao).
+   a primeira página, mostrando indicadores + validação).
 6. `06_consolidado.png` — Tela `/consolidado` com filtro "todas",
    mostrando os 6 stats cards e a tabela das 4 NFs.
 
@@ -367,12 +409,12 @@ cd backend
 uv run pytest          # 83 testes, ~5s
 ```
 
-## Output de referencia (NF 8108 -> NF 8187)
+## Output de referência (NF 8108 -> NF 8187)
 
 - Janela: 05/03/2026 10:10 -> 13/03/2026 08:50
-- Saida teorica: 18.270,30 L
-- Saidas registradas (Infleet): 18.342,00 L
-- Diferenca: +71,70 L (+0,39%)
-- Equipamentos nao cadastrados: 36
-- Validacao final: **INCONSISTENTE**
+- Saída teórica: 18.270,30 L
+- Saídas registradas (Infleet): 18.342,00 L
+- Diferença: +71,70 L (+0,39%)
+- Equipamentos não cadastrados: 36
+- Validação final: **INCONSISTENTE**
 - Alertas: 38 (36 NAO_CADASTRADO + 1 OUTLIER + 1 DUPLICIDADE)

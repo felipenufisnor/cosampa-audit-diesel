@@ -10,6 +10,7 @@ export interface Healthz {
   ai: string;
   provider: string;
   model: string;
+  fallback_model: string | null;
   offline: boolean;
   demo_mode: boolean;
 }

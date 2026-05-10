@@ -4,16 +4,16 @@ Rode com:
     DEMO_MODE=record uv run python scripts/popular_cache_demo.py
 
 O script:
-  1. Forca AUDIT_AI_OFFLINE=1 (usa as fixtures determinisicas do offline
-     provider; nao gasta tokens nem depende de internet).
+  1. Força AUDIT_AI_OFFLINE=1 (usa as fixtures determinísticas do offline
+     provider; não gasta tokens nem depende de internet).
   2. Para cada par (8108->8187, 8187->8278, 8278->8328):
      a. Roda a auditoria via AuditEngine + GeradorParecer (gera parecer e
         grava em parecer_NF_{nf_atual}_anterior_{nf_anterior}.json).
-     b. Roda o ReconciliadorSemantico (grava sugestoes em
+     b. Roda o ReconciliadorSemantico (grava sugestões em
         reconciliacao_par_{nf_atual}_anterior_{nf_anterior}.json).
   3. Renderiza o PDF de cada auditoria em `data/pdfs_amostra/`.
 
-Apos rodar uma vez, o backend pode subir com DEMO_MODE=true e respondera
+Após rodar uma vez, o backend pode subir com DEMO_MODE=true e responderá
 a partir do cache, sem chamar nenhum provider externo.
 
 Idempotente: pode ser rodado quantas vezes quiser (sobrescreve o cache).
@@ -106,7 +106,7 @@ def main() -> int:
                     f" provider={par.provider}"
                 )
 
-                # 2) Reconciliacao (so faz sentido se ha alertas NAO_CADASTRADO).
+                # 2) Reconciliação (só faz sentido se há alertas NAO_CADASTRADO).
                 rec = ReconciliadorSemantico(session=session, client=chat)
                 sugestoes = rec.sugerir_para_auditoria(int(resultado.auditoria.id or 0))
                 _print(f"[reconc] sugestoes={len(sugestoes)}")
@@ -119,7 +119,7 @@ def main() -> int:
                 ).first()
                 if checklist is None:
                     raise RuntimeError(
-                        f"Checklist da NF {resultado.auditoria.nf_atual} nao "
+                        f"Checklist da NF {resultado.auditoria.nf_atual} não "
                         "encontrado para o PDF."
                     )
                 alertas = list(
@@ -129,7 +129,7 @@ def main() -> int:
                         )
                     ).all()
                 )
-                # Reconciliacoes ja aprovadas relativas a esse par (se houver).
+                # Reconciliações já aprovadas relativas a esse par (se houver).
                 aprovacoes = list(
                     session.exec(
                         select(ReconciliacaoAprovada).order_by(

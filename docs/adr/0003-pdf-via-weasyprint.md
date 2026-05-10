@@ -42,8 +42,8 @@ parametriza, monta o HTML autonomo (CSS inline) e chama
 
 ## Consequencias
 
-- Relatorio com aparencia de documento oficial em < 1s para 1 pagina A4.
-- Hash sha256 dos indicadores entra no rodape via `string-set` do CSS,
+- Relatório com aparência de documento oficial em < 1s para 1 página A4.
+- Hash sha256 dos indicadores entra no rodapé via `string-set` do CSS,
   garantindo rastreabilidade visual.
 - Em macOS, todos os scripts/tarefas que disparam o WeasyPrint precisam
   do `DYLD_FALLBACK_LIBRARY_PATH`. Documentado no README.

@@ -40,8 +40,8 @@ def test_parecer_contem_4_blocos_e_eh_curto():
     md = p.markdown
     for bloco in (
         "**Resultado**",
-        "**Causa mais provavel**",
-        "**Recomendacao ao auditor**",
+        "**Causa mais provável**",
+        "**Recomendação ao auditor**",
         "**Risco financeiro associado**",
     ):
         assert bloco in md, f"bloco ausente: {bloco}"
@@ -50,17 +50,17 @@ def test_parecer_contem_4_blocos_e_eh_curto():
 
 def test_parecer_situacao_3_quando_dominam_nao_cadastrados():
     p = _gerador().gerar(_payload(diff_pct=0.005, qtd_nao_cad=20))
-    assert "Situacao 3" in p.markdown
+    assert "Situação 3" in p.markdown
 
 
 def test_parecer_situacao_2_quando_diferenca_alta():
     p = _gerador().gerar(_payload(diff_pct=0.10, qtd_nao_cad=2))
-    assert "Situacao 2" in p.markdown
+    assert "Situação 2" in p.markdown
 
 
 def test_parecer_situacao_1_quando_tudo_pequeno():
     p = _gerador().gerar(_payload(diff_pct=0.01, qtd_nao_cad=1))
-    assert "Situacao 1" in p.markdown
+    assert "Situação 1" in p.markdown
 
 
 def test_parecer_metadata_offline():

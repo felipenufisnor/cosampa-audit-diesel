@@ -158,7 +158,7 @@ function Header({
             title="Marca a auditoria como aprovada após validação manual com a obra"
           >
             <CheckCircle2 className="h-4 w-4" aria-hidden />
-            Aprovar auditoria
+            Aprovar
           </Button>
         )}
         <Button
@@ -169,11 +169,12 @@ function Header({
           title="Gera o relatório em PDF pronto para arquivamento"
         >
           <FileDown className="h-4 w-4" aria-hidden />
-          Gerar PDF de auditoria
+          Gerar PDF
         </Button>
         <StatusBadge
           status={ind.validacao_final}
           aprovadaManualmente={aprovadaManualmente}
+          className="h-9 min-w-[190px] justify-center px-4 text-sm"
         />
       </div>
       <AprovarDialog

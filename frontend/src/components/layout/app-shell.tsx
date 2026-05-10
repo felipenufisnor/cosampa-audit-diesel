@@ -32,7 +32,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-app-bg md:grid md:grid-cols-[240px_1fr]">
       <SidebarConteudo
         pathname={pathname}
-        className="hidden md:flex md:flex-col bg-brand-sidebar text-brand-primary-dark"
+        className="hidden md:flex md:flex-col bg-brand-primary-light/55 text-brand-primary-dark"
       />
 
       {drawerAberto && (
@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-brand-sidebar text-brand-primary-dark shadow-2xl transition-transform duration-200 md:hidden",
+          "fixed inset-y-0 left-0 z-50 w-64 bg-brand-primary-light/55 text-brand-primary-dark shadow-2xl transition-transform duration-200 md:hidden",
           drawerAberto ? "translate-x-0" : "-translate-x-full",
         )}
         aria-hidden={!drawerAberto}
@@ -70,7 +70,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex flex-col min-h-screen">
-        <header className="min-h-16 border-b border-app-border bg-white/95 px-4 py-3 shadow-[0_1px_0_rgba(15,23,42,0.03)] backdrop-blur md:px-8 flex items-center justify-between gap-4">
+        <header className="min-h-16 border-b border-app-border bg-brand-primary-light/55 px-4 py-3 shadow-[0_1px_0_rgba(15,23,42,0.03)] backdrop-blur md:px-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <button
               type="button"
@@ -87,7 +87,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="hidden sm:block md:hidden shrink-0"
             />
             <div className="min-w-0 flex-1">
-              <h1 className="text-base font-bold leading-snug tracking-tight text-zinc-950 sm:text-xl lg:text-2xl">
+              <h1 className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-primary-dark/70">
                 {APP_TITLE}
               </h1>
             </div>
@@ -115,7 +115,7 @@ function SidebarConteudo({
         <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-primary-dark/70">
           Controle técnico
         </p>
-        <p className="mt-1 text-sm font-semibold leading-snug text-brand-primary-dark">
+        <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-primary-dark/70">
           Auditoria de diesel
         </p>
       </div>
@@ -177,7 +177,7 @@ function CosampaLogo({
 
 function AppFooter() {
   return (
-    <footer className="mt-auto border-t border-app-border bg-white/70 px-4 py-3 md:px-8">
+    <footer className="mt-auto border-t border-app-border bg-brand-primary-light/55 px-4 py-3 md:px-8">
       <div className="flex items-center justify-center">
         <Image
           src="/brand/logo-tarea.svg"

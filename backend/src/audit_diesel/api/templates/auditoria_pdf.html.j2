@@ -17,12 +17,12 @@
 <h1>Auditoria de Diesel &mdash; NF {{ auditoria.nf_atual }}</h1>
 <p class="muted small">
   Documento gerado automaticamente pela ferramenta audit-diesel a partir das
-  fontes Checklist (GLPI), Mobilizados (Gestao de Projetos) e Infleet
-  (Telemetria). Os indicadores reproduzem a logica da aba "AUDITORIA DO
+  fontes Checklist (GLPI), Mobilizados (Gestão de Projetos) e Infleet
+  (Telemetria). Os indicadores reproduzem a lógica da aba "AUDITORIA DO
   DIESEL_0" da planilha de controle interna.
 </p>
 
-<h2 class="section-title">1. Identificacao</h2>
+<h2 class="section-title">1. Identificação</h2>
 <table class="id-table">
   <tr>
     <td class="label">Obra</td><td class="value">{{ auditoria.nome_obra }}</td>
@@ -58,10 +58,10 @@
 <h2 class="section-title">3. Alertas detectados</h2>
 {% include "_components/alertas_section.html.j2" %}
 
-<h2 class="section-title">4. Parecer Tecnico &mdash; IA</h2>
+<h2 class="section-title">4. Parecer Técnico &mdash; IA</h2>
 {% include "_components/parecer_section.html.j2" %}
 
-<h2 class="section-title">5. Reconciliacoes aprovadas no ciclo</h2>
+<h2 class="section-title">5. Reconciliações aprovadas no ciclo</h2>
 {% if reconciliacoes %}
 <ul class="recon-list">
   {% for r in reconciliacoes %}
@@ -75,7 +75,7 @@
       vinculado ao mobilizado <strong>#{{ r.mobilizado_id }}</strong>
       ({{ r.mobilizado_label }})
       {% if r.confianca is not none %}
-        &middot; confianca {{ '%.0f' | format(r.confianca * 100) }}%
+        &middot; confiança {{ '%.0f' | format(r.confianca * 100) }}%
       {% endif %}
     </div>
     {% if r.justificativa %}
@@ -85,7 +85,7 @@
   {% endfor %}
 </ul>
 {% else %}
-<p class="empty-note">Nenhuma reconciliacao aprovada para esta auditoria.</p>
+<p class="empty-note">Nenhuma reconciliação aprovada para esta auditoria.</p>
 {% endif %}
 
 </body>

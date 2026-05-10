@@ -1,15 +1,15 @@
-"""Cache de respostas da IA para o modo demonstracao.
+"""Cache de respostas da IA para o modo demonstração.
 
-Motivacao: durante a apresentacao, latencia da API externa, falha de rede
-ou variacao da resposta do LLM sao riscos inaceitaveis. Este modulo grava
-em disco as respostas do parecer e da reconciliacao indexadas pelos inputs
-estaveis (par de NFs, id da auditoria) e devolve-as instantaneamente quando
+Motivação: durante a apresentação, latência da API externa, falha de rede
+ou variação da resposta do LLM são riscos inaceitáveis. Este módulo grava
+em disco as respostas do parecer e da reconciliação indexadas pelos inputs
+estáveis (par de NFs, id da auditoria) e devolve-as instantaneamente quando
 `DEMO_MODE=true`.
 
 Comportamento por modo:
   - off (default): no-op; tudo passa direto.
   - record: chama o provider normalmente e GRAVA o resultado no cache.
-  - true: tenta LER do cache; se nao tiver, chama o provider e grava (mais
+  - true: tenta LER do cache; se não tiver, chama o provider e grava (mais
     flexivel que strict-replay, mantem o sistema funcional fora da demo).
 
 Os arquivos sao JSON simples e legiveis para que o time consiga revisar e

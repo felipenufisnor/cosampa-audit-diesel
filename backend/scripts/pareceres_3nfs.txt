@@ -1,56 +1,56 @@
 ============================================================
 NF anterior=8108 atual=8187
 ============================================================
-Validacao: INCONSISTENTE  Diferenca: +0.39%  NaoCadastrados: 36
+Validação: INCONSISTENTE  Diferença: +0.39%  Não cadastrados: 36
 
 **Resultado**
-INCONSISTENTE: diferenca de +0.39% entre saidas Infleet e saida teorica; 36 equipamento(s) sem cadastro no GP.
+INCONSISTENTE: diferença de +0.39% entre saídas Infleet e saída teórica; 36 equipamento(s) sem cadastro no GP.
 
-**Causa mais provavel**
-Situacao 3 (alta quantidade de nao-cadastrados). 36 abastecimentos da janela ocorreram em equipamentos sem cadastro correspondente no GP, dominando o sinal de inconsistencia (diferenca de 71.7 L / +0.39%).
+**Causa mais provável**
+Situação 3 (alta quantidade de não cadastrados). 36 abastecimentos da janela ocorreram em equipamentos sem cadastro correspondente no GP, dominando o sinal de inconsistência (diferença de 71.7 L / +0.39%).
 
-**Recomendacao ao auditor**
-1. Cobre a insercao no GP dos 36 equipamento(s) abastecido(s) sem cadastro durante a janela.
-2. Solicite a obra a relacao de saidas de comboio nao registradas no Infleet entre o descarregamento da NF anterior e a NF 8187.
-3. Confirme com o estoquista os valores de tanque e comboio informados no checklist da NF 8187 antes de fechar o mes.
+**Recomendação ao auditor**
+1. Cobre a inserção no GP dos 36 equipamento(s) abastecido(s) sem cadastro durante a janela.
+2. Solicite à obra a relação de saídas de comboio não registradas no Infleet entre o descarregamento da NF anterior e a NF 8187.
+3. Confirme com o estoquista os valores de tanque e comboio informados no checklist da NF 8187 antes de fechar o mês.
 
 **Risco financeiro associado**
-R$ 32.924,16 em alertas de alta severidade na janela (custo dos abastecimentos nao cadastrados e pos-desmobilizacao).
+R$ 32.924,16 em alertas de alta severidade na janela (custo dos abastecimentos não cadastrados e pós-desmobilização).
 
 ============================================================
 NF anterior=8187 atual=8278
 ============================================================
-Validacao: INCONSISTENTE  Diferenca: +1.40%  NaoCadastrados: 38
+Validação: INCONSISTENTE  Diferença: +1.40%  Não cadastrados: 38
 
 **Resultado**
-INCONSISTENTE: diferenca de +1.40% entre saidas Infleet e saida teorica; 38 equipamento(s) sem cadastro no GP.
+INCONSISTENTE: diferença de +1.40% entre saídas Infleet e saída teórica; 38 equipamento(s) sem cadastro no GP.
 
-**Causa mais provavel**
-Situacao 3 (alta quantidade de nao-cadastrados). 38 abastecimentos da janela ocorreram em equipamentos sem cadastro correspondente no GP, dominando o sinal de inconsistencia (diferenca de 199.0 L / +1.40%).
+**Causa mais provável**
+Situação 3 (alta quantidade de não cadastrados). 38 abastecimentos da janela ocorreram em equipamentos sem cadastro correspondente no GP, dominando o sinal de inconsistência (diferença de 199.0 L / +1.40%).
 
-**Recomendacao ao auditor**
-1. Cobre a insercao no GP dos 38 equipamento(s) abastecido(s) sem cadastro durante a janela.
-2. Solicite a obra a relacao de saidas de comboio nao registradas no Infleet entre o descarregamento da NF anterior e a NF 8278.
-3. Confirme com o estoquista os valores de tanque e comboio informados no checklist da NF 8278 antes de fechar o mes.
+**Recomendação ao auditor**
+1. Cobre a inserção no GP dos 38 equipamento(s) abastecido(s) sem cadastro durante a janela.
+2. Solicite à obra a relação de saídas de comboio não registradas no Infleet entre o descarregamento da NF anterior e a NF 8278.
+3. Confirme com o estoquista os valores de tanque e comboio informados no checklist da NF 8278 antes de fechar o mês.
 
 **Risco financeiro associado**
-R$ 25.997,55 em alertas de alta severidade na janela (custo dos abastecimentos nao cadastrados e pos-desmobilizacao).
+R$ 25.997,55 em alertas de alta severidade na janela (custo dos abastecimentos não cadastrados e pós-desmobilização).
 
 ============================================================
 NF anterior=8278 atual=8328
 ============================================================
-Validacao: INCONSISTENTE  Diferenca: +0.26%  NaoCadastrados: 35
+Validação: INCONSISTENTE  Diferença: +0.26%  Não cadastrados: 35
 
 **Resultado**
-INCONSISTENTE: diferenca de +0.26% entre saidas Infleet e saida teorica; 35 equipamento(s) sem cadastro no GP.
+INCONSISTENTE: diferença de +0.26% entre saídas Infleet e saída teórica; 35 equipamento(s) sem cadastro no GP.
 
-**Causa mais provavel**
-Situacao 3 (alta quantidade de nao-cadastrados). 35 abastecimentos da janela ocorreram em equipamentos sem cadastro correspondente no GP, dominando o sinal de inconsistencia (diferenca de 36.0 L / +0.26%).
+**Causa mais provável**
+Situação 3 (alta quantidade de não cadastrados). 35 abastecimentos da janela ocorreram em equipamentos sem cadastro correspondente no GP, dominando o sinal de inconsistência (diferença de 36.0 L / +0.26%).
 
-**Recomendacao ao auditor**
-1. Cobre a insercao no GP dos 35 equipamento(s) abastecido(s) sem cadastro durante a janela.
-2. Solicite a obra a relacao de saidas de comboio nao registradas no Infleet entre o descarregamento da NF anterior e a NF 8328.
-3. Confirme com o estoquista os valores de tanque e comboio informados no checklist da NF 8328 antes de fechar o mes.
+**Recomendação ao auditor**
+1. Cobre a inserção no GP dos 35 equipamento(s) abastecido(s) sem cadastro durante a janela.
+2. Solicite à obra a relação de saídas de comboio não registradas no Infleet entre o descarregamento da NF anterior e a NF 8328.
+3. Confirme com o estoquista os valores de tanque e comboio informados no checklist da NF 8328 antes de fechar o mês.
 
 **Risco financeiro associado**
-R$ 29.357,28 em alertas de alta severidade na janela (custo dos abastecimentos nao cadastrados e pos-desmobilizacao).
+R$ 29.357,28 em alertas de alta severidade na janela (custo dos abastecimentos não cadastrados e pós-desmobilização).

@@ -103,13 +103,13 @@ export function ConsolidadoView() {
   return (
     <>
       <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-primary-dark">
+        <p className="text-sm font-semibold uppercase tracking-[0.12em] text-brand-primary-dark">
           Controle consolidado
         </p>
-        <h2 className="mt-1 text-2xl font-bold tracking-tight text-zinc-950">
+        <h2 className="mt-1 text-[26px] font-bold tracking-tight text-zinc-950">
           Visão consolidada
         </h2>
-        <p className="mt-1 text-sm text-zinc-500">Período: {periodo}</p>
+        <p className="mt-1 text-[16px] text-zinc-500">Período: {periodo}</p>
       </header>
 
       <StatsConsolidadoCards />
@@ -129,7 +129,7 @@ export function ConsolidadoView() {
               <a
                 href={api.csvConsolidadoUrl()}
                 download
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-app-border bg-white px-3 text-xs font-semibold text-zinc-900 shadow-sm transition-colors hover:bg-zinc-50 hover:border-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/25"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-app-border bg-white px-3 text-sm font-semibold text-zinc-900 shadow-sm transition-colors hover:bg-zinc-50 hover:border-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/25"
               >
                 <Download className="h-3.5 w-3.5" aria-hidden />
                 Exportar CSV

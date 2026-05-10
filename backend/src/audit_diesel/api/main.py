@@ -87,6 +87,7 @@ def create_app() -> FastAPI:
             ai=ai_state,
             provider=provider.name,
             model=provider.model,
+            fallback_model=s.llm_fallback_model,
             offline=provider.offline,
             demo_mode=s.demo_replay,
         )

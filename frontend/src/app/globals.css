@@ -33,7 +33,7 @@ body {
    tipografia base; cores e alinhamento ficam por classe Tailwind no JSX. */
 .th-base {
   padding: 0.875rem 1rem;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;

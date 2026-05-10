@@ -1,11 +1,11 @@
-/* CSS especifico do PDF (WeasyPrint).
-   Decisoes:
-   - Tipografia DejaVu (Serif para corpo, Sans para cabecalhos) garante
-     suporte a portugues sem dependencia de fontes externas.
-   - Margens A4 padrao de relatorio oficial: 20mm laterais, 18mm topo,
-     22mm base (rodape com paginacao + hash).
+/* CSS específico do PDF (WeasyPrint).
+   Decisões:
+   - Tipografia DejaVu (Serif para corpo, Sans para cabeçalhos) garante
+     suporte a português sem dependência de fontes externas.
+   - Margens A4 padrão de relatório oficial: 20mm laterais, 18mm topo,
+     22mm base (rodapé com paginação + hash).
    - Cores em escala de cinza com toques discretos de severidade. Tudo
-     pensado para impressao monocromatica legivel.
+     pensado para impressão monocromática legível.
 */
 
 @page {
@@ -241,7 +241,7 @@ p  { margin: 0 0 2mm 0; }
   padding-top: 1.5mm;
 }
 
-/* --- Reconciliacoes --- */
+/* --- Reconciliações --- */
 .recon-list { margin: 2mm 0 0 0; padding: 0; list-style: none; }
 .recon-list li {
   border-left: 1pt solid #888;

@@ -24,11 +24,11 @@ class PosDesmobilizacaoAlert:
                 AlertResult(
                     tipo=self.tipo,
                     severidade="alta",
-                    titulo="Abastecimento apos desmobilizacao",
+                    titulo="Abastecimento após desmobilização",
                     descricao=(
-                        f"Veiculo {mob.placa_ativo_raw} foi desmobilizado em "
+                        f"Veículo {mob.placa_ativo_raw} foi desmobilizado em "
                         f"{mob.data_desmobilizacao:%d/%m/%Y} mas registra abastecimento em "
-                        f"{ab.data:%d/%m/%Y} ({delta_dias} dias apos desmobilizacao)."
+                        f"{ab.data:%d/%m/%Y} ({delta_dias} dias após desmobilização)."
                     ),
                     payload={
                         "veiculo_raw": ab.veiculo_raw,

@@ -3,7 +3,7 @@
 Pipeline:
 1. Recebe `auditoria_id` -> carrega abastecimentos da janela com tipo
    NAO_CADASTRADO + lista de mobilizados da mesma obra.
-2. Pre-filtra candidatos para nao mandar 286 itens; usa heuristica de
+2. Pré-filtra candidatos para não mandar 286 itens; usa heurística de
    identificador / tipo de equipamento para reduzir.
 3. Chama o LLM em batches de 20 abastecimentos por chamada.
 4. Parseia o tool call `registrar_sugestoes`, valida com pydantic e enriquece
@@ -34,7 +34,7 @@ BATCH_SIZE = 20
 
 
 class _SugestaoLLM(BaseModel):
-    """Item retornado pelo modelo (validacao do tool call)."""
+    """Item retornado pelo modelo (validação do tool call)."""
 
     abastecimento_id: int
     mobilizado_id_candidato: int | None = None
@@ -77,7 +77,7 @@ class CandidatoGP:
 
 @dataclass
 class SugestaoReconciliacao:
-    """Sugestao final, enriquecida, pronta para o frontend."""
+    """Sugestão final, enriquecida, pronta para o frontend."""
 
     abastecimento_id: int
     veiculo_infleet: str
@@ -88,14 +88,14 @@ class SugestaoReconciliacao:
 
 
 class ReconciliadorSemantico:
-    """Orquestra reconciliacao de abastecimentos NAO_CADASTRADO via LLM."""
+    """Orquestra reconciliação de abastecimentos NAO_CADASTRADO via LLM."""
 
     def __init__(self, session: Session, client: ChatClient | None = None) -> None:
         self.session = session
         self.client = client or ChatClient()
 
     def sugerir_para_auditoria(self, auditoria_id: int) -> list[SugestaoReconciliacao]:
-        """Gera sugestoes para todos os abastecimentos NAO_CADASTRADO da auditoria."""
+        """Gera sugestões para todos os abastecimentos NAO_CADASTRADO da auditoria."""
         auditoria = self.session.get(Auditoria, auditoria_id)
         if auditoria is None:
             log.warning("reconciliador.auditoria_nao_encontrada", id=auditoria_id)
@@ -103,7 +103,7 @@ class ReconciliadorSemantico:
 
         # DEMO_MODE=true: tenta cache pelo par de NFs (id da auditoria pode
         # mudar quando a re-auditoria do fluxo /reconciliacao/aprovar recria
-        # a auditoria). Se o cache existir, devolve as sugestoes prontas.
+        # a auditoria). Se o cache existir, devolve as sugestões prontas.
         cached = cache.get_cached_reconciliacao_par(
             auditoria.nf_anterior, auditoria.nf_atual
         )
@@ -179,6 +179,37 @@ class ReconciliadorSemantico:
         )
 
         sugestoes_validadas = _extrair_sugestoes(response)
+        if sugestoes_validadas is None:
+            fallback_model = self.client.settings.llm_fallback_model
+            if fallback_model:
+                response = self.client.chat(
+                    messages=[
+                        ChatMessage(role="system", content=prompts.SYSTEM_PROMPT),
+                        ChatMessage(role="user", content=user_msg),
+                    ],
+                    tools=[prompts.TOOL_SCHEMA],
+                    tool_choice={
+                        "type": "function",
+                        "function": {"name": "registrar_sugestoes"},
+                    },
+                    temperature=0.1,
+                    max_tokens=2000,
+                    model_override=fallback_model,
+                )
+                sugestoes_validadas = _extrair_sugestoes(response)
+            if sugestoes_validadas is None:
+                log.error(
+                    "llm.guardrail.reconciliacao_degraded",
+                    abastecimentos=len(abastecimentos),
+                    candidatos=len(filtrados),
+                )
+                sugestoes_validadas = []
+
+        sugestoes_validadas = _sanitizar_sugestoes(
+            sugestoes_validadas,
+            abastecimento_ids=[int(a.id or 0) for a in abastecimentos],
+            candidato_ids={c.id for c in filtrados},
+        )
         cand_index = {c.id: c for c in candidatos}
         ab_index = {a.id: a for a in abastecimentos}
         out: list[SugestaoReconciliacao] = []
@@ -283,7 +314,7 @@ def _prefiltrar_candidatos(
     return list(selecionados.values())[:60]
 
 
-def _extrair_sugestoes(response: Any) -> list[_SugestaoLLM]:
+def _extrair_sugestoes(response: Any) -> list[_SugestaoLLM] | None:
     """Extrai e valida o tool call `registrar_sugestoes`. Tolerante a falhas."""
     if not response.tool_calls:
         # Alguns providers podem responder em content JSON; tenta parse direto.
@@ -300,19 +331,54 @@ def _extrair_sugestoes(response: Any) -> list[_SugestaoLLM]:
                 error=str(exc),
                 args=tc.arguments_json[:200],
             )
-    return []
+    return None
 
 
-def _try_parse_content_json(content: str) -> list[_SugestaoLLM]:
+def _try_parse_content_json(content: str) -> list[_SugestaoLLM] | None:
     if not content:
-        return []
+        return None
     try:
         payload = json.loads(content)
         if isinstance(payload, dict) and "sugestoes" in payload:
             return _SugestoesLLM.model_validate(payload).sugestoes
     except (json.JSONDecodeError, ValidationError):
-        return []
-    return []
+        return None
+    return None
+
+
+def _sanitizar_sugestoes(
+    sugestoes: list[_SugestaoLLM],
+    *,
+    abastecimento_ids: list[int],
+    candidato_ids: set[int],
+) -> list[_SugestaoLLM]:
+    """Garante exatamente uma sugestão segura por abastecimento de entrada."""
+    por_ab: dict[int, list[_SugestaoLLM]] = {ab_id: [] for ab_id in abastecimento_ids}
+    for s in sugestoes:
+        if s.abastecimento_id in por_ab:
+            por_ab[s.abastecimento_id].append(s)
+
+    out: list[_SugestaoLLM] = []
+    for ab_id in abastecimento_ids:
+        items = por_ab[ab_id]
+        if len(items) != 1:
+            out.append(_null_sugestao(ab_id, "Resposta ausente ou duplicada pelo LLM."))
+            continue
+        s = items[0]
+        if s.mobilizado_id_candidato is not None and s.mobilizado_id_candidato not in candidato_ids:
+            out.append(_null_sugestao(ab_id, "Candidato retornado não foi enviado ao LLM."))
+            continue
+        out.append(s)
+    return out
+
+
+def _null_sugestao(abastecimento_id: int, motivo: str) -> _SugestaoLLM:
+    return _SugestaoLLM(
+        abastecimento_id=abastecimento_id,
+        mobilizado_id_candidato=None,
+        confianca=0.0,
+        justificativa=motivo,
+    )
 
 
 def _sugestao_to_dict(s: SugestaoReconciliacao) -> dict[str, Any]:

@@ -49,184 +49,184 @@
 
 ### 0:00 — 1:00 | Abertura ancorada
 
-> "Hoje, quando voces recebem uma NF de diesel, alguem do escritorio
-> abre tres planilhas — o checklist do GLPI, a lista de mobilizados da
-> Gestao de Projetos e o relatorio do Infleet — e cruza linha a linha
+> "Hoje, quando vocês recebem uma NF de diesel, alguém do escritório
+> abre três planilhas — o checklist do GLPI, a lista de mobilizados da
+> Gestão de Projetos e o relatório do Infleet — e cruza linha a linha
 > para confirmar se o consumo bate com o que entrou no tanque. Esse
-> processo, hoje, leva **dias**. E como sao mais de 2.000 abastecimentos
-> por mes, e humanamente impossivel auditar tudo. O que vamos mostrar
-> agora e um agente que faz exatamente esse cruzamento — em segundos,
-> com auditoria rastreavel."
+> processo, hoje, leva **dias**. E como são mais de 2.000 abastecimentos
+> por mês, é humanamente impossível auditar tudo. O que vamos mostrar
+> agora é um agente que faz exatamente esse cruzamento — em segundos,
+> com auditoria rastreável."
 
 Pontos a transmitir nestes 60 segundos:
-- Nao e "IA generica que adivinha". E uma engine deterministica + um
-  parecer de IA opcional para sintese.
+- Não é "IA genérica que adivinha". É uma engine determinística + um
+  parecer de IA opcional para síntese.
 - A planilha "AUDITORIA DO DIESEL_0" continua sendo a fonte da verdade
-  contabil — nos a reproduzimos integralmente para que voces reconhecam.
-- Os dados sao reais: as 4 NFs do mes de marco/2026.
+  contábil — nós a reproduzimos integralmente para que vocês reconheçam.
+- Os dados são reais: as 4 NFs do mês de março/2026.
 
 ### 1:00 — 3:00 | Demo: dashboard
 
-Acoes:
+Ações:
 1. Mostrar a tela inicial `/`. Apontar para os **4 stats cards**:
-   - "X abastecimentos no periodo"
-   - "Y% de custo nao cadastrado" — falar: "Esse e o problema que estamos
+   - "X abastecimentos no período"
+   - "Y% de custo não cadastrado" — falar: "Esse é o problema que estamos
      resolvendo: 22 mil reais em diesel sem placa identificada."
-   - "Z NFs no periodo"
+   - "Z NFs no período"
    - "N equipamentos mobilizados"
-2. Apontar para a **tabela de NFs**. Comentar que sao as 4 NFs reais.
+2. Apontar para a **tabela de NFs**. Comentar que são as 4 NFs reais.
 3. Click em **"Auditar"** da NF 8187.
-4. No dialogo, **selecionar 8108 como NF anterior** (default ja apontado).
+4. No diálogo, **selecionar 8108 como NF anterior** (default já apontado).
 5. Click em **"Confirmar auditoria"**. Aguardar 1 a 2 segundos.
 
 > "Repare que o sistema escolhe a NF anterior automaticamente — porque
-> a auditoria e sempre entre duas NFs sequenciais da mesma obra. E o
+> a auditoria é sempre entre duas NFs sequenciais da mesma obra. É o
 > que o auditor define como janela temporal."
 
 ### 3:00 — 6:00 | Demo: auditoria detalhada
 
-Acoes:
+Ações:
 1. Apontar para o **bloco de indicadores** (centro da tela).
-   > "Esse layout — estoque inicial, descarregamento, saida teorica,
-   > diferenca apurada — e exatamente o que voces tem na aba 'AUDITORIA
-   > DO DIESEL_0' da planilha. A diferenca e que aqui ele se preenche
+   > "Esse layout — estoque inicial, descarregamento, saída teórica,
+   > diferença apurada — é exatamente o que vocês têm na aba 'AUDITORIA
+   > DO DIESEL_0' da planilha. A diferença é que aqui ele se preenche
    > sozinho a partir das 4 fontes."
 
-2. Apontar para a **diferenca em litros e percentual**.
-   > "Quando essa diferenca passa de 2%, a NF entra como inconsistente
-   > automaticamente — regra que voces ja usam hoje."
+2. Apontar para a **diferença em litros e percentual**.
+   > "Quando essa diferença passa de 2%, a NF entra como inconsistente
+   > automaticamente — regra que vocês já usam hoje."
 
 3. Apontar para o **parecer da IA** (coluna direita).
-   > "Aqui a IA produz uma sintese tecnica em linguagem natural —
-   > pensada para o supervisor que vai assinar o parecer. Nao substitui
+   > "Aqui a IA produz uma síntese técnica em linguagem natural —
+   > pensada para o supervisor que vai assinar o parecer. Não substitui
    > a auditoria; complementa."
-   Ler em voz alta o trecho de **Recomendacao**.
+   Ler em voz alta o trecho de **Recomendação**.
 
-4. Descer ate a **lista de alertas**. Comentar:
-   - "Equipamentos nao cadastrados" — abastecimentos que aparecem no
-     Infleet mas nao tem nenhum equipamento mobilizado correspondente.
-   - "Pos-desmobilizacao" — equipamento ja desmobilizado mas continuou
+4. Descer até a **lista de alertas**. Comentar:
+   - "Equipamentos não cadastrados" — abastecimentos que aparecem no
+     Infleet mas não têm nenhum equipamento mobilizado correspondente.
+   - "Pós-desmobilização" — equipamento já desmobilizado mas continuou
      abastecendo.
-   - "Outliers" — consumo fora do padrao historico do equipamento.
-   - "Duplicidade" — possivel mesmo abastecimento contado duas vezes.
+   - "Outliers" — consumo fora do padrão histórico do equipamento.
+   - "Duplicidade" — possível mesmo abastecimento contado duas vezes.
 
-5. Click em um alerta de **"Nao cadastrado"**. Click em **"Reconciliar"**.
+5. Click em um alerta de **"Não cadastrado"**. Click em **"Reconciliar"**.
 
-### 6:00 — 8:00 | Demo: reconciliacao semantica
+### 6:00 — 8:00 | Demo: reconciliação semântica
 
-Acoes:
-1. O modal abre com sugestoes da IA, lado a lado com os candidatos.
-2. Apontar para a **confianca** (em %) e a **justificativa**.
+Ações:
+1. O modal abre com sugestões da IA, lado a lado com os candidatos.
+2. Apontar para a **confiança** (em %) e a **justificativa**.
    > "A IA olha o nome do equipamento no Infleet — que vem com erro de
-   > digitacao, abreviacao, espacamento — e propoe o casamento mais
-   > provavel com algum mobilizado. Mostra a confianca para que o
+   > digitação, abreviação, espaçamento — e propõe o casamento mais
+   > provável com algum mobilizado. Mostra a confiança para que o
    > auditor decida se aprova."
-3. **Aprovar** a sugestao de maior confianca.
-4. Voltar para a tela de auditoria. Apontar que o numero de
-   "equipamentos nao cadastrados" caiu em uma unidade.
-   > "Cada aprovacao fica registrada com o auditor, timestamp e
-   > justificativa. Tudo rastreavel."
+3. **Aprovar** a sugestão de maior confiança.
+4. Voltar para a tela de auditoria. Apontar que o número de
+   "equipamentos não cadastrados" caiu em uma unidade.
+   > "Cada aprovação fica registrada com o auditor, timestamp e
+   > justificativa. Tudo rastreável."
 
-### 8:00 — 9:00 | Demo: PDF + visao consolidada
+### 8:00 — 9:00 | Demo: PDF + visão consolidada
 
-Acoes:
-1. Click em **"Gerar PDF de auditoria"** (botao primario, canto superior
+Ações:
+1. Click em **"Gerar PDF de auditoria"** (botão primário, canto superior
    direito).
 2. Abrir PDF na nova aba. Mostrar:
-   - O **layout dos indicadores** identico a planilha que eles usam.
-   - O **parecer da IA** ja embutido.
-   - O **hash de rastreabilidade** no rodape.
-   > "Esse PDF e o documento oficial. Pode ser arquivado, impresso, ou
+   - O **layout dos indicadores** idêntico à planilha que eles usam.
+   - O **parecer da IA** já embutido.
+   - O **hash de rastreabilidade** no rodapé.
+   > "Esse PDF é o documento oficial. Pode ser arquivado, impresso, ou
    > anexado ao processo no GLPI."
 3. Voltar ao app. Click em **"Consolidado"** no menu lateral.
-4. Mostrar a **visao das 4 NFs** com semaforo (status), diferenca % e
+4. Mostrar a **visão das 4 NFs** com semáforo (status), diferença % e
    chips de alerta.
 5. Aplicar filtro **"Inconsistentes"** — restam menos linhas.
 6. Click em uma linha — leva direto para a auditoria daquela NF.
 
 ### 9:00 — 10:00 | Fechamento e roadmap
 
-> "O que voces viram hoje e o **MVP**. Em 3 dias entregamos a engine
-> deterministica, a camada de IA, o frontend de auditoria, o PDF e a
-> visao consolidada. O que vem agora:"
+> "O que vocês viram hoje é o **MVP**. Em 3 dias entregamos a engine
+> determinística, a camada de IA, o frontend de auditoria, o PDF e a
+> visão consolidada. O que vem agora:"
 
-- **30 dias**: integracao direta com GLPI e Infleet via API (eliminar
-  exportacao manual de xlsx).
-- **60 dias**: workflow de aprovacao multi-nivel (auditor -> supervisor
-  -> contabilidade) e exportacao para o ERP.
+- **30 dias**: integração direta com GLPI e Infleet via API (eliminar
+  exportação manual de xlsx).
+- **60 dias**: workflow de aprovação multinível (auditor -> supervisor
+  -> contabilidade) e exportação para o ERP.
 - **90 dias**: piloto em duas obras adicionais. Auditoria continua, sem
   esperar a NF: o sistema avisa em tempo real quando um abastecimento
-  fora do padrao ocorre.
+  fora do padrão ocorre.
 
-> "A pergunta que fica e: **quais NFs do trimestre passado voces
+> "A pergunta que fica é: **quais NFs do trimestre passado vocês
 > gostariam de auditar primeiro com essa ferramenta?**"
 
 ---
 
-## Plano de contingencia
+## Plano de contingência
 
-| Cenario                          | Acao                                                                                  |
+| Cenário                          | Ação                                                                                  |
 | -------------------------------- | ------------------------------------------------------------------------------------- |
-| API Anthropic offline            | DEMO_MODE=true ja cobre. O cache local responde. **Nao mencione** o problema.         |
-| Backend caiu                     | Janela 1 tem o uvicorn; ctrl+c e re-rode o comando. SQLite ja tem todos os dados.     |
-| Frontend caiu                    | Janela 2; idem. `pnpm start` em modo producao restart < 3s.                           |
-| Nao carrega a NF clicada         | Volte e clique em outra NF. Sao 4. Pior caso, abra o PDF ja gerado em data/pdfs_amostra/. |
-| Pergunta sobre dado especifico   | Use a CLI no terminal: `uv run audit-diesel auditar --nf-anterior X --nf-atual Y --json`. |
-| Internet caiu                    | Modo offline ja garante a demo. Aproveite para reforcar: "veja, nem precisa de internet". |
+| API Anthropic offline            | DEMO_MODE=true já cobre. O cache local responde. **Não mencione** o problema.         |
+| Backend caiu                     | Janela 1 tem o uvicorn; ctrl+c e re-rode o comando. SQLite já tem todos os dados.     |
+| Frontend caiu                    | Janela 2; idem. `pnpm start` em modo produção reinicia < 3s.                          |
+| Não carrega a NF clicada         | Volte e clique em outra NF. São 4. Pior caso, abra o PDF já gerado em data/pdfs_amostra/. |
+| Pergunta sobre dado específico   | Use a CLI no terminal: `uv run audit-diesel auditar --nf-anterior X --nf-atual Y --json`. |
+| Internet caiu                    | Modo offline já garante a demo. Aproveite para reforçar: "veja, nem precisa de internet". |
 
 ---
 
 ## Perguntas frequentes esperadas (e respostas curtas)
 
-**1. Como voces escolheram a tolerancia de 2%?**
-> Veio da propria planilha de voces — usamos a mesma regra: |diferenca| < 2%
-> aprova, acima reprova. Pode ser ajustada em uma linha de configuracao.
+**1. Como vocês escolheram a tolerância de 2%?**
+> Veio da própria planilha de vocês — usamos a mesma regra: |diferença| < 2%
+> aprova, acima reprova. Pode ser ajustada em uma linha de configuração.
 
 **2. O sistema substitui o auditor?**
-> Nao. Ele acelera a parte braçal — cruzar 4 fontes, identificar
-> divergencias, calcular indicadores. A decisao final e sempre do auditor;
-> ele que aprova ou recusa cada reconciliacao.
+> Não. Ele acelera a parte braçal — cruzar 4 fontes, identificar
+> divergências, calcular indicadores. A decisão final é sempre do auditor;
+> ele que aprova ou recusa cada reconciliação.
 
-**3. O parecer da IA e auditavel?**
-> Sim. Cada parecer guarda provider, modelo, latencia, tokens. O texto
-> entra no PDF junto com o hash dos indicadores. Se um numero mudar, o
+**3. O parecer da IA é auditável?**
+> Sim. Cada parecer guarda provider, modelo, latência, tokens. O texto
+> entra no PDF junto com o hash dos indicadores. Se um número mudar, o
 > hash muda.
 
 **4. Quanto custa a IA por auditoria?**
-> Em modo provider-agnostico: cerca de 3.000 tokens por parecer. Com
-> Qwen-32B no OpenRouter, isso da menos de R$ 0,02 por auditoria. Com
+> Em modo provider-agnóstico: cerca de 3.000 tokens por parecer. Com
+> Qwen-32B no OpenRouter, isso dá menos de R$ 0,02 por auditoria. Com
 > Claude Opus, na faixa de R$ 0,30. Pode ser trocado a qualquer momento.
 
-**5. E se o LLM errar a sugestao de reconciliacao?**
-> Cada sugestao tem confianca. O auditor decide se aprova. Sugestoes
-> recusadas tambem ficam registradas e melhoram a heuristica futura.
+**5. E se o LLM errar a sugestão de reconciliação?**
+> Cada sugestão tem confiança. O auditor decide se aprova. Sugestões
+> recusadas também ficam registradas e melhoram a heurística futura.
 
-**6. Como voces lidam com NF cancelada?**
+**6. Como vocês lidam com NF cancelada?**
 > Hoje a NF cancelada precisa ser removida na fonte (GLPI). O sistema
-> reprocessa na proxima ingestao. Em V2 podemos absorver eventos de
+> reprocessa na próxima ingestão. Em V2 podemos absorver eventos de
 > cancelamento via webhook.
 
-**7. Quantos meses de historico aguentam?**
-> O SQLite local aguenta facil 5 anos de dados de uma obra do tamanho
-> da ARCO. Se for escalar para todo o consorcio, recomendamos PostgreSQL.
+**7. Quantos meses de histórico aguentam?**
+> O SQLite local aguenta fácil 5 anos de dados de uma obra do tamanho
+> da ARCO. Se for escalar para todo o consórcio, recomendamos PostgreSQL.
 
-**8. Tem versao mobile?**
-> A interface ja e responsiva. Para uso pesado em campo (foto de
+**8. Tem versão mobile?**
+> A interface já é responsiva. Para uso pesado em campo (foto de
 > abastecimento), recomendamos um app dedicado em V2.
 
 **9. Quanto tempo para implementar de verdade?**
-> O MVP voces estao vendo. Para entrar em producao com integracao real
+> O MVP vocês estão vendo. Para entrar em produção com integração real
 > com GLPI/Infleet, estimamos 4 a 6 semanas, dependendo da disponibilidade
-> de credenciais e ambiente de homologacao.
+> de credenciais e ambiente de homologação.
 
 **10. E LGPD?**
-> Os dados nao tem informacao pessoal — sao placas, NFs, valores. O CNPJ
-> do fornecedor e dado publico. O sistema roda on-premise; nada sai do
-> ambiente de voces.
+> Os dados não têm informação pessoal — são placas, NFs, valores. O CNPJ
+> do fornecedor é dado público. O sistema roda on-premise; nada sai do
+> ambiente de vocês.
 
 ---
 
-## Checklist 60 segundos antes de comecar
+## Checklist 60 segundos antes de começar
 
 - [ ] DEMO_MODE=true exportado
 - [ ] Backend rodando, /healthz responde com `demo_mode: true`

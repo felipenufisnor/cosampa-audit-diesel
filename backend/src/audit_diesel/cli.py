@@ -111,7 +111,7 @@ def cmd_auditar(nf_anterior: str, nf_atual: str, as_json: bool) -> None:
     console.print(Panel(header, style=cor_validacao))
 
     table = Table(title="Indicadores §4 do escopo", box=SIMPLE_HEAVY)
-    table.add_column("Metrica", style="bold")
+    table.add_column("Métrica", style="bold")
     table.add_column("Valor", justify="right")
 
     def linha(nome: str, valor: float, unidade: str = "L") -> None:
@@ -124,14 +124,14 @@ def cmd_auditar(nf_anterior: str, nf_atual: str, as_json: bool) -> None:
 
     linha("Estoque inicial (NF anterior)", a.estoque_inicial_anterior)
     linha("Quantidade descarregada (NF anterior)", a.quantidade_descarregada_anterior)
-    linha("Estoque final teorico (NF anterior)", a.estoque_final_teorico_anterior)
+    linha("Estoque final teórico (NF anterior)", a.estoque_final_teorico_anterior)
     linha("Estoque inicial (NF atual)", a.estoque_inicial_atual)
-    linha("Saida teorica", a.saida_teorica_litros)
-    linha("Saidas registradas (Infleet)", a.saidas_registradas_litros)
-    linha("Saidas registradas - custo", a.saidas_registradas_custo, "R$")
-    linha("Diferenca", a.diferenca_litros)
-    linha("Diferenca percentual", a.diferenca_percentual, "%")
-    table.add_row("Equipamentos nao cadastrados", str(a.qtd_equipamentos_nao_cadastrados))
+    linha("Saída teórica", a.saida_teorica_litros)
+    linha("Saídas registradas (Infleet)", a.saidas_registradas_litros)
+    linha("Saídas registradas - custo", a.saidas_registradas_custo, "R$")
+    linha("Diferença", a.diferenca_litros)
+    linha("Diferença percentual", a.diferenca_percentual, "%")
+    table.add_row("Equipamentos não cadastrados", str(a.qtd_equipamentos_nao_cadastrados))
     table.add_row("Validacao final", f"[{cor_validacao}]{a.validacao_final}[/{cor_validacao}]")
     console.print(table)
 
@@ -158,7 +158,7 @@ def cmd_auditar(nf_anterior: str, nf_atual: str, as_json: bool) -> None:
 
 @app.command("stats")
 def cmd_stats() -> None:
-    """Estatisticas globais do banco."""
+    """Estatísticas globais do banco."""
     engine = build_engine()
     with Session(engine) as session:
         abast = session.exec(select(Abastecimento)).all()
@@ -178,13 +178,13 @@ def cmd_stats() -> None:
     n_nao_cadastrados = sum(1 for a in abast if a.veiculo_normalizado not in cadastrados)
     pct_nao_cadastrados = n_nao_cadastrados / total
 
-    table = Table(title="Estatisticas globais", box=SIMPLE_HEAVY)
-    table.add_column("Metrica", style="bold")
+    table = Table(title="Estatísticas globais", box=SIMPLE_HEAVY)
+    table.add_column("Métrica", style="bold")
     table.add_column("Valor", justify="right")
     table.add_row("Total de abastecimentos", f"{total:,}")
     table.add_row("Total de litros", f"{total_litros:,.2f} L")
     table.add_row("Total de custo", f"R$ {total_custo:,.2f}")
-    table.add_row("Abastec. com inconsistencia Infleet", f"{n_inconsist} ({pct_inconsist:.1%})")
+    table.add_row("Abastec. com inconsistência Infleet", f"{n_inconsist} ({pct_inconsist:.1%})")
     table.add_row("Abastec. sem cadastro no GP", f"{n_nao_cadastrados} ({pct_nao_cadastrados:.1%})")
     console.print(table)
     console.print(f"[dim]Banco: {DB_PATH}  |  Origem: {RAW_DIR}[/dim]")

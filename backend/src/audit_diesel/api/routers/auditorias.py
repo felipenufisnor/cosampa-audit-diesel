@@ -125,7 +125,7 @@ def get_auditoria(
 ) -> AuditoriaCompletaResponse:
     a = session.get(Auditoria, auditoria_id)
     if a is None:
-        raise HTTPException(status_code=404, detail=f"Auditoria {auditoria_id} nao encontrada.")
+        raise HTTPException(status_code=404, detail=f"Auditoria {auditoria_id} não encontrada.")
     alertas = session.exec(
         select(Alerta).where(Alerta.auditoria_id == auditoria_id)
     ).all()
@@ -153,7 +153,7 @@ def aprovar_auditoria(
     if auditoria is None:
         raise HTTPException(
             status_code=404,
-            detail=f"Auditoria {auditoria_id} nao encontrada.",
+            detail=f"Auditoria {auditoria_id} não encontrada.",
         )
 
     if auditoria.validacao_final != "APROVADO":
@@ -181,7 +181,7 @@ def gerar_pdf_auditoria(
     auditoria = session.get(Auditoria, auditoria_id)
     if auditoria is None:
         raise HTTPException(
-            status_code=404, detail=f"Auditoria {auditoria_id} nao encontrada."
+            status_code=404, detail=f"Auditoria {auditoria_id} não encontrada."
         )
     checklist = session.exec(
         select(Checklist).where(Checklist.nota_fiscal == auditoria.nf_atual)
@@ -189,14 +189,14 @@ def gerar_pdf_auditoria(
     if checklist is None:
         raise HTTPException(
             status_code=404,
-            detail=f"Checklist da NF {auditoria.nf_atual} nao localizado.",
+            detail=f"Checklist da NF {auditoria.nf_atual} não localizado.",
         )
 
     alertas = list(
         session.exec(select(Alerta).where(Alerta.auditoria_id == auditoria_id)).all()
     )
 
-    # Reconciliacoes aprovadas associadas. Como o /reconciliacao/aprovar pode
+    # Reconciliações aprovadas associadas. Como o /reconciliacao/aprovar pode
     # recriar a auditoria (apaga + insere), filtramos pelos abastecimentos
     # que pertencem aos alertas NAO_CADASTRADO desse ciclo OU pelo par de NFs.
     reconciliacoes_raw = list(
@@ -285,7 +285,7 @@ def _reconciliacoes_da_obra(
 
 
 def _build_consolidado(session: Session) -> ConsolidadoResponse:
-    """Monta a visao consolidada (1 linha por NF + agregados de cabecalho)."""
+    """Monta a visão consolidada (1 linha por NF + agregados de cabeçalho)."""
     checklists = list(
         session.exec(select(Checklist).order_by(Checklist.data_recebimento)).all()
     )

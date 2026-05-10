@@ -1,14 +1,14 @@
-"""Geracao do PDF de auditoria via Jinja2 + WeasyPrint.
+"""Geração do PDF de auditoria via Jinja2 + WeasyPrint.
 
-Decisao: Jinja2 monta um HTML autonomo (com `<style>` inline) para evitar
-hot-paths dependentes de I/O extra dentro do WeasyPrint. O CSS contem as
-regras `@page` que controlam margens, header rodando e rodape com paginacao
+Decisão: Jinja2 monta um HTML autônomo (com `<style>` inline) para evitar
+hot-paths dependentes de I/O extra dentro do WeasyPrint. O CSS contém as
+regras `@page` que controlam margens, header rodando e rodapé com paginação
 + hash de integridade. Toda a tipografia usa fontes DejaVu (instaladas por
-padrao em distros Linux usadas para servir o PDF) com fallback para Georgia
+padrão em distros Linux usadas para servir o PDF) com fallback para Georgia
 no macOS de desenvolvimento; em todos os ambientes testados o resultado
 visual fica equivalente.
 
-`render_auditoria_pdf` recebe os SQLModel ja carregados pelo router e
+`render_auditoria_pdf` recebe os SQLModel já carregados pelo router e
 devolve `bytes` do PDF, deixando a parte HTTP (Content-Disposition, nome
 do arquivo) para o caller. Isso permite reuso pelo script de smoke-test
 que grava amostras em `data/pdfs_amostra/` sem precisar do FastAPI.
@@ -35,16 +35,16 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CSS_PATH = TEMPLATES_DIR / "_styles.css"
 
 TIPO_LABELS = {
-    "NAO_CADASTRADO": "Equipamentos nao cadastrados",
-    "POS_DESMOB": "Abastecimentos pos-desmobilizacao",
+    "NAO_CADASTRADO": "Equipamentos não cadastrados",
+    "POS_DESMOB": "Abastecimentos pós-desmobilização",
     "OUTLIER": "Outliers de consumo",
-    "DUPLICIDADE": "Possiveis duplicidades",
+    "DUPLICIDADE": "Possíveis duplicidades",
 }
 
 
 @dataclass
 class ReconciliacaoView:
-    """Linha de reconciliacao ja resolvida com o nome do mobilizado."""
+    """Linha de reconciliação já resolvida com o nome do mobilizado."""
 
     abastecimento_id: int
     mobilizado_id: int

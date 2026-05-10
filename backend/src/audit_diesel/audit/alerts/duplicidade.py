@@ -29,9 +29,9 @@ class DuplicidadeAlert:
                 AlertResult(
                     tipo=self.tipo,
                     severidade="baixa",
-                    titulo="Multiplos abastecimentos no mesmo dia",
+                    titulo="Múltiplos abastecimentos no mesmo dia",
                     descricao=(
-                        f"Veiculo {itens[0].veiculo_raw} (apelido: "
+                        f"Veículo {itens[0].veiculo_raw} (apelido: "
                         f"{itens[0].apelido or '-'}) tem {len(itens)} abastecimentos em "
                         f"{dia} totalizando {total_litros:.1f} L (R$ {total_custo:,.2f})."
                     ),

@@ -17,10 +17,10 @@ from .normalizers import (
 
 
 def carregar_mobilizados(arquivo: Path) -> list[Mobilizado]:
-    """Le o xlsx do Gestao de Projetos e devolve a lista de Mobilizado.
+    """Lê o xlsx do Gestão de Projetos e devolve a lista de Mobilizado.
 
-    O cabecalho real esta na linha 5 (indice 4); as 4 primeiras linhas sao
-    metadados de geracao do relatorio. Linhas sem ID (rodape e total) sao
+    O cabeçalho real está na linha 5 (índice 4); as 4 primeiras linhas são
+    metadados de geração do relatório. Linhas sem ID (rodapé e total) são
     descartadas.
     """
     df = pd.read_excel(arquivo, sheet_name=0, header=4)

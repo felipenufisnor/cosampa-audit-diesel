@@ -6,15 +6,25 @@ interface Props {
   status: ValidacaoFinal | null;
   /** Indica se a auditoria foi aprovada manualmente pelo auditor. */
   aprovadaManualmente?: boolean;
+  className?: string;
 }
 
-export function StatusBadge({ status, aprovadaManualmente }: Props) {
-  if (!status) return <Badge variant="muted">Não auditada</Badge>;
+export function StatusBadge({ status, aprovadaManualmente, className }: Props) {
+  if (!status)
+    return (
+      <Badge variant="muted" className={className}>
+        Não auditada
+      </Badge>
+    );
   if (status === "APROVADO")
     return (
-      <Badge variant="success">
+      <Badge variant="success" className={className}>
         {aprovadaManualmente ? "Aprovada (manual)" : "Aprovada"}
       </Badge>
     );
-  return <Badge variant="danger">Inconsistente</Badge>;
+  return (
+    <Badge variant="danger" className={className}>
+      Inconsistente
+    </Badge>
+  );
 }

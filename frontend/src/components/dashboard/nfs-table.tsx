@@ -36,8 +36,8 @@ export function NFsTable() {
     <Card className="overflow-hidden">
       <CardHeader className="px-5 py-4">
         <div>
-          <CardTitle>Notas fiscais</CardTitle>
-          <p className="mt-1 text-sm text-zinc-500">
+          <CardTitle className="text-[18px]">Notas fiscais</CardTitle>
+          <p className="mt-1 text-[16px] text-zinc-500">
             Janela de auditoria definida entre duas NFs sequenciais.
           </p>
         </div>
@@ -47,25 +47,25 @@ export function NFsTable() {
           <table className="w-full min-w-[900px] text-sm">
             <thead>
               <tr className="border-b border-app-border bg-zinc-50/90 text-zinc-500">
-                <th className="px-5 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.08em]">
+                <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   NF
                 </th>
-                <th className="px-5 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.08em]">
+                <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   DATA
                 </th>
-                <th className="px-5 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.08em]">
+                <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   OBRA
                 </th>
-                <th className="px-5 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.08em]">
+                <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   QUANTIDADE
                 </th>
-                <th className="px-5 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.08em]">
+                <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   VALOR
                 </th>
-                <th className="px-5 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.08em]">
+                <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   ÚLTIMA AUDITORIA
                 </th>
-                <th className="px-5 py-3.5 text-center text-[11px] font-bold uppercase tracking-[0.08em]">
+                <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   AÇÕES
                 </th>
               </tr>
@@ -111,11 +111,11 @@ export function NFsTable() {
                     {formatBRL(nf.valor_total)}
                   </td>
                   <td className="px-5 py-4 text-center">
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="relative flex min-h-7 items-center justify-center">
                       <StatusBadge status={nf.ultima_validacao} />
                       {nf.ultima_auditoria_id && (
                         <Link
-                          className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-brand-primary-dark transition-colors hover:bg-brand-primary-light"
+                          className="absolute right-0 inline-flex translate-x-10 items-center gap-1 rounded-full px-2 py-1 text-sm font-semibold text-brand-primary-dark transition-colors hover:bg-brand-primary-light"
                           href={`/auditoria/${nf.ultima_auditoria_id}`}
                         >
                           Ver

@@ -73,14 +73,14 @@ def normalizar_numero_br(valor: Any) -> float:
     if not s or s.lower() in {"nan", "-", "--", "none"}:
         return 0.0
     s = s.replace("R$", "").replace(" ", "")
-    # Heuristica BR: virgula = decimal; ponto = separador de milhar quando
-    # todos os grupos sao de 3 digitos (ex: "15.000", "1.092.345"); caso
-    # contrario, ponto eh decimal padrao ingles ("15.5", "6.59").
+    # Heurística BR: vírgula = decimal; ponto = separador de milhar quando
+    # todos os grupos são de 3 dígitos (ex: "15.000", "1.092.345"); caso
+    # contrário, ponto é decimal padrão inglês ("15.5", "6.59").
     if "," in s:
         s = s.replace(".", "").replace(",", ".")
     elif s.count(".") >= 1:
         partes = s.split(".")
-        # Todas as partes apos a primeira tem exatamente 3 digitos -> milhar BR.
+        # Todas as partes após a primeira têm exatamente 3 dígitos -> milhar BR.
         if all(len(p) == 3 and p.isdigit() for p in partes[1:]) and partes[0].lstrip("-").isdigit():
             s = s.replace(".", "")
     try:

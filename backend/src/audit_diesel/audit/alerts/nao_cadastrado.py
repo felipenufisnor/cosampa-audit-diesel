@@ -20,11 +20,11 @@ class NaoCadastradoAlert:
                 AlertResult(
                     tipo=self.tipo,
                     severidade="alta",
-                    titulo="Veiculo nao cadastrado no GP",
+                    titulo="Veículo não cadastrado no GP",
                     descricao=(
-                        f"Veiculo {ab.veiculo_raw} (apelido: {ab.apelido or '-'}) "
+                        f"Veículo {ab.veiculo_raw} (apelido: {ab.apelido or '-'}) "
                         f"abastecido em {ab.data:%d/%m/%Y %H:%M} mas sem cadastro "
-                        f"correspondente no Gestao de Projetos."
+                        f"correspondente no Gestão de Projetos."
                     ),
                     payload={
                         "veiculo_raw": ab.veiculo_raw,

@@ -40,10 +40,10 @@ serve fixtures determinisicas.
 
 - Trocar de provider = trocar `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`
   no `.env`. Sem deploy.
-- O modo offline e gratuito e cobre testes, CI e a apresentacao da demo
+- O modo offline é gratuito e cobre testes, CI e a apresentação da demo
   sem chave de API real.
 - A camada `ChatClient` adiciona retry com backoff e fallback de modelo
   por cima do provider — comportamento que precisa funcionar igual em
   qualquer LLM.
-- Custo por auditoria fica visivel: o `ParecerMeta` retorna tokens e
-  latencia, exibidos no rodape do parecer.
+- Custo por auditoria fica visível: o `ParecerMeta` retorna tokens e
+  latência, exibidos no rodapé do parecer.

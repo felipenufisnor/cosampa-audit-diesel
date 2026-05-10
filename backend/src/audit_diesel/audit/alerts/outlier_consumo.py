@@ -43,12 +43,12 @@ class OutlierConsumoAlert:
                 AlertResult(
                     tipo=self.tipo,
                     severidade="media",
-                    titulo="Consumo atipico para o veiculo",
+                    titulo="Consumo atípico para o veículo",
                     descricao=(
                         f"Abastecimento de {ab.quantidade_litros:.1f} L em "
                         f"{ab.veiculo_raw} (apelido: {ab.apelido or '-'}) tem z-score "
-                        f"{z:.2f} (media historica {media:.1f} L, desvio {desvio:.1f} L "
-                        f"em {n} observacoes)."
+                        f"{z:.2f} (média histórica {media:.1f} L, desvio {desvio:.1f} L "
+                        f"em {n} observações)."
                     ),
                     payload={
                         "veiculo_raw": ab.veiculo_raw,

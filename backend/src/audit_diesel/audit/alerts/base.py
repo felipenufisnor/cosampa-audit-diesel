@@ -40,7 +40,7 @@ class AuditContext:
 
 
 class Alert(Protocol):
-    """Interface dos alertas. Cada tipo eh uma classe stateless."""
+    """Interface dos alertas. Cada tipo é uma classe stateless."""
 
     tipo: str
 

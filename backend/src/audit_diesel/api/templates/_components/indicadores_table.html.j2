@@ -1,8 +1,8 @@
 {# Replica o layout da aba "AUDITORIA DO DIESEL_0" da planilha original:
    coluna esquerda = NF anterior (estoque inicial / quantidade descarregada /
-   estoque final teorico / saidas) ; coluna direita = NF atual (estoque
-   inicial / saida teorica). Mantive a mesma sequencia para que o auditor
-   reconheca de imediato. Indicador final em destaque preto (validacao). #}
+   estoque final teórico / saídas) ; coluna direita = NF atual (estoque
+   inicial / saída teórica). Mantive a mesma sequência para que o auditor
+   reconheça de imediato. Indicador final em destaque preto (validação). #}
 <section class="indicadores">
   <table>
     <thead>
@@ -29,32 +29,32 @@
         <td class="num">&mdash;</td>
       </tr>
       <tr>
-        <td class="label-cell">Saidas registradas no periodo (litros)</td>
+        <td class="label-cell">Saídas registradas no período (litros)</td>
         <td class="num">{{ fmt_litros(auditoria.saidas_registradas_litros) }}</td>
         <td class="num">&mdash;</td>
       </tr>
       <tr>
-        <td class="label-cell">Saidas registradas no periodo (R$)</td>
+        <td class="label-cell">Saídas registradas no período (R$)</td>
         <td class="num">{{ fmt_brl(auditoria.saidas_registradas_custo) }}</td>
         <td class="num">&mdash;</td>
       </tr>
       <tr>
-        <td class="label-cell">Saida teorica (litros)</td>
+        <td class="label-cell">Saída teórica (litros)</td>
         <td class="num">&mdash;</td>
         <td class="num">{{ fmt_litros(auditoria.saida_teorica_litros) }}</td>
       </tr>
       <tr class="row-total">
-        <td class="label-cell">Diferenca apurada (litros)</td>
+        <td class="label-cell">Diferença apurada (litros)</td>
         <td class="num">&mdash;</td>
         <td class="num">{{ fmt_litros(auditoria.diferenca_litros) }}</td>
       </tr>
       <tr class="row-total">
-        <td class="label-cell">Diferenca apurada (%)</td>
+        <td class="label-cell">Diferença apurada (%)</td>
         <td class="num">&mdash;</td>
         <td class="num">{{ fmt_pct(auditoria.diferenca_percentual) }}</td>
       </tr>
       <tr class="row-total">
-        <td class="label-cell">Equipamentos nao cadastrados (qtd)</td>
+        <td class="label-cell">Equipamentos não cadastrados (qtd)</td>
         <td class="num">&mdash;</td>
         <td class="num">{{ auditoria.qtd_equipamentos_nao_cadastrados }}</td>
       </tr>
@@ -64,8 +64,8 @@
 
 <div class="validacao-box {{ 'validacao-aprovado' if auditoria.validacao_final == 'APROVADO' else 'validacao-inconsistente' }}">
   <div>
-    <div class="titulo">Indicador de validacao final</div>
-    <div class="small muted">Tolerancia aplicada: |diferenca| &lt; {{ fmt_pct(tolerancia_pct) }}</div>
+    <div class="titulo">Indicador de validação final</div>
+    <div class="small muted">Tolerância aplicada: |diferença| &lt; {{ fmt_pct(tolerancia_pct) }}</div>
   </div>
   <div class="valor">{{ auditoria.validacao_final }}</div>
 </div>

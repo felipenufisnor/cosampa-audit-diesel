@@ -58,6 +58,9 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::UserWarning",
 ]
+markers = [
+    "real_llm: opt-in tests that call the configured external LLM provider",
+]
 
 [tool.mypy]
 python_version = "3.11"

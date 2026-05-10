@@ -49,7 +49,7 @@ def listar_auditorias_da_nf(
     if session.exec(
         select(Checklist).where(Checklist.nota_fiscal == nota_fiscal)
     ).first() is None:
-        raise HTTPException(status_code=404, detail=f"NF {nota_fiscal} nao encontrada.")
+        raise HTTPException(status_code=404, detail=f"NF {nota_fiscal} não encontrada.")
     auditorias = session.exec(
         select(Auditoria)
         .where(Auditoria.nf_atual == nota_fiscal)
@@ -76,7 +76,7 @@ def detalhe_nf(nota_fiscal: str, session: Session = Depends(get_session)) -> NFD
         select(Checklist).where(Checklist.nota_fiscal == nota_fiscal)
     ).first()
     if c is None:
-        raise HTTPException(status_code=404, detail=f"NF {nota_fiscal} nao encontrada.")
+        raise HTTPException(status_code=404, detail=f"NF {nota_fiscal} não encontrada.")
     auditorias = session.exec(
         select(Auditoria)
         .where(

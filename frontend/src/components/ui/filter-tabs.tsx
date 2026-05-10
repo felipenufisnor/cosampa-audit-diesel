@@ -41,7 +41,7 @@ export function FilterTabs<T extends string>({
               "inline-flex items-center gap-1.5 rounded-lg font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/25",
               compact
                 ? "px-2.5 py-1 text-[11px] uppercase tracking-[0.06em]"
-                : "px-3 py-1.5 text-xs",
+                : "px-3 py-1.5 text-sm",
               active
                 ? "bg-brand-primary-light text-brand-primary-dark shadow-sm"
                 : "text-zinc-600 hover:bg-white hover:text-zinc-950",
@@ -51,7 +51,7 @@ export function FilterTabs<T extends string>({
             {option.count !== undefined && (
               <span
                 className={cn(
-                  "tabular rounded-full px-1.5 py-0.5 text-[10px]",
+                  "tabular rounded-full px-1.5 py-0.5 text-xs",
                   active ? "bg-white/70 text-brand-primary-dark" : "bg-white text-zinc-500",
                 )}
               >

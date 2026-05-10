@@ -35,11 +35,11 @@ def sugerir(
     session: Session = Depends(get_session),
     chat: ChatClient = Depends(get_chat_client),
 ) -> SugerirReconciliacaoResponse:
-    """Pede ao LLM sugestoes de reconciliacao para abastecimentos NAO_CADASTRADO."""
+    """Pede ao LLM sugestões de reconciliação para abastecimentos NAO_CADASTRADO."""
     if session.get(Auditoria, body.auditoria_id) is None:
         raise HTTPException(
             status_code=404,
-            detail=f"Auditoria {body.auditoria_id} nao encontrada.",
+            detail=f"Auditoria {body.auditoria_id} não encontrada.",
         )
     rec = ReconciliadorSemantico(session=session, client=chat)
     sugestoes = rec.sugerir_para_auditoria(body.auditoria_id)
@@ -84,9 +84,9 @@ def aprovar(
 ) -> AprovarReconciliacaoResponse:
     """Cria o vinculo aprovado e re-roda a auditoria associada para refletir o ajuste."""
     if session.get(Abastecimento, body.abastecimento_id) is None:
-        raise HTTPException(status_code=404, detail="Abastecimento nao encontrado.")
+        raise HTTPException(status_code=404, detail="Abastecimento não encontrado.")
     if session.get(Mobilizado, body.mobilizado_id) is None:
-        raise HTTPException(status_code=404, detail="Mobilizado nao encontrado.")
+        raise HTTPException(status_code=404, detail="Mobilizado não encontrado.")
 
     rec = ReconciliacaoAprovada(
         abastecimento_id=body.abastecimento_id,

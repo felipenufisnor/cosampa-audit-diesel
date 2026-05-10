@@ -8,7 +8,7 @@ from sqlmodel import Field, SQLModel
 
 
 class Mobilizado(SQLModel, table=True):
-    """Equipamento mobilizado/desmobilizado em uma obra (origem: Gestao de Projetos)."""
+    """Equipamento mobilizado/desmobilizado em uma obra (origem: Gestão de Projetos)."""
 
     id: int | None = Field(default=None, primary_key=True)
     codigo_projeto: str
@@ -85,10 +85,10 @@ class Auditoria(SQLModel, table=True):
     qtd_equipamentos_nao_cadastrados: int
     validacao_final: str
     parecer_ia: str | None = None
-    # Campos de aprovacao manual (PATCH /auditorias/{id}/aprovar). Permitem
-    # marcar uma auditoria INCONSISTENTE como APROVADA apos validacao do
-    # auditor, mantendo rastreabilidade. Sao preenchidos apenas no fluxo
-    # de aprovacao manual; permanecem None para aprovacoes automaticas.
+    # Campos de aprovação manual (PATCH /auditorias/{id}/aprovar). Permitem
+    # marcar uma auditoria INCONSISTENTE como APROVADA após validação do
+    # auditor, mantendo rastreabilidade. São preenchidos apenas no fluxo
+    # de aprovação manual; permanecem None para aprovações automáticas.
     aprovada_em: datetime | None = None
     auditor_aprovacao: str | None = None
     observacao_aprovacao: str | None = None
@@ -109,11 +109,11 @@ class Alerta(SQLModel, table=True):
 
 
 class ReconciliacaoAprovada(SQLModel, table=True):
-    """Vinculo aprovado entre um abastecimento orfao e um mobilizado.
+    """Vínculo aprovado entre um abastecimento órfão e um mobilizado.
 
-    Criado pelo endpoint POST /reconciliacao/aprovar. Nao altera a tabela
-    Mobilizado nem Abastecimento; e considerado pelo engine ao re-auditar
-    como uma "lista de exclusao" para o NaoCadastradoAlert.
+    Criado pelo endpoint POST /reconciliacao/aprovar. Não altera a tabela
+    Mobilizado nem Abastecimento; é considerado pelo engine ao re-auditar
+    como uma "lista de exclusão" para o NaoCadastradoAlert.
     """
 
     id: int | None = Field(default=None, primary_key=True)

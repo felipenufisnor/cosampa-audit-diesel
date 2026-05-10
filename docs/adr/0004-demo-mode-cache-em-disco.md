@@ -32,27 +32,27 @@ solucao. Tres riscos colocam o show em perigo no dia:
    - Contras: precisa popular o cache antes da demo; cache pode ficar
      desatualizado se o codigo do prompt mudar.
 
-## Decisao
+## Decisão
 
-Adotada a opcao 3. Implementacao em `audit_diesel/ai/cache.py`:
+Adotada a opção 3. Implementação em `audit_diesel/ai/cache.py`:
 
 - `DEMO_MODE=record`: chama o provider normalmente e grava cada resposta
   em `data/demo_cache/`.
-- `DEMO_MODE=true`: le do cache; cai pro provider apenas em cache miss.
+- `DEMO_MODE=true`: lê do cache; cai para o provider apenas em cache miss.
 - `DEMO_MODE=off` (default): sem cache, comportamento normal.
 
-Os arquivos do cache sao indexados por par de NFs
+Os arquivos do cache são indexados por par de NFs
 (`parecer_NF_{nf_atual}_anterior_{nf_anterior}.json`,
-`reconciliacao_par_{nf_atual}_anterior_{nf_anterior}.json`), nao por
-auditoria_id — isso resolve o detalhe pratico de que o id muda quando
-a auditoria e recriada apos uma reconciliacao aprovada.
+`reconciliacao_par_{nf_atual}_anterior_{nf_anterior}.json`), não por
+auditoria_id — isso resolve o detalhe prático de que o id muda quando
+a auditoria é recriada após uma reconciliação aprovada.
 
-## Consequencias
+## Consequências
 
-- Apresentacao roda mesmo com WiFi desligado — cache + SQLite local
+- Apresentação roda mesmo com WiFi desligado — cache + SQLite local
   cobrem tudo.
-- O `GET /healthz` expoe `demo_mode: bool` para o frontend exibir um
-  badge discreto, evitando duvida do cliente sobre se esta vendo
+- O `GET /healthz` expõe `demo_mode: bool` para o frontend exibir um
+  badge discreto, evitando dúvida do cliente sobre se está vendo
   resposta "real" ou cacheada.
 - Script `scripts/popular_cache_demo.py` e idempotente: roda quando
   quiser, sobrescreve o cache, regenera os PDFs amostra. Tempo total
