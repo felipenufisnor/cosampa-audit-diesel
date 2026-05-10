@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Auditoria de Diesel &mdash; NF {{ auditoria.nf_atual }}</title>
+  <style>{{ inline_css | safe }}</style>
+</head>
+<body>
+
+{# Header e footer "rodando": ambos sao replicados em todas as paginas. #}
+{% include "_header.html.j2" %}
+<div class="running-footer">
+  <span class="gen-date">Gerado em {{ gerado_em_str }}</span>
+  <span class="hash">SHA256:&nbsp;{{ integrity_hash }}</span>
+</div>
+
+<h1>Auditoria de Diesel &mdash; NF {{ auditoria.nf_atual }}</h1>
+<p class="muted small">
+  Documento gerado automaticamente pela ferramenta audit-diesel a partir das
+  fontes Checklist (GLPI), Mobilizados (Gestao de Projetos) e Infleet
+  (Telemetria). Os indicadores reproduzem a logica da aba "AUDITORIA DO
+  DIESEL_0" da planilha de controle interna.
+</p>
+
+<h2 class="section-title">1. Identificacao</h2>
+<table class="id-table">
+  <tr>
+    <td class="label">Obra</td><td class="value">{{ auditoria.nome_obra }}</td>
+  </tr>
+  <tr>
+    <td class="label">Fornecedor</td><td class="value">{{ checklist.cnpj_fornecedor }}</td>
+  </tr>
+  <tr>
+    <td class="label">Data do recebimento</td>
+    <td class="value">{{ fmt_data(checklist.data_recebimento) }}</td>
+  </tr>
+  <tr>
+    <td class="label">Numero do chamado (GLPI)</td>
+    <td class="value">{{ checklist.numero_chamado }}</td>
+  </tr>
+  <tr>
+    <td class="label">Quantidade NF (litros)</td>
+    <td class="value tabular">{{ fmt_litros(checklist.quantidade_nf_litros) }}</td>
+  </tr>
+  <tr>
+    <td class="label">Volume conferido (litros)</td>
+    <td class="value tabular">{{ fmt_litros(checklist.volume_conferido_litros) }}</td>
+  </tr>
+  <tr>
+    <td class="label">Valor total NF (R$)</td>
+    <td class="value tabular">{{ fmt_brl(checklist.valor_total_nf) }}</td>
+  </tr>
+</table>
+
+<h2 class="section-title">2. Indicadores da auditoria</h2>
+{% include "_components/indicadores_table.html.j2" %}
+
+<h2 class="section-title">3. Alertas detectados</h2>
+{% include "_components/alertas_section.html.j2" %}
+
+<h2 class="section-title">4. Parecer Tecnico &mdash; IA</h2>
+{% include "_components/parecer_section.html.j2" %}
+
+<h2 class="section-title">5. Reconciliacoes aprovadas no ciclo</h2>
+{% if reconciliacoes %}
+<ul class="recon-list">
+  {% for r in reconciliacoes %}
+  <li>
+    <div>
+      <span class="quem">{{ r.auditor }}</span>
+      <span class="quando">{{ fmt_datahora(r.criada_em) }}</span>
+    </div>
+    <div class="small">
+      Abastecimento <strong>#{{ r.abastecimento_id }}</strong>
+      vinculado ao mobilizado <strong>#{{ r.mobilizado_id }}</strong>
+      ({{ r.mobilizado_label }})
+      {% if r.confianca is not none %}
+        &middot; confianca {{ '%.0f' | format(r.confianca * 100) }}%
+      {% endif %}
+    </div>
+    {% if r.justificativa %}
+    <div class="small muted">"{{ r.justificativa }}"</div>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty-note">Nenhuma reconciliacao aprovada para esta auditoria.</p>
+{% endif %}
+
+</body>
+</html>

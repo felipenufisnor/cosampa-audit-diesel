@@ -1,0 +1,7 @@
+{# Header em todas as paginas. WeasyPrint move este bloco para @top-center
+   via `position: running()`, replicando-o em cada folha sem repetir o nome
+   da obra na primeira pagina (ver auditoria_pdf.html.j2). #}
+<div class="running-header">
+  <div class="left">COPAMSA &middot; Setor de Auditoria e Controle</div>
+  <div class="right">Auditoria de Diesel &middot; NF {{ auditoria.nf_atual }}</div>
+</div>

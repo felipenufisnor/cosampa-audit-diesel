@@ -1,0 +1,16 @@
+{# Parecer renderizado a partir do markdown do banco. O markdown ja vem do
+   GeradorParecer; aqui injetamos o HTML simples convertido pelo backend. #}
+<section class="parecer">
+  <h3>Parecer Tecnico &mdash; IA</h3>
+  {% if parecer_html %}
+    {{ parecer_html | safe }}
+  {% else %}
+    <p class="empty-note">Parecer nao gerado para esta auditoria.</p>
+  {% endif %}
+  {% if parecer_meta %}
+  <div class="meta">
+    Provider: {{ parecer_meta.provider }}{% if parecer_meta.modelo %} &middot; Modelo: {{ parecer_meta.modelo }}{% endif %}
+    {% if parecer_meta.offline %} &middot; Modo offline{% endif %}
+  </div>
+  {% endif %}
+</section>

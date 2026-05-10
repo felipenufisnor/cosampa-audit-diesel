@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Helvetica, Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+
+  --color-brand-primary: #1e8f5a;
+  --color-brand-primary-dark: #0b3d2e;
+  --color-brand-primary-light: #e8f5ee;
+  --color-brand-primary-medium: #2fa866;
+  --color-brand-sidebar: #5bb879;
+  --color-app-bg: #f6f8f7;
+  --color-app-border: #e5e7eb;
+}
+
+html,
+body {
+  background: #f6f8f7;
+  color: #111827;
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum";
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Atalhos de tabela usados no consolidado e dashboard. Apenas espacamento e
+   tipografia base; cores e alinhamento ficam por classe Tailwind no JSX. */
+.th-base {
+  padding: 0.875rem 1rem;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+.td-base {
+  padding: 0.875rem 1rem;
+}
+
+.markdown-tight strong {
+  font-weight: 600;
+  display: block;
+  margin-top: 0.6rem;
+  margin-bottom: 0.15rem;
+  color: #27272a;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.markdown-tight strong:first-child {
+  margin-top: 0;
+}
+.markdown-tight p {
+  margin: 0 0 0.6rem;
+  color: #3f3f46;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+.markdown-tight ol,
+.markdown-tight ul {
+  margin: 0 0 0.6rem 1rem;
+  font-size: 0.875rem;
+  color: #3f3f46;
+  list-style: decimal;
+}
+.markdown-tight li {
+  margin-bottom: 0.2rem;
+  line-height: 1.5;
+}

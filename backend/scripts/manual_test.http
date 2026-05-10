@@ -1,0 +1,187 @@
+### healthz
+GET http://localhost:8001/healthz
+{
+    "status": "ok",
+    "db": "connected",
+    "ai": "offline_fixture",
+    "provider": "offline",
+    "model": "qwen/qwen3-32b (mocked)",
+    "offline": true
+}
+
+### stats
+GET http://localhost:8001/stats
+{
+    "total_abastecimentos": 1862,
+    "total_litros": 214535.0,
+    "total_custo_brl": 1231936.75,
+    "periodo_inicio": "2026-01-05",
+    "periodo_fim": "2026-04-14",
+    "total_nfs": 4,
+    "total_mobilizados": 286,
+    "mobilizados_ativos": 128,
+    "veiculos_distintos_infleet": 120,
+    "abastecimentos_nao_cadastrados": 461,
+    "custo_nao_cadastrado_brl": 353830.82,
+    "pct_custo_nao_cadastrado": 28.72
+}
+
+### nfs
+GET http://localhost:8001/nfs
+[
+    {
+        "nota_fiscal": "8108",
+        "data_recebimento": "2026-03-05",
+        "nome_obra": "CONSORCIO CLC/ROCHA/COSAMPA (ARCO METROPOLITANO JP)",
+        "valor_total": 86340.0,
+        "qtd_litros": 15000.0,
+        "ultima_auditoria_id": null,
+        "ultima_validacao": null
+    },
+    {
+        "nota_fiscal": "8187",
+        "data_recebimento": "2026-03-13",
+        "nome_obra": "CONSORCIO CLC/ROCHA/COSAMPA (ARCO METROPOLITANO JP)",
+        "valor_total": 98850.0,
+        "qtd_litros": 15000.0,
+        "ultima_auditoria_id": 2,
+        "ultima_validacao": "INCONSISTENTE"
+    },
+    {
+        "nota_fiscal": "8278",
+        "data_recebimento": "2026-03-21",
+        "nome_obra": "CONSORCIO CLC/ROCHA/COSAMPA (ARCO METROPOLITANO JP)",
+        "valor_total": 99900.0,
+        "qtd_litros": 15000.0,
+        "ultima_auditoria_id": null,
+        "ultima_validacao": null
+    },
+    {
+        "nota_fiscal": "8328",
+        "data_recebimento": "2026-03-27",
+        "nome_obra": "CONSORCIO CLC/ROCHA/COSAMPA (ARCO METROPOLITANO JP)",
+        "valor_total": 102000.0,
+        "qtd_litros": 15000.0,
+        "ultima_auditoria_id": null,
+        "ultima_validacao": null
+    }
+]
+
+### nfs/8108
+GET http://localhost:8001/nfs/8108
+{
+    "nota_fiscal": "8108",
+    "numero_chamado": "1435",
+    "data_recebimento": "2026-03-05",
+    "hora_inicio_descarga": "08:50",
+    "hora_final_descarga": "10:10",
+    "nome_obra": "CONSORCIO CLC/ROCHA/COSAMPA (ARCO METROPOLITANO JP)",
+    "cnpj_fornecedor": "38.177.339/0001-30",
+    "quantidade_nf_litros": 15000.0,
+    "volume_conferido_litros": 15000.0,
+    "estoque_antes_tanque_litros": 268.3,
+    "estoque_antes_comboio_litros": 4362.0,
+    "preco_unitario": 5.75,
+    "valor_total_nf": 86340.0,
+    "auditorias_passadas": [
+        {
+            "id": 2,
+            "nf_anterior": "8108",
+            "nf_atual": "8187",
+            "nome_obra": "CONSORCIO CLC/ROCHA/COSAMPA (ARCO METROPOLITANO JP)",
+            "criada_em": "2026-05-09T13:30:05.349163",
+            "validacao_final": "INCONSISTENTE",
+            "diferenca_percentual": 0.003924401898162632
+        },
+        {
+            "id": 1,
+            "nf_anterior": "8108",
+            "nf_atual": "8187",
+            "nome_obra": "CONSORCIO CLC/ROCHA/COSAMPA (ARCO METROPOLITANO JP)",
+            "criada_em": "2026-05-09T13:29:40.134437",
+            "validacao_final": "INCONSISTENTE",
+            "diferenca_percentual": 0.003924401898162632
+        }
+    ]
+}
+
+### POST /auditorias 8108 -> 8187 (com parecer)
+POST http://localhost:8001/auditorias
+(id=3)
+{
+    "auditoria": {
+        "id": 3,
+        "nf_anterior": "8108",
+        "nf_atual": "8187",
+        "nome_obra": "CONSORCIO CLC/ROCHA/COSAMPA (ARCO METROPOLITANO JP)",
+        "criada_em": "2026-05-09T13:30:32.935579",
+        "estoque_inicial_anterior": 4630.3,
+        "quantidade_descarregada_anterior": 15000.0,
+        "estoque_final_teorico_anterior": 19630.3,
+        "saidas_registradas_litros": 18342.0,
+        "saidas_registradas_custo": 105649.92000000001,
+        "estoque_inicial_atual": 1360.0,
+        "saida_teorica_litros": 18270.3,
+        "diferenca_litros": 71.70000000000073,
+        "diferenca_percentual": 0.003924401898162632,
+        "qtd_equipamentos_nao_cadastrados": 36,
+        "validacao_final": "INCONSISTENTE",
+        "parecer_ia": "**Resultado**\nINCONSISTENTE: diferenca de +0.39% entre saidas Infleet e saida teorica; 36 equipamento(s) sem cadastro no GP.\n\n**Causa mais provavel**\nSituacao 3 (alta quantidade de nao-cadastrados). 36 abastecimentos da janela ocorreram em equipamentos sem cadastro correspondente no GP, dominando o sinal de inconsistencia (diferenca de 71.7 L / +0.39%).\n\n**Recomendacao ao auditor**\n1. Cobre a insercao no GP dos 36 equipamento(s) abastecido(s) sem cadastro durante a janela.\n2. Solicite a obra a relacao de saidas de comboio nao registradas no Infleet entre o descarregamento da NF anterior e a NF 8187.\n3. Confirme com o estoquista os valores de tanque e comboio informados no checklist da NF 8187 antes de fechar o mes.\n\n**Risco financeiro associado**\nR$ 32.924,16 em alertas de alta severidade na janela (custo dos abastecimentos nao cadastrados e pos-desmobilizacao)."
+    },
+    "alertas": [
+        {
+            "id": 77,
+            "tipo": "NAO_CADASTRADO",
+            "severidade": "alta",
+            "titulo": "Veiculo nao cadastrado no GP",
+            "descricao": "Veiculo OSB8826 (apelido: 34.002) abastecido em 05/03/2026 10:45 mas sem cadastro correspondente no Gestao de Projetos.",
+            "abastecimento_id": 588,
+            "impacto_financeiro": 2943.36,
+            "payload": {
+                "veiculo_raw": "OSB8826",
+                "veiculo_normalizado": "OSB8826",
+                "apelido": "34.002",
+                "data": "2026-03-05T10:45:00",
+                "quantidade_litros": 511.0,
+                "custo_total": 2943.36
+            }
+        },
+        {
+            "id": 78,
+            "tipo": "NAO_CADASTRADO",
+            "severidade": "alta",
+            "titulo": "Veiculo nao cadastrado no GP",
+            "descricao": "Veiculo 17.T908 (apelido: GE-04 JP) abastecido em 05/03/2026 15:22 mas sem cadastro correspondente no Gestao de Projetos.",
+            "abastecimento_id": 587,
+            "impacto_financeiro": 207.36,
+            "payload": {
+                "veiculo_raw": "17.T908",
+                "veiculo_normalizado": "17T908",
+                "apelido": "GE-04 JP",
+                "data": "2026-03-05T15:22:00",
+                "quantidade_litros": 36.0,
+                "custo_total": 207.36
+            }
+        },
+        {
+            "id": 79,
+            "tipo": "NAO_CADASTRADO",
+            "severidade": "alta",
+            "titulo": "Veiculo nao cadastrado no GP",
+...
+
+### POST /reconciliacao/sugerir auditoria_id=3
+provider=offline offline=True total=36
+>=0.65: 10 | 0.40-0.64: 0 | <0.40: 26
+--- 3 amostras ---
+  ab=588 v=OSB8826 ap='34.002'                         -> NONE (conf=0.00)
+    just: Nenhum candidato para 'OSB8826' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra.
+  ab=587 v=17.T908 ap='GE-04 JP'                       -> NONE (conf=0.00)
+    just: Nenhum candidato para '17.T908' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra.
+  ab=586 v=17.T195 ap='GE-03 JP'                       -> NONE (conf=0.00)
+    just: Nenhum candidato para '17.T195' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra.
+
+### POST /reconciliacao/aprovar (primeira sugestao com confianca >=0.65)
+POST aprovar abastecimento_id=581 mobilizado_id=1122 confianca=0.78 auditoria_id=3
+status=ok reconciliacao_id=1
+nova_auditoria_id=3 nao_cadastrados=31 validacao=INCONSISTENTE

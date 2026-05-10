@@ -1,0 +1,1 @@
+"""Routers expostos pelo FastAPI."""

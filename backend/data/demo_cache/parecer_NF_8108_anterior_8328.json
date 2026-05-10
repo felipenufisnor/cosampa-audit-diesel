@@ -1,0 +1,9 @@
+{
+  "markdown": "**Resultado**\nINCONSISTENTE: diferenca de -100.00% entre saidas Infleet e saida teorica; 0 equipamento(s) sem cadastro no GP.\n\n**Causa mais provavel**\nSituacao 2 (saidas muito acima do esperado). Saidas registradas no Infleet (0 L) divergem em -100.00% da saida teorica (13788 L), compativel com registros faltantes ou consumo nao reportado.\n\n**Recomendacao ao auditor**\n1. Cobre a insercao no GP dos 0 equipamento(s) abastecido(s) sem cadastro durante a janela.\n2. Solicite a obra a relacao de saidas de comboio nao registradas no Infleet entre o descarregamento da NF anterior e a NF 8108.\n3. Confirme com o estoquista os valores de tanque e comboio informados no checklist da NF 8108 antes de fechar o mes.\n\n**Risco financeiro associado**\nR$ 0,00 em alertas de alta severidade na janela (custo dos abastecimentos nao cadastrados e pos-desmobilizacao).",
+  "modelo": "qwen3-32b-offline-mock",
+  "provider": "offline",
+  "offline": true,
+  "latency_s": 0.000124708007206209,
+  "prompt_tokens": 151,
+  "completion_tokens": 213
+}

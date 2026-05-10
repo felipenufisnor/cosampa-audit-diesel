@@ -1,0 +1,9 @@
+{
+  "markdown": "**Resultado**\nINCONSISTENTE: diferenca de +1.40% entre saidas Infleet e saida teorica; 38 equipamento(s) sem cadastro no GP.\n\n**Causa mais provavel**\nSituacao 3 (alta quantidade de nao-cadastrados). 38 abastecimentos da janela ocorreram em equipamentos sem cadastro correspondente no GP, dominando o sinal de inconsistencia (diferenca de 199.0 L / +1.40%).\n\n**Recomendacao ao auditor**\n1. Cobre a insercao no GP dos 38 equipamento(s) abastecido(s) sem cadastro durante a janela.\n2. Solicite a obra a relacao de saidas de comboio nao registradas no Infleet entre o descarregamento da NF anterior e a NF 8278.\n3. Confirme com o estoquista os valores de tanque e comboio informados no checklist da NF 8278 antes de fechar o mes.\n\n**Risco financeiro associado**\nR$ 25.997,55 em alertas de alta severidade na janela (custo dos abastecimentos nao cadastrados e pos-desmobilizacao).",
+  "modelo": "qwen3-32b-offline-mock",
+  "provider": "offline",
+  "offline": true,
+  "latency_s": 0.00021245800598990172,
+  "prompt_tokens": 5416,
+  "completion_tokens": 218
+}

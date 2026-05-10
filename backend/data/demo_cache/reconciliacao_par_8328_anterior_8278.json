@@ -1,0 +1,394 @@
+{
+  "sugestoes": [
+    {
+      "abastecimento_id": 274,
+      "veiculo_infleet": "28.020",
+      "apelido_infleet": null,
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '28.020' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 267,
+      "veiculo_infleet": "TPA-2A54 MAÇARICO",
+      "apelido_infleet": "CE-04 | TPA-2A54 MAÇARICO",
+      "candidato_gp": {
+        "id": 1268,
+        "placa_ativo_raw": "TPA2A54",
+        "placa_ativo_normalizada": "TPA2A54",
+        "equipamento": "CAMINHÃO ESPARGIDOR",
+        "marca": "MERCEDES BENZ",
+        "modelo": "ATEGO 1719 CL",
+        "tipo_equipamento": "CAMINHÃO",
+        "capacidade_litros": 210,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP TPA2A54 aparece como subsequencia da placa Infleet TPA-2A54 MAÇARICO."
+    },
+    {
+      "abastecimento_id": 264,
+      "veiculo_infleet": "KIN2G72",
+      "apelido_infleet": "KIN2G72 | CA-02",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'KIN2G72' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 263,
+      "veiculo_infleet": "17.T908",
+      "apelido_infleet": "GE-04 JP",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '17.T908' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 262,
+      "veiculo_infleet": "17.T195",
+      "apelido_infleet": "GE-03 JP",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '17.T195' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 260,
+      "veiculo_infleet": "KLH9C20",
+      "apelido_infleet": "CARRO | CAT-100",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'KLH9C20' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 249,
+      "veiculo_infleet": "09.002",
+      "apelido_infleet": null,
+      "candidato_gp": {
+        "id": 117,
+        "placa_ativo_raw": "9.002",
+        "placa_ativo_normalizada": "9002",
+        "equipamento": "ROLO TANDEM",
+        "marca": "DYNAPAC",
+        "modelo": "CC4200",
+        "tipo_equipamento": "MÁQUINAS",
+        "capacidade_litros": 240,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP 9.002 aparece como subsequencia da placa Infleet 09.002."
+    },
+    {
+      "abastecimento_id": 247,
+      "veiculo_infleet": "TPA-2A54 MAÇARICO",
+      "apelido_infleet": "CE-04 | TPA-2A54 MAÇARICO",
+      "candidato_gp": {
+        "id": 1268,
+        "placa_ativo_raw": "TPA2A54",
+        "placa_ativo_normalizada": "TPA2A54",
+        "equipamento": "CAMINHÃO ESPARGIDOR",
+        "marca": "MERCEDES BENZ",
+        "modelo": "ATEGO 1719 CL",
+        "tipo_equipamento": "CAMINHÃO",
+        "capacidade_litros": 210,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP TPA2A54 aparece como subsequencia da placa Infleet TPA-2A54 MAÇARICO."
+    },
+    {
+      "abastecimento_id": 245,
+      "veiculo_infleet": "OCP0615",
+      "apelido_infleet": "29.024",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'OCP0615' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 239,
+      "veiculo_infleet": "QFT5F93",
+      "apelido_infleet": "QFT5F93",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'QFT5F93' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 238,
+      "veiculo_infleet": "CHASSI 197950",
+      "apelido_infleet": "30.010",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'CHASSI 197950' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 237,
+      "veiculo_infleet": "POY6236",
+      "apelido_infleet": "43.037",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'POY6236' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 233,
+      "veiculo_infleet": "62.T036",
+      "apelido_infleet": "62.T036",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '62.T036' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 232,
+      "veiculo_infleet": "17.T908",
+      "apelido_infleet": "GE-04 JP",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '17.T908' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 228,
+      "veiculo_infleet": "06.001",
+      "apelido_infleet": null,
+      "candidato_gp": {
+        "id": 1122,
+        "placa_ativo_raw": "6.001",
+        "placa_ativo_normalizada": "6001",
+        "equipamento": "TRATOR AGRICOLA",
+        "marca": "VALTRA",
+        "modelo": "BH 145",
+        "tipo_equipamento": "MÁQUINAS",
+        "capacidade_litros": 230,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP 6.001 aparece como subsequencia da placa Infleet 06.001."
+    },
+    {
+      "abastecimento_id": 222,
+      "veiculo_infleet": "GE-02 JP",
+      "apelido_infleet": "GE-02 JP",
+      "candidato_gp": {
+        "id": 2120,
+        "placa_ativo_raw": "GE02",
+        "placa_ativo_normalizada": "GE02",
+        "equipamento": "GERADOR DE ENERGIA",
+        "marca": "NI",
+        "modelo": "GTA252",
+        "tipo_equipamento": "EQUIPAMENTO ESTACIONÁRIO",
+        "capacidade_litros": 800,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP GE02 aparece como subsequencia da placa Infleet GE-02 JP."
+    },
+    {
+      "abastecimento_id": 221,
+      "veiculo_infleet": "28.020",
+      "apelido_infleet": null,
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '28.020' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 210,
+      "veiculo_infleet": "17.T908",
+      "apelido_infleet": "GE-04 JP",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '17.T908' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 209,
+      "veiculo_infleet": "17.T195",
+      "apelido_infleet": "GE-03 JP",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '17.T195' tem evidencia suficiente (>= 0.40) entre os 25 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 207,
+      "veiculo_infleet": "06.001",
+      "apelido_infleet": null,
+      "candidato_gp": {
+        "id": 1122,
+        "placa_ativo_raw": "6.001",
+        "placa_ativo_normalizada": "6001",
+        "equipamento": "TRATOR AGRICOLA",
+        "marca": "VALTRA",
+        "modelo": "BH 145",
+        "tipo_equipamento": "MÁQUINAS",
+        "capacidade_litros": 230,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP 6.001 aparece como subsequencia da placa Infleet 06.001."
+    },
+    {
+      "abastecimento_id": 201,
+      "veiculo_infleet": "09.002",
+      "apelido_infleet": null,
+      "candidato_gp": {
+        "id": 117,
+        "placa_ativo_raw": "9.002",
+        "placa_ativo_normalizada": "9002",
+        "equipamento": "ROLO TANDEM",
+        "marca": "DYNAPAC",
+        "modelo": "CC4200",
+        "tipo_equipamento": "MÁQUINAS",
+        "capacidade_litros": 240,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP 9.002 aparece como subsequencia da placa Infleet 09.002."
+    },
+    {
+      "abastecimento_id": 200,
+      "veiculo_infleet": "LEP-JP",
+      "apelido_infleet": "LIMPEZA EQUIP- ASFALTO",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'LEP-JP' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 197,
+      "veiculo_infleet": "TPA-2A54 MAÇARICO",
+      "apelido_infleet": "CE-04 | TPA-2A54 MAÇARICO",
+      "candidato_gp": {
+        "id": 1268,
+        "placa_ativo_raw": "TPA2A54",
+        "placa_ativo_normalizada": "TPA2A54",
+        "equipamento": "CAMINHÃO ESPARGIDOR",
+        "marca": "MERCEDES BENZ",
+        "modelo": "ATEGO 1719 CL",
+        "tipo_equipamento": "CAMINHÃO",
+        "capacidade_litros": 210,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP TPA2A54 aparece como subsequencia da placa Infleet TPA-2A54 MAÇARICO."
+    },
+    {
+      "abastecimento_id": 196,
+      "veiculo_infleet": "17.T038",
+      "apelido_infleet": "GE-05 JP",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '17.T038' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 195,
+      "veiculo_infleet": "31.T801",
+      "apelido_infleet": "MAÇARICO 31.T801",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '31.T801' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 193,
+      "veiculo_infleet": "POY6236",
+      "apelido_infleet": "43.037",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'POY6236' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 188,
+      "veiculo_infleet": "17.T908",
+      "apelido_infleet": "GE-04 JP",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '17.T908' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 187,
+      "veiculo_infleet": "17.T195",
+      "apelido_infleet": "GE-03 JP",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '17.T195' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 186,
+      "veiculo_infleet": "13.T881",
+      "apelido_infleet": "CALDEIRA US ASF-01",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '13.T881' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 182,
+      "veiculo_infleet": "09.002",
+      "apelido_infleet": null,
+      "candidato_gp": {
+        "id": 117,
+        "placa_ativo_raw": "9.002",
+        "placa_ativo_normalizada": "9002",
+        "equipamento": "ROLO TANDEM",
+        "marca": "DYNAPAC",
+        "modelo": "CC4200",
+        "tipo_equipamento": "MÁQUINAS",
+        "capacidade_litros": 240,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP 9.002 aparece como subsequencia da placa Infleet 09.002."
+    },
+    {
+      "abastecimento_id": 174,
+      "veiculo_infleet": "LEP-JP",
+      "apelido_infleet": "LIMPEZA EQUIP- ASFALTO",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'LEP-JP' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 172,
+      "veiculo_infleet": "28.020",
+      "apelido_infleet": null,
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para '28.020' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    },
+    {
+      "abastecimento_id": 169,
+      "veiculo_infleet": "GE-02 JP",
+      "apelido_infleet": "GE-02 JP",
+      "candidato_gp": {
+        "id": 2120,
+        "placa_ativo_raw": "GE02",
+        "placa_ativo_normalizada": "GE02",
+        "equipamento": "GERADOR DE ENERGIA",
+        "marca": "NI",
+        "modelo": "GTA252",
+        "tipo_equipamento": "EQUIPAMENTO ESTACIONÁRIO",
+        "capacidade_litros": 800,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP GE02 aparece como subsequencia da placa Infleet GE-02 JP."
+    },
+    {
+      "abastecimento_id": 163,
+      "veiculo_infleet": "TPA-2A54 MAÇARICO",
+      "apelido_infleet": "CE-04 | TPA-2A54 MAÇARICO",
+      "candidato_gp": {
+        "id": 1268,
+        "placa_ativo_raw": "TPA2A54",
+        "placa_ativo_normalizada": "TPA2A54",
+        "equipamento": "CAMINHÃO ESPARGIDOR",
+        "marca": "MERCEDES BENZ",
+        "modelo": "ATEGO 1719 CL",
+        "tipo_equipamento": "CAMINHÃO",
+        "capacidade_litros": 210,
+        "situacao": "MOBILIZADO"
+      },
+      "confianca": 0.78,
+      "justificativa": "Identificador do GP TPA2A54 aparece como subsequencia da placa Infleet TPA-2A54 MAÇARICO."
+    },
+    {
+      "abastecimento_id": 152,
+      "veiculo_infleet": "OIP6397",
+      "apelido_infleet": "29.006",
+      "candidato_gp": null,
+      "confianca": 0.0,
+      "justificativa": "Nenhum candidato para 'OIP6397' tem evidencia suficiente (>= 0.40) entre os 15 mobilizados da obra."
+    }
+  ]
+}

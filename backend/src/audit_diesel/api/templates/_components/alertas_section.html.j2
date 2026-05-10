@@ -1,0 +1,32 @@
+{# Tabela de alertas agrupados por tipo. Severidade em B&W com peso ao inves
+   de cor saturada para nao quebrar em impressao monocromatica. #}
+{% if alertas_por_tipo %}
+<table class="alertas-table">
+  <thead>
+    <tr>
+      <th style="width: 14%;">Severidade</th>
+      <th>Descricao</th>
+      <th style="width: 18%;" class="right">Impacto (R$)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tipo, items in alertas_por_tipo.items() %}
+      <tr>
+        <td colspan="3" class="tipo-grupo">{{ tipo_labels[tipo] | default(tipo) }} &middot; {{ items|length }} ocorrencia(s)</td>
+      </tr>
+      {% for a in items %}
+      <tr>
+        <td class="sev-{{ a.severidade }}">{{ a.severidade | upper }}</td>
+        <td>
+          <div><strong>{{ a.titulo }}</strong></div>
+          <div class="small muted">{{ a.descricao }}</div>
+        </td>
+        <td class="right tabular">{{ fmt_brl(a.impacto_financeiro) if a.impacto_financeiro is not none else '—' }}</td>
+      </tr>
+      {% endfor %}
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-note">Nenhum alerta gerado nesta auditoria.</p>
+{% endif %}
