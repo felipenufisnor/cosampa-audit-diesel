@@ -48,7 +48,19 @@ Regras:
 - Português do Brasil técnico. Termos do domínio: NF, descarregamento,
   estoque teórico, comboio, mobilizado, GP, Infleet.
 - Máximo 220 palavras no total.
-- NUNCA invente números que não estejam nos indicadores fornecidos.
+- Use APENAS números que aparecem literalmente no JSON dos indicadores
+  ou são derivados diretos previstos abaixo. Se um número não estiver
+  disponível, omita-o em vez de estimar.
+- Derivados PERMITIDOS (já pre-computados em `resumo_para_parecer`):
+  * `diferenca_percentual_em_pp` -> use ESSE valor em "+/-X.XX%". Não
+    multiplique nada manualmente.
+  * `impacto_total_alertas_brl` -> total do bloco "Risco financeiro".
+  * `impacto_por_tipo_brl` / `impacto_por_severidade_brl` -> use as
+    chaves para citar recortes ("R$ X em NAO_CADASTRADO").
+  * `qtd_equipamentos_nao_cadastrados` exatamente como informado.
+- PROIBIDO: inventar contagens (ex.: "13 dias", "81 saídas", "615
+  abastecimentos"), somas parciais que não estejam acima, IDs, datas
+  ou valores não presentes no payload.
 - Responda apenas com o parecer em markdown, sem cercas de código,
   sem cabeçalho, sem rodapé.
 """
@@ -63,15 +75,50 @@ Regras obrigatórias:
 - Não use cercas de código.
 - Máximo 220 palavras.
 - O status do Resultado deve bater com validacao_final.
-- Não invente números; use apenas números presentes no payload ou derivados
-  diretos, como diferença percentual em pontos percentuais.
+- Use APENAS números do payload ou derivados diretos:
+  * `diferenca_percentual` em pontos percentuais.
+  * Soma de `impacto_financeiro` por `tipo` ou `severidade`.
+  * `qtd_equipamentos_nao_cadastrados`.
+- Se o parecer inválido cita números fora dessa lista (contagens
+  inventadas, somas parciais, dias entre datas), REMOVA-OS — não tente
+  ajustar para um valor "próximo".
 - Responda apenas com o parecer corrigido.
 """
 
 
 def montar_user_message(auditoria_payload: dict[str, Any]) -> str:
-    """Serializa o payload da auditoria em JSON para o modelo consumir."""
-    return json.dumps(auditoria_payload, ensure_ascii=False, indent=2, default=str)
+    """Serializa o payload da auditoria + subtotais pre-computados.
+
+    LLMs (especialmente os menores) erram aritmética mental em listas longas
+    de alertas. Pre-computamos os recortes que o parecer cita rotineiramente
+    para que o modelo apenas copie o número correto, evitando alucinação.
+    """
+    enriched = dict(auditoria_payload)
+    enriched["resumo_para_parecer"] = _resumo_para_parecer(auditoria_payload)
+    return json.dumps(enriched, ensure_ascii=False, indent=2, default=str)
+
+
+def _resumo_para_parecer(payload: dict[str, Any]) -> dict[str, Any]:
+    alertas = [a for a in payload.get("alertas", []) if isinstance(a, dict)]
+    soma_por_tipo: dict[str, float] = {}
+    soma_por_severidade: dict[str, float] = {}
+    for a in alertas:
+        imp = float(a.get("impacto_financeiro") or 0.0)
+        soma_por_tipo[str(a.get("tipo") or "")] = (
+            soma_por_tipo.get(str(a.get("tipo") or ""), 0.0) + imp
+        )
+        soma_por_severidade[str(a.get("severidade") or "")] = (
+            soma_por_severidade.get(str(a.get("severidade") or ""), 0.0) + imp
+        )
+    auditoria = payload.get("auditoria") or {}
+    dif_pct = float(auditoria.get("diferenca_percentual") or 0.0) * 100.0
+    return {
+        "diferenca_percentual_em_pp": round(dif_pct, 2),
+        "qtd_equipamentos_nao_cadastrados": auditoria.get("qtd_equipamentos_nao_cadastrados"),
+        "impacto_total_alertas_brl": round(sum(soma_por_tipo.values()), 2),
+        "impacto_por_tipo_brl": {k: round(v, 2) for k, v in soma_por_tipo.items()},
+        "impacto_por_severidade_brl": {k: round(v, 2) for k, v in soma_por_severidade.items()},
+    }
 
 
 def montar_repair_user_message(

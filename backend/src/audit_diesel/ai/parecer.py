@@ -61,7 +61,7 @@ class GeradorParecer:
                 ChatMessage(role="user", content=user_msg),
             ],
             temperature=0.3,
-            max_tokens=900,
+            max_tokens=1500,
         )
         response = self._ensure_valid_response(response, auditoria_payload)
         provider = response.provider
@@ -116,7 +116,7 @@ class GeradorParecer:
                     ChatMessage(role="user", content=prompts.montar_user_message(payload)),
                 ],
                 temperature=0.2,
-                max_tokens=900,
+                max_tokens=1500,
                 model_override=fallback_model,
             )
             fallback_validation = validar_parecer(fallback.content, payload)
@@ -146,7 +146,7 @@ class GeradorParecer:
                 ),
             ],
             temperature=0.1,
-            max_tokens=900,
+            max_tokens=1500,
             model_override=self.client.settings.llm_model,
         )
 
