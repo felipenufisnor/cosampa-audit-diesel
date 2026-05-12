@@ -14,7 +14,6 @@ import * as React from "react";
 import { ChevronRight, Filter, Paperclip, X } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
-import { PreviewBanner } from "@/components/layout/preview-banner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -73,8 +72,6 @@ export default function InvestigacoesPage() {
         items={[{ label: "Dashboard", href: "/" }, { label: "Investigações" }]}
       />
 
-      <PreviewBanner descricao="Esta tela é uma simulação navegável do Workflow de Tratativa de Inconsistências, planejado para a fase 2 da plataforma. Os dados exibidos são ilustrativos e não refletem informações reais." />
-
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-primary-dark">
@@ -84,12 +81,14 @@ export default function InvestigacoesPage() {
             Investigações em andamento
           </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Kanban de tratativa de inconsistências. Os dados desta tela são
-            ilustrativos.
+            Kanban para tratativa de inconsistências.
           </p>
         </div>
-        <Badge variant="muted" className="text-[12px]">
-          Preview - Disponível em versão futura
+        <Badge
+          variant="warn"
+          className="border-amber-200 bg-amber-50 px-2 text-[11px] font-medium text-amber-700"
+        >
+          PREVIEW
         </Badge>
       </header>
 
@@ -107,8 +106,6 @@ export default function InvestigacoesPage() {
           />
         ))}
       </div>
-
-      <Rodape />
 
       {aberto && (
         <DetalheDrawer inv={aberto} onClose={() => setAberto(null)} />
@@ -452,17 +449,5 @@ function DetalheDrawer({
         </footer>
       </aside>
     </>
-  );
-}
-
-function Rodape() {
-  return (
-    <p className="rounded-xl border border-app-border bg-zinc-50 px-4 py-3 text-xs leading-relaxed text-zinc-600">
-      Esta tela é uma simulação navegável da funcionalidade Workflow Formal de
-      Tratativa, planejada para a fase 2 da solução. Os dados exibidos são
-      ilustrativos. A entrega real desta funcionalidade inclui integração com
-      GLPI, e-mail automatizado para gestores de obra, anexo de evidências
-      direto no sistema, e análise automática de documentos físicos.
-    </p>
   );
 }

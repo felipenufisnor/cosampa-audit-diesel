@@ -122,11 +122,6 @@ export function NFsTable() {
                           <ExternalLink className="h-3 w-3" aria-hidden />
                         </Link>
                       )}
-                      {nf.qtd_auditorias > 1 && (
-                        <span className="absolute left-0 -bottom-4 text-[11px] font-medium text-amber-700">
-                          Atual v{nf.qtd_auditorias} de {nf.qtd_auditorias}
-                        </span>
-                      )}
                     </div>
                   </td>
                   <td className="px-5 py-4 text-center">

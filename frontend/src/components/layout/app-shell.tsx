@@ -384,18 +384,7 @@ function CosampaLogo({
 function AppFooter() {
   return (
     <footer className="mt-auto border-t border-app-border bg-brand-primary-light/55 px-4 py-3 md:px-8">
-      <div className="flex items-center justify-center gap-6">
-        <button
-          type="button"
-          onClick={() => {
-            if (typeof window !== "undefined") {
-              window.dispatchEvent(new Event("audit-diesel:open-tour"));
-            }
-          }}
-          className="text-xs text-brand-primary-dark/70 underline-offset-2 hover:text-brand-primary-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary-dark/35 rounded"
-        >
-          Refazer tour
-        </button>
+      <div className="flex items-center justify-center">
         <Image
           src="/brand/logo-tarea.svg"
           alt="Tarea"
