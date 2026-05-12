@@ -21,6 +21,8 @@ def stats(session: Session = Depends(get_session)) -> StatsResponse:
     total_custo = session.exec(select(func.sum(Abastecimento.custo_total))).one() or 0.0
     periodo_min = session.exec(select(func.min(Abastecimento.data))).one()
     periodo_max = session.exec(select(func.max(Abastecimento.data))).one()
+    periodo_nfs_min = session.exec(select(func.min(Checklist.data_recebimento))).one()
+    periodo_nfs_max = session.exec(select(func.max(Checklist.data_recebimento))).one()
 
     total_nfs = session.exec(select(func.count()).select_from(Checklist)).one()
     total_mob = session.exec(select(func.count()).select_from(Mobilizado)).one()
@@ -43,6 +45,8 @@ def stats(session: Session = Depends(get_session)) -> StatsResponse:
         total_custo_brl=round(float(total_custo), 2),
         periodo_inicio=periodo_min.date() if periodo_min else None,
         periodo_fim=periodo_max.date() if periodo_max else None,
+        periodo_nfs_inicio=periodo_nfs_min.date() if periodo_nfs_min else None,
+        periodo_nfs_fim=periodo_nfs_max.date() if periodo_nfs_max else None,
         total_nfs=int(total_nfs or 0),
         total_mobilizados=int(total_mob or 0),
         mobilizados_ativos=int(mob_ativos or 0),

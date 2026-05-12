@@ -237,7 +237,14 @@ def render_auditoria_pdf(
     integrity_hash = _hash_indicadores(auditoria)
     css = CSS_PATH.read_text(encoding="utf-8")
 
-    parecer_html = _markdown_basico(auditoria.parecer_ia or "")
+    from audit_diesel.ai.parecer_quality import avaliar_parecer  # noqa: PLC0415
+
+    qualidade_parecer = avaliar_parecer(auditoria.parecer_ia)
+    parecer_html = (
+        _markdown_basico(auditoria.parecer_ia or "")
+        if qualidade_parecer.is_ok
+        else ""
+    )
     alertas_por_tipo = _agrupar_alertas(alertas)
 
     env = Environment(

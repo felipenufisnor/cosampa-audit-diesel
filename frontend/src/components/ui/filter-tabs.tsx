@@ -6,6 +6,7 @@ export interface FilterTabOption<T extends string> {
   value: T;
   label: string;
   count?: number;
+  countClassName?: string;
 }
 
 interface FilterTabsProps<T extends string> {
@@ -51,8 +52,11 @@ export function FilterTabs<T extends string>({
             {option.count !== undefined && (
               <span
                 className={cn(
-                  "tabular rounded-full px-1.5 py-0.5 text-xs",
-                  active ? "bg-white/70 text-brand-primary-dark" : "bg-white text-zinc-500",
+                  "tabular rounded-full border px-1.5 py-0.5 text-xs",
+                  active
+                    ? "border-transparent bg-white/70 text-brand-primary-dark"
+                    : "border-zinc-200 bg-white text-zinc-500",
+                  option.countClassName,
                 )}
               >
                 {option.count}

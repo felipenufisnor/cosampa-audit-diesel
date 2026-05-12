@@ -155,7 +155,7 @@ direto das fontes originais.
 
 ```bash
 cd backend
-AUDIT_AI_OFFLINE=1 uv run uvicorn audit_diesel.api.main:app --port 8001
+AUDIT_AI_OFFLINE=0 DEMO_MODE=off uv run uvicorn audit_diesel.api.main:app --port 8001
 # Docs: http://localhost:8001/docs
 ```
 
@@ -175,7 +175,7 @@ Endpoints principais (todos documentados via OpenAPI):
 | `GET  /auditorias/consolidado`         | Resumo cross-NF com agregados + alertas resumidos |
 | `GET  /auditorias/consolidado.csv`     | Mesmo conteúdo em CSV (BOM UTF-8 para Excel) |
 
-Curl realmente executado contra o backend (modo offline) está em
+Curl de referência executado contra o backend em modo offline está em
 `backend/scripts/manual_test.http`.
 
 ## Camada de IA
@@ -191,11 +191,17 @@ LLM_PROVIDER=openrouter
 LLM_BASE_URL=https://openrouter.ai/api/v1
 LLM_API_KEY=...
 LLM_MODEL=qwen/qwen3-32b
-LLM_FALLBACK_MODEL=
+LLM_FALLBACK_MODEL=deepseek/deepseek-chat
 LLM_REQUEST_TIMEOUT_S=60
 LLM_MAX_RETRIES=3
-AUDIT_AI_OFFLINE=1     # força uso de fixtures determinísticas (sem rede)
+AUDIT_AI_OFFLINE=0     # tenta provider real quando LLM_API_KEY estiver preenchida
+DEMO_MODE=off          # modo demonstracao e opt-in
 ```
+
+Sem `LLM_API_KEY`, o backend sinaliza `assistant_status=missing_key` e o
+Assistente desabilita perguntas livres. Se houver cache local por janela de NF,
+as perguntas sugeridas continuam funcionando como modo degradado. Para forcar
+zero rede, use `AUDIT_AI_OFFLINE=1`.
 
 ### Runbook: IA real com OpenRouter
 
@@ -203,14 +209,8 @@ Use `backend/.env.openrouter.example` como base e copie para `backend/.env`.
 Nunca commite chaves; se uma chave aparecer em chat, print ou log, rotacione
 antes de usar em ambiente real.
 
-Modo demo/offline, recomendado para apresentação e CI:
-
-```bash
-AUDIT_AI_OFFLINE=1 DEMO_MODE=true \
-  uv run uvicorn audit_diesel.api.main:app --port 8000
-```
-
-Modo real, recomendado para calibração Qwen/DeepSeek:
+Modo padrao com IA real, recomendado para desenvolvimento integrado e
+calibracao Qwen/DeepSeek:
 
 ```bash
 AUDIT_AI_OFFLINE=0 DEMO_MODE=off \
@@ -222,11 +222,41 @@ LLM_FALLBACK_MODEL=deepseek/deepseek-chat \
   uv run uvicorn audit_diesel.api.main:app --port 8000
 ```
 
+Modo demo/offline, recomendado para apresentação e CI:
+
+```bash
+AUDIT_AI_OFFLINE=1 DEMO_MODE=true \
+  uv run uvicorn audit_diesel.api.main:app --port 8000
+```
+
 Confirme o estado em `GET /healthz`:
 
-- `ai=offline_fixture` / `offline=true`: sem rede, usando fixtures.
-- `ai=configured` / `offline=false`: provider real configurado.
+- `assistant_status=available`: provider real respondeu ao probe e perguntas
+  livres estao habilitadas.
+- `assistant_status=degraded_cache`: provider falhou, mas ha respostas
+  pre-carregadas para uso parcial.
+- `assistant_status=missing_key`: `LLM_API_KEY` nao foi configurada para
+  provider remoto.
+- `assistant_status=offline_fixture`: sem rede por configuracao
+  (`AUDIT_AI_OFFLINE=1`).
+- `assistant_status=provider_error`: provider configurado, mas indisponivel e
+  sem cache local.
 - `model`: modelo primário ativo; `fallback_model`: fallback configurado.
+
+Smoke test do assistente real:
+
+```bash
+curl -s http://localhost:8000/healthz | jq '{
+  assistant_status,
+  assistant_reason,
+  assistant_can_answer_free_text,
+  assistant_has_cached_answers
+}'
+
+curl -N -X POST http://localhost:8000/auditorias/1/perguntar \
+  -H 'Content-Type: application/json' \
+  -d '{"pergunta":"Qual o principal risco desta auditoria?"}'
+```
 
 Smoke/calibração real:
 
@@ -344,7 +374,7 @@ Três modos via env var `DEMO_MODE`:
 
 | Valor    | Comportamento |
 | -------- | ------------- |
-| `off`    | (default) Sem cache. Chama o provider de LLM normalmente. |
+| `off`    | (default) Sem cache. Chama o provider configurado; sem chave, usa fixtures offline. |
 | `record` | Chama o provider e GRAVA cada resposta em `data/demo_cache/`. |
 | `true`   | LE do `data/demo_cache/`; cai pro provider em cache miss. |
 

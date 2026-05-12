@@ -14,7 +14,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from sqlmodel import Session, select
 
-from audit_diesel.audit.engine import AuditEngine, ChecklistNaoEncontrado
+from audit_diesel.audit.engine import AuditEngine, ChecklistNaoEncontrado, ParTemporalInvalido
 from audit_diesel.config import DB_PATH, RAW_DIR
 from audit_diesel.ingestion.pipeline import build_engine, ingerir
 from audit_diesel.models import Abastecimento, Checklist
@@ -97,6 +97,9 @@ def cmd_auditar(nf_anterior: str, nf_atual: str, as_json: bool) -> None:
         except ChecklistNaoEncontrado as e:
             console.print(f"[red]Erro:[/red] {e}")
             _exit(2)
+        except ParTemporalInvalido as e:
+            console.print(f"[red]Erro:[/red] {e}")
+            _exit(3)
 
     if as_json:
         click.echo(json.dumps(resultado.to_dict(), ensure_ascii=False, indent=2, default=str))
@@ -188,6 +191,42 @@ def cmd_stats() -> None:
     table.add_row("Abastec. sem cadastro no GP", f"{n_nao_cadastrados} ({pct_nao_cadastrados:.1%})")
     console.print(table)
     console.print(f"[dim]Banco: {DB_PATH}  |  Origem: {RAW_DIR}[/dim]")
+
+
+@app.command("analisar-padroes")
+def cmd_analisar_padroes() -> None:
+    """Roda a analise proativa de padroes cross-NF (Feature C da v2)."""
+    from audit_diesel.ai.padroes import analisar_padroes  # noqa: PLC0415
+
+    engine = build_engine()
+    with Session(engine) as session, Progress(
+        SpinnerColumn(),
+        TextColumn("[bold]{task.description}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        progress.add_task("Analisando padroes proativos...", total=None)
+        resultado = analisar_padroes(session)
+
+    table = Table(title="Analise de padroes", box=SIMPLE_HEAVY)
+    table.add_column("#", justify="right", style="bold")
+    table.add_column("Severidade", justify="center")
+    table.add_column("Tipo")
+    table.add_column("Titulo")
+    if not resultado.padroes:
+        console.print(
+            "[yellow]Nenhum padrao com evidencia real foi detectado.[/yellow]"
+        )
+    for i, p in enumerate(resultado.padroes, 1):
+        cor = _SEVERIDADE_COR.get(p.severidade, "white")
+        table.add_row(
+            str(i), f"[{cor}]{p.severidade}[/{cor}]", p.tipo, p.titulo,
+        )
+    console.print(table)
+    console.print(
+        f"[dim]candidatos coletados: {resultado.n_candidatos} | "
+        f"provider: {resultado.provider} | offline: {resultado.offline}[/dim]"
+    )
 
 
 def _exit(code: int) -> NoReturn:

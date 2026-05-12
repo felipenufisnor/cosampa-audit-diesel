@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     llm_base_url: str = "https://openrouter.ai/api/v1"
     llm_api_key: str | None = None
     llm_model: str = "qwen/qwen3-32b"
-    llm_fallback_model: str | None = None
+    llm_fallback_model: str | None = "deepseek/deepseek-chat"
     llm_request_timeout_s: float = 60.0
     llm_max_retries: int = 3
 

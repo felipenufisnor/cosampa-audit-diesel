@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import {
   Dialog,
@@ -43,19 +45,54 @@ function AuditarDialogInner({
   candidatos: NFListItem[];
   onClose: () => void;
 }) {
+  const router = useRouter();
   const mutation = useCriarAuditoria();
   const historico = useAuditoriasDaNf(alvo.nota_fiscal);
   const possuiHistorico = (historico.data?.length ?? 0) > 0;
 
-  const sugestaoDefault = React.useMemo(() => {
-    const anteriores = candidatos
-      .filter((c) => c.nota_fiscal !== alvo.nota_fiscal)
-      .filter((c) => c.data_recebimento < alvo.data_recebimento)
-      .sort((a, b) => b.data_recebimento.localeCompare(a.data_recebimento));
-    return anteriores[0]?.nota_fiscal ?? null;
-  }, [alvo, candidatos]);
+  const candidatosAnteriores = React.useMemo(
+    () =>
+      candidatos
+        .filter((c) => c.nota_fiscal !== alvo.nota_fiscal)
+        .filter((c) => c.data_recebimento < alvo.data_recebimento)
+        .sort((a, b) => b.data_recebimento.localeCompare(a.data_recebimento)),
+    [alvo.data_recebimento, alvo.nota_fiscal, candidatos],
+  );
+  const semNfAnterior = candidatosAnteriores.length === 0;
+  const sugestaoDefault = candidatosAnteriores[0]?.nota_fiscal ?? null;
   const [anteriorNf, setAnteriorNf] = React.useState<string | null>(sugestaoDefault);
   const [modo, setModo] = React.useState<ModoAuditoria>("nova_versao");
+  const anteriorNfValida = anteriorNf !== null && candidatosAnteriores.some(
+    (c) => c.nota_fiscal === anteriorNf,
+  );
+  const anteriorNfEfetiva = anteriorNfValida ? anteriorNf : sugestaoDefault;
+  const anteriorSelecionadaValida = candidatosAnteriores.some(
+    (c) => c.nota_fiscal === anteriorNfEfetiva,
+  );
+
+  // Estado do "ponto de corte manual" — usado apenas quando nao ha NF anterior.
+  // Default: dia anterior a data da NF alvo, 08:00, estoques zerados.
+  const pcDataDefault = React.useMemo(() => {
+    const d = new Date(`${alvo.data_recebimento}T00:00:00`);
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+  }, [alvo.data_recebimento]);
+  const [pcData, setPcData] = React.useState(pcDataDefault);
+  const [pcHora, setPcHora] = React.useState("08:00");
+  const [pcTanque, setPcTanque] = React.useState("0");
+  const [pcComboio, setPcComboio] = React.useState("0");
+  const [pcMotivo, setPcMotivo] = React.useState("");
+
+  const pcTanqueNum = Number.parseFloat(pcTanque);
+  const pcComboioNum = Number.parseFloat(pcComboio);
+  const pcDataValida = pcData && pcData < alvo.data_recebimento;
+  const pcEstoquesValidos =
+    Number.isFinite(pcTanqueNum) &&
+    Number.isFinite(pcComboioNum) &&
+    pcTanqueNum >= 0 &&
+    pcComboioNum >= 0;
+  const pcMotivoValido = pcMotivo.trim().length > 0;
+  const pcFormValido = Boolean(pcDataValida && pcEstoquesValidos && pcMotivoValido);
 
   return (
     <Dialog open={Boolean(alvo)} onOpenChange={(o) => !o && onClose()}>
@@ -79,6 +116,30 @@ function AuditarDialogInner({
               <p className="text-[11px] text-amber-800 mt-0.5">
                 Última em {formatDateTimeBR(historico.data[0].criada_em)} (NF anterior {historico.data[0].nf_anterior}).
               </p>
+            )}
+            {historico.data && historico.data.length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                {historico.data.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-2 rounded-md bg-white/65 px-2 py-1.5 text-[11px] text-amber-900"
+                  >
+                    <span className="font-semibold">
+                      {a.is_atual ? "Atual" : "Histórica"} v{a.versao} de {a.total_versoes}
+                    </span>
+                    <span>NF anterior {a.nf_anterior}</span>
+                    <span className="text-amber-700">
+                      {formatDateTimeBR(a.criada_em)}
+                    </span>
+                    <Link
+                      href={`/auditoria/${a.id}`}
+                      className="ml-auto font-semibold text-brand-primary-dark underline-offset-2 hover:underline"
+                    >
+                      Abrir
+                    </Link>
+                  </div>
+                ))}
+              </div>
             )}
             <fieldset className="mt-2.5 space-y-1.5">
               <legend className="sr-only">Modo de criação</legend>
@@ -111,41 +172,117 @@ function AuditarDialogInner({
             </fieldset>
           </section>
         )}
-        <p className="mb-3 text-zinc-700">
-          Escolha a NF anterior. A janela de auditoria será o intervalo entre o
-          fim do descarregamento da NF anterior e o desta NF.
-        </p>
-        <div className="space-y-1.5">
-          {candidatos
-            .filter((c) => c.nota_fiscal !== alvo.nota_fiscal)
-            .map((c) => {
-              const selected = anteriorNf === c.nota_fiscal;
-              return (
-                <label
-                  key={c.nota_fiscal}
-                  className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors ${
-                    selected
-                      ? "border-brand-primary bg-brand-primary-light"
-                      : "border-zinc-200 bg-white hover:bg-zinc-50"
-                  }`}
-                >
+        {semNfAnterior ? (
+          <>
+            <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-sm text-amber-900">
+              <p className="font-semibold">Nenhuma NF anterior disponível.</p>
+              <p className="mt-0.5 text-[12px] text-amber-800">
+                NF {alvo.nota_fiscal} é a mais antiga do conjunto. Defina manualmente
+                o ponto de corte (data, hora e estoques iniciais) para abrir a janela
+                de auditoria.
+              </p>
+            </div>
+            <fieldset className="space-y-3 rounded-xl border border-zinc-200 bg-white p-3">
+              <legend className="px-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                Ponto de corte manual
+              </legend>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+                  Data
                   <input
-                    type="radio"
-                    name="nf-anterior"
-                    className="accent-brand-primary"
-                    checked={selected}
-                    onChange={() => setAnteriorNf(c.nota_fiscal)}
+                    type="date"
+                    max={alvo.data_recebimento}
+                    value={pcData}
+                    onChange={(e) => setPcData(e.target.value)}
+                    className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-sm text-zinc-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25"
                   />
-                  <span className="font-semibold tabular text-zinc-950">
-                    NF {c.nota_fiscal}
-                  </span>
-                  <span className="text-zinc-500">{formatDateBR(c.data_recebimento)}</span>
-                  <span className="ml-auto tabular text-zinc-700">
-                    {formatLitros(c.qtd_litros, 0)}
-                  </span>
                 </label>
-              );
-            })}
+                <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+                  Hora
+                  <input
+                    type="time"
+                    value={pcHora}
+                    onChange={(e) => setPcHora(e.target.value)}
+                    className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-sm text-zinc-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+                  Estoque inicial — tanque (L)
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={pcTanque}
+                    onChange={(e) => setPcTanque(e.target.value)}
+                    className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-sm text-zinc-900 tabular focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+                  Estoque inicial — comboio (L)
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={pcComboio}
+                    onChange={(e) => setPcComboio(e.target.value)}
+                    className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-sm text-zinc-900 tabular focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25"
+                  />
+                </label>
+              </div>
+              <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+                Motivo / referência
+                <textarea
+                  rows={2}
+                  value={pcMotivo}
+                  onChange={(e) => setPcMotivo(e.target.value)}
+                  placeholder="Ex: medição manual do tanque em 01/03/2026 às 08:00."
+                  className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-sm text-zinc-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25"
+                />
+              </label>
+              {pcData && !pcDataValida && (
+                <p className="text-[11px] font-medium text-red-700">
+                  A data do corte precisa ser anterior a {formatDateBR(alvo.data_recebimento)}.
+                </p>
+              )}
+            </fieldset>
+          </>
+        ) : (
+          <p className="mb-3 text-zinc-700">
+            Escolha a NF anterior. A janela de auditoria será o intervalo entre o
+            fim do descarregamento da NF anterior e o desta NF.
+          </p>
+        )}
+        <div className={semNfAnterior ? "hidden" : "space-y-1.5"}>
+          {candidatosAnteriores.map((c) => {
+            const selected = anteriorNfEfetiva === c.nota_fiscal;
+            return (
+              <label
+                key={c.nota_fiscal}
+                className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors ${
+                  selected
+                    ? "border-brand-primary bg-brand-primary-light"
+                    : "border-zinc-200 bg-white hover:bg-zinc-50"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="nf-anterior"
+                  className="accent-brand-primary"
+                  checked={selected}
+                  onChange={() => setAnteriorNf(c.nota_fiscal)}
+                />
+                <span className="font-semibold tabular text-zinc-950">
+                  NF {c.nota_fiscal}
+                </span>
+                <span className="text-zinc-500">{formatDateBR(c.data_recebimento)}</span>
+                <span className="ml-auto tabular text-zinc-700">
+                  {formatLitros(c.qtd_litros, 0)}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </DialogBody>
       <DialogFooter>
@@ -153,18 +290,57 @@ function AuditarDialogInner({
           Cancelar
         </Button>
         <Button
-          disabled={!anteriorNf || mutation.isPending}
+          variant="secondary"
+          disabled={
+            (semNfAnterior ? !pcFormValido : !anteriorSelecionadaValida) ||
+            mutation.isPending
+          }
           onClick={() => {
-            if (!anteriorNf) return;
+            if (semNfAnterior) {
+              if (!pcFormValido) return;
+              mutation.mutate({
+                nf_atual: alvo.nota_fiscal,
+                gerar_parecer: true,
+                modo,
+                ponto_corte: {
+                  data_inicio: `${pcData}T${pcHora}:00`,
+                  estoque_tanque_inicial_litros: pcTanqueNum,
+                  estoque_comboio_inicial_litros: pcComboioNum,
+                  motivo: pcMotivo.trim(),
+                },
+              });
+              return;
+            }
+            if (!anteriorNfEfetiva || !anteriorSelecionadaValida) return;
             mutation.mutate({
-              nf_anterior: anteriorNf,
+              nf_anterior: anteriorNfEfetiva,
               nf_atual: alvo.nota_fiscal,
               gerar_parecer: true,
               modo,
             });
           }}
+          title="Roda a auditoria de forma síncrona, sem narração em tempo real"
         >
-          {mutation.isPending ? "Auditando..." : "Auditar"}
+          {mutation.isPending ? "Auditando..." : "Auditar (rápido)"}
+        </Button>
+        <Button
+          disabled={semNfAnterior || !anteriorSelecionadaValida || mutation.isPending}
+          onClick={() => {
+            if (semNfAnterior) return;
+            if (!anteriorNfEfetiva || !anteriorSelecionadaValida) return;
+            const qs = new URLSearchParams({
+              ant: anteriorNfEfetiva,
+              atual: alvo.nota_fiscal,
+            });
+            router.push(`/auditoria/run?${qs.toString()}`);
+          }}
+          title={
+            semNfAnterior
+              ? "Narração em tempo real ainda não suporta ponto de corte manual."
+              : "Mostra cada etapa em tempo real, com a análise automática narrada"
+          }
+        >
+          Auditar com narração
         </Button>
       </DialogFooter>
     </Dialog>

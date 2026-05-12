@@ -2,12 +2,14 @@
 
 import * as React from "react";
 import { use } from "react";
-import { CheckCircle2, FileDown } from "lucide-react";
+import { CheckCircle2, FileDown, Loader2, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { AlertasList } from "@/components/auditoria/alertas-list";
 import { AprovarDialog } from "@/components/auditoria/aprovar-dialog";
+import { AssistenteDrawer } from "@/components/auditoria/assistente-drawer";
 import { IndicadoresCard } from "@/components/auditoria/indicadores-card";
 import { JanelaTemporal } from "@/components/auditoria/janela-temporal";
 import { ParecerIA } from "@/components/auditoria/parecer-ia";
@@ -18,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { useAuditoria } from "@/hooks/use-auditoria";
+import { useAuditoria, useRegenerarParecer } from "@/hooks/use-auditoria";
 import { useNF } from "@/hooks/use-nfs";
 import { useAuditoriaStore } from "@/stores/auditoria-store";
 import { api, ApiError } from "@/lib/api";
@@ -27,10 +29,19 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function AuditoriaPage({ params }: PageProps) {
+export default function AuditoriaPage(props: PageProps) {
+  return (
+    <React.Suspense fallback={<PageSkeleton />}>
+      <AuditoriaPageInner {...props} />
+    </React.Suspense>
+  );
+}
+
+function AuditoriaPageInner({ params }: PageProps) {
   const { id } = use(params);
   const auditoriaId = Number(id);
   const { data, isLoading, isError, error } = useAuditoria(auditoriaId);
+  const regenerarParecer = useRegenerarParecer(auditoriaId);
 
   const reconciliacaoTarget = useAuditoriaStore(
     (s) => s.reconciliacaoTargetAbastecimentoId,
@@ -38,6 +49,14 @@ export default function AuditoriaPage({ params }: PageProps) {
   const setReconciliacaoTarget = useAuditoriaStore(
     (s) => s.setReconciliacaoTarget,
   );
+
+  // Drawer do Assistente. Suporta abertura via ?assistente=open[&ask=...]
+  // (usado pela Feature C "Investigar" e por links externos).
+  const search = useSearchParams();
+  const assistenteFromQuery = search.get("assistente") === "open";
+  const askFromQuery = search.get("ask");
+  const [assistenteOpen, setAssistenteOpen] = React.useState(assistenteFromQuery);
+  const perguntaInicial = askFromQuery;
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-6">
@@ -51,7 +70,12 @@ export default function AuditoriaPage({ params }: PageProps) {
       {isError && <ErroEstado erro={error} />}
       {data && (
         <>
-          <Header auditoriaId={auditoriaId} ind={data.auditoria} />
+          <Header
+            auditoriaId={auditoriaId}
+            ind={data.auditoria}
+            onAbrirAssistente={() => setAssistenteOpen(true)}
+          />
+          <AuditoriaVersionNotice ind={data.auditoria} />
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <div className="min-w-0 space-y-6 xl:col-span-8">
               <JanelaConDados anteriorNF={data.auditoria.nf_anterior} atualNF={data.auditoria.nf_atual} />
@@ -64,8 +88,11 @@ export default function AuditoriaPage({ params }: PageProps) {
             <div className="min-w-0 xl:col-span-4">
               <ParecerIA
                 markdown={data.auditoria.parecer_ia}
+                status={data.auditoria.parecer_status}
                 meta={data.parecer_meta}
                 criadaEm={data.auditoria.criada_em}
+                onRegenerar={() => regenerarParecer.mutate()}
+                regenerando={regenerarParecer.isPending}
               />
             </div>
           </div>
@@ -73,6 +100,12 @@ export default function AuditoriaPage({ params }: PageProps) {
             auditoria={data}
             abastecimentoId={reconciliacaoTarget}
             onClose={() => setReconciliacaoTarget(null)}
+          />
+          <AssistenteDrawer
+            open={assistenteOpen}
+            onClose={() => setAssistenteOpen(false)}
+            auditoria={data.auditoria}
+            perguntaInicial={perguntaInicial}
           />
         </>
       )}
@@ -112,27 +145,40 @@ function ErroEstado({ erro }: { erro: unknown }) {
 function Header({
   auditoriaId,
   ind,
+  onAbrirAssistente,
 }: {
   auditoriaId: number;
   ind: import("@/lib/types").AuditoriaIndicadores;
+  onAbrirAssistente: () => void;
 }) {
   const [aprovarOpen, setAprovarOpen] = React.useState(false);
   const podeAprovar = ind.validacao_final === "INCONSISTENTE";
   const aprovadaManualmente = Boolean(ind.aprovada_em);
+  const versao = ind.versao ?? 1;
+  const totalVersoes = ind.total_versoes ?? versao;
+
+  const [gerandoPdf, setGerandoPdf] = React.useState(false);
 
   async function handleBaixarPdf() {
+    if (gerandoPdf) return;
+    setGerandoPdf(true);
+    const toastId = toast.loading("Gerando PDF da auditoria…");
     try {
       const blob = await api.baixarPdf(auditoriaId);
       const url = URL.createObjectURL(blob);
+      const filename = `auditoria_${auditoriaId}.pdf`;
       const a = document.createElement("a");
       a.href = url;
-      a.download = `auditoria_${auditoriaId}.pdf`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success(`PDF baixado: ${filename}`, { id: toastId });
     } catch {
-      toast.error("Erro ao gerar PDF");
+      toast.error("Erro ao gerar PDF. Tente novamente.", { id: toastId });
+    } finally {
+      setGerandoPdf(false);
     }
   }
 
@@ -145,6 +191,9 @@ function Header({
         <h2 className="mt-1 text-3xl font-bold tabular tracking-tight text-zinc-950">
           NF {ind.nf_atual}
         </h2>
+        <p className="mt-1 text-sm font-medium text-zinc-700">
+          {ind.is_atual ? "Auditoria atual" : "Auditoria histórica"} v{versao} de {totalVersoes}
+        </p>
         <p className="mt-1 max-w-2xl truncate text-sm text-zinc-500">
           {ind.nome_obra}
         </p>
@@ -162,14 +211,30 @@ function Header({
           </Button>
         )}
         <Button
+          variant="secondary"
+          type="button"
+          onClick={onAbrirAssistente}
+          aria-label="Abrir assistente de investigação"
+          title="Conversa contextualizada com a IA sobre esta auditoria"
+        >
+          <MessageSquare className="h-4 w-4" aria-hidden />
+          Assistente
+        </Button>
+        <Button
           variant="primary"
           type="button"
           onClick={handleBaixarPdf}
+          disabled={gerandoPdf}
           aria-label="Baixar PDF de auditoria"
+          aria-busy={gerandoPdf}
           title="Gera o relatório em PDF pronto para arquivamento"
         >
-          <FileDown className="h-4 w-4" aria-hidden />
-          Gerar PDF
+          {gerandoPdf ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          ) : (
+            <FileDown className="h-4 w-4" aria-hidden />
+          )}
+          {gerandoPdf ? "Gerando…" : "Gerar PDF"}
         </Button>
         <StatusBadge
           status={ind.validacao_final}
@@ -187,6 +252,30 @@ function Header({
   );
 }
 
+function AuditoriaVersionNotice({
+  ind,
+}: {
+  ind: import("@/lib/types").AuditoriaIndicadores;
+}) {
+  if (ind.is_atual || !ind.auditoria_atual_id) return null;
+
+  return (
+    <Card className="border-amber-200 bg-amber-50">
+      <CardContent className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm text-amber-900">
+        <p>
+          Esta é uma versão histórica da NF {ind.nf_atual}. A versão atual é
+          v{ind.total_versoes}.
+        </p>
+        <Link href={`/auditoria/${ind.auditoria_atual_id}`}>
+          <Button variant="secondary" size="sm">
+            Abrir versão atual
+          </Button>
+        </Link>
+      </CardContent>
+    </Card>
+  );
+}
+
 function JanelaConDados({
   anteriorNF,
   atualNF,
@@ -194,16 +283,19 @@ function JanelaConDados({
   anteriorNF: string;
   atualNF: string;
 }) {
-  const ant = useNF(anteriorNF);
+  const temNFAnteriorReal = !anteriorNF.startsWith("CORTE:");
+  const ant = useNF(temNFAnteriorReal ? anteriorNF : undefined);
   const atu = useNF(atualNF);
   return (
     <JanelaTemporal
-      nfAnterior={anteriorNF}
+      nfAnterior={temNFAnteriorReal ? anteriorNF : null}
       dataAnterior={ant.data?.data_recebimento}
       qtdAnterior={ant.data?.quantidade_nf_litros}
+      isLoadingAnterior={temNFAnteriorReal && !ant.data && ant.isFetching}
       nfAtual={atualNF}
       dataAtual={atu.data?.data_recebimento}
       qtdAtual={atu.data?.quantidade_nf_litros}
+      isLoadingAtual={!atu.data && atu.isFetching}
     />
   );
 }

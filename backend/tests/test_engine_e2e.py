@@ -7,7 +7,7 @@ import time
 import pytest
 from sqlmodel import Session
 
-from audit_diesel.audit.engine import AuditEngine, ChecklistNaoEncontrado
+from audit_diesel.audit.engine import AuditEngine, ChecklistNaoEncontrado, ParTemporalInvalido
 from audit_diesel.ingestion.pipeline import build_engine, ingerir
 
 
@@ -47,6 +47,14 @@ def test_engine_levanta_quando_nf_inexistente(db_real):
         eng = AuditEngine(session)
         with pytest.raises(ChecklistNaoEncontrado):
             eng.auditar("99999", "99998")
+
+
+def test_engine_rejeita_nf_anterior_posterior(db_real):
+    engine = build_engine(db_real)
+    with Session(engine) as session:
+        eng = AuditEngine(session)
+        with pytest.raises(ParTemporalInvalido):
+            eng.auditar("8187", "8108")
 
 
 def test_engine_serializacao_dict(db_real):

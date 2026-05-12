@@ -1,14 +1,19 @@
+import { Info } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-type MetricTone = "neutral" | "success" | "danger" | "warn" | "info";
+export type MetricTone = "neutral" | "success" | "danger" | "warn" | "info";
 
 const toneClasses: Record<
   MetricTone,
   { icon: string; value: string; rail: string }
 > = {
+  // Semantica dos KPIs:
+  // success = aprovado/positivo, danger = critico, warn = atencao,
+  // info = volume ou contexto informativo, neutral = cadastro/estado sem juizo.
   neutral: {
     icon: "bg-zinc-100 text-zinc-700",
     value: "text-zinc-950",
@@ -42,6 +47,7 @@ interface MetricCardProps {
   hint?: string;
   icon: LucideIcon;
   tone?: MetricTone;
+  tooltip?: string;
 }
 
 export function MetricCard({
@@ -50,6 +56,7 @@ export function MetricCard({
   hint,
   icon: Icon,
   tone = "neutral",
+  tooltip,
 }: MetricCardProps) {
   const classes = toneClasses[tone];
   return (
@@ -67,8 +74,19 @@ export function MetricCard({
             <Icon className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-[13px] font-bold uppercase tracking-[0.09em] text-zinc-500">
-              {label}
+            <p className="flex items-center justify-center gap-1.5 text-[13px] font-bold uppercase tracking-[0.09em] text-zinc-500">
+              <span>{label}</span>
+              {tooltip && (
+                <Tooltip content={tooltip}>
+                  <button
+                    type="button"
+                    aria-label={`Sobre ${label}`}
+                    className="inline-flex h-4 w-4 items-center justify-center rounded-full text-zinc-400 transition-colors hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/30"
+                  >
+                    <Info className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                </Tooltip>
+              )}
             </p>
             <p
               className={cn(

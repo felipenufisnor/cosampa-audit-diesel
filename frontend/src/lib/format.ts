@@ -71,3 +71,14 @@ export function formatHora(s: string | null | undefined): string {
   // Backend manda "HH:MM" para hora_inicio/final.
   return s.slice(0, 5);
 }
+
+// Planilhas do cliente frequentemente omitem acentos. Corrige casos conhecidos
+// apenas para exibição — não altera o dado armazenado.
+const _CORRECOES_OBRA: [RegExp, string][] = [
+  [/\bCONSORCIO\b/g, "CONSÓRCIO"],
+];
+
+export function formatNomeObra(nome: string | null | undefined): string {
+  if (!nome) return "-";
+  return _CORRECOES_OBRA.reduce((s, [re, sub]) => s.replace(re, sub), nome);
+}

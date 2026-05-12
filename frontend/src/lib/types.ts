@@ -13,6 +13,25 @@ export interface Healthz {
   fallback_model: string | null;
   offline: boolean;
   demo_mode: boolean;
+  assistant_status:
+    | "available"
+    | "degraded_cache"
+    | "offline_fixture"
+    | "missing_key"
+    | "provider_error";
+  assistant_reason: string;
+  assistant_can_answer_free_text: boolean;
+  assistant_has_cached_answers: boolean;
+}
+
+export interface PerguntaSugerida {
+  pergunta: string;
+  cacheada: boolean;
+}
+
+export interface PerguntasSugeridasResponse {
+  auditoria_id: number;
+  perguntas: PerguntaSugerida[];
 }
 
 export interface AlertaConsolidado {
@@ -59,6 +78,8 @@ export interface Stats {
   total_custo_brl: number;
   periodo_inicio: string | null;
   periodo_fim: string | null;
+  periodo_nfs_inicio: string | null;
+  periodo_nfs_fim: string | null;
   total_nfs: number;
   total_mobilizados: number;
   mobilizados_ativos: number;
@@ -78,6 +99,7 @@ export interface NFListItem {
   qtd_litros: number;
   ultima_auditoria_id: number | null;
   ultima_validacao: ValidacaoFinal | null;
+  qtd_auditorias: number;
 }
 
 export interface AuditoriaResumo {
@@ -88,6 +110,10 @@ export interface AuditoriaResumo {
   criada_em: string;
   validacao_final: ValidacaoFinal;
   diferenca_percentual: number;
+  versao: number;
+  total_versoes: number;
+  is_atual: boolean;
+  auditoria_atual_id: number | null;
 }
 
 export interface NFDetail {
@@ -144,12 +170,32 @@ export interface AuditoriaIndicadores {
   qtd_equipamentos_nao_cadastrados: number;
   validacao_final: ValidacaoFinal;
   parecer_ia: string | null;
+  parecer_status: "ok" | "placeholder" | "ausente";
   aprovada_em: string | null;
   auditor_aprovacao: string | null;
   observacao_aprovacao: string | null;
+  versao: number;
+  total_versoes: number;
+  is_atual: boolean;
+  auditoria_atual_id: number | null;
 }
 
 export type ModoAuditoria = "nova_versao" | "sobrescrever_ultima";
+
+export interface PontoCorteManual {
+  data_inicio: string; // ISO datetime, ex: "2026-03-01T08:00:00"
+  estoque_tanque_inicial_litros: number;
+  estoque_comboio_inicial_litros: number;
+  motivo: string;
+}
+
+export interface CriarAuditoriaPayload {
+  nf_atual: string;
+  nf_anterior?: string;
+  ponto_corte?: PontoCorteManual;
+  gerar_parecer?: boolean;
+  modo?: ModoAuditoria;
+}
 
 export interface ParecerMeta {
   provider: string;
@@ -197,4 +243,103 @@ export interface AprovarReconciliacaoResponse {
   status: string;
   reconciliacao_id: number;
   auditoria_atualizada: AuditoriaCompleta | null;
+}
+
+export interface MatchAproximado {
+  candidato: CandidatoGP;
+  similaridade: number;
+  motivo: string;
+}
+
+export interface HistoricoReconciliacaoItem {
+  reconciliacao_id: number;
+  criada_em: string;
+  auditor: string;
+  confianca: number | null;
+  justificativa: string | null;
+  mobilizado: CandidatoGP;
+  auditoria_id: number | null;
+}
+
+export interface ContextoReconciliacaoResponse {
+  abastecimento_id: number;
+  veiculo_raw: string;
+  apelido: string | null;
+  nome_obra: string;
+  termo_busca_sugerido: string;
+  matches_aproximados: MatchAproximado[];
+  historico: HistoricoReconciliacaoItem[];
+}
+
+// --- Padroes proativos (Feature C) ----------------------------------------
+
+export type PadraoSeveridade = "alta" | "media" | "baixa";
+
+export interface Padrao {
+  id: number;
+  tipo: string;
+  titulo: string;
+  descricao: string;
+  severidade: PadraoSeveridade;
+  dados: Record<string, unknown>;
+  criado_em: string;
+  auditoria_alvo_id: number | null;
+  auditoria_alvo_nf: string | null;
+}
+
+export interface PadroesResponse {
+  padroes: Padrao[];
+  atualizado_em: string | null;
+}
+
+export interface RecalcularPadroesResponse {
+  n_candidatos: number;
+  n_padroes: number;
+  provider: string;
+  modelo: string | null;
+  offline: boolean;
+}
+
+// --- Assistente (Feature B) -----------------------------------------------
+
+export type AssistantStreamKind =
+  | "assistant_status"
+  | "tool_call_started"
+  | "tool_call_completed"
+  | "assistant_chunk"
+  | "assistant_done"
+  | "error";
+
+export interface AssistantStreamEvent {
+  event: AssistantStreamKind;
+  payload: Record<string, unknown>;
+}
+
+export interface MensagemAssistente {
+  id: number;
+  papel: "user" | "assistant";
+  conteudo: string;
+  criada_em: string;
+}
+
+export interface AssistenteHistorico {
+  auditoria_id: number;
+  mensagens: MensagemAssistente[];
+}
+
+// --- Reasoning Stream (Feature A) -----------------------------------------
+
+export type StreamEventKind =
+  | "step_started"
+  | "step_completed"
+  | "insight_found"
+  | "ia_thinking_start"
+  | "ia_thinking_chunk"
+  | "ia_thinking_end"
+  | "final_result"
+  | "error";
+
+export interface StreamEvent {
+  event: StreamEventKind;
+  payload: Record<string, unknown>;
 }

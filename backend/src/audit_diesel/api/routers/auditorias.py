@@ -11,7 +11,14 @@ from sqlmodel import Session, select
 
 from audit_diesel.ai.client import ChatClient
 from audit_diesel.ai.parecer import GeradorParecer
-from audit_diesel.audit.engine import AuditEngine, AuditoriaCompleta, ChecklistNaoEncontrado
+from audit_diesel.ai.parecer_quality import avaliar_parecer
+from audit_diesel.audit.engine import (
+    AuditEngine,
+    AuditoriaCompleta,
+    ChecklistNaoEncontrado,
+    ParTemporalInvalido,
+    PontoCorteManual,
+)
 from audit_diesel.config import TOLERANCIA_PERCENTUAL
 from audit_diesel.models import Alerta, Auditoria, Checklist, Mobilizado, ReconciliacaoAprovada
 
@@ -57,6 +64,15 @@ def criar_auditoria(
             detail=f"Modo invalido: {body.modo}. Use um de {sorted(MODOS_VALIDOS)}.",
         )
 
+    engine = AuditEngine(session)
+    if body.nf_anterior is not None:
+        try:
+            engine.validar_par_temporal(body.nf_anterior, body.nf_atual)
+        except ChecklistNaoEncontrado as e:
+            raise HTTPException(status_code=404, detail=str(e)) from e
+        except ParTemporalInvalido as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
     if body.modo == "sobrescrever_ultima":
         ultima = session.exec(
             select(Auditoria)
@@ -71,11 +87,24 @@ def criar_auditoria(
             session.delete(ultima)
             session.commit()
 
-    engine = AuditEngine(session)
     try:
-        resultado = engine.auditar(body.nf_anterior, body.nf_atual)
+        if body.ponto_corte is not None:
+            resultado = engine.auditar_com_ponto_corte(
+                PontoCorteManual(
+                    data_inicio=body.ponto_corte.data_inicio,
+                    estoque_tanque_inicial_litros=body.ponto_corte.estoque_tanque_inicial_litros,
+                    estoque_comboio_inicial_litros=body.ponto_corte.estoque_comboio_inicial_litros,
+                    motivo=body.ponto_corte.motivo,
+                ),
+                body.nf_atual,
+            )
+        else:
+            assert body.nf_anterior is not None  # garantido pelo model_validator
+            resultado = engine.auditar(body.nf_anterior, body.nf_atual)
     except ChecklistNaoEncontrado as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+    except ParTemporalInvalido as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
     parecer_meta: ParecerMeta | None = None
     if body.gerar_parecer:
@@ -93,7 +122,7 @@ def criar_auditoria(
             completion_tokens=result.completion_tokens,
         )
 
-    return _to_response(resultado, parecer_meta)
+    return _to_response(resultado, parecer_meta, session=session)
 
 
 @router.get("/auditorias/consolidado", response_model=ConsolidadoResponse)
@@ -130,7 +159,51 @@ def get_auditoria(
         select(Alerta).where(Alerta.auditoria_id == auditoria_id)
     ).all()
     completa = AuditoriaCompleta(auditoria=a, alertas=list(alertas))
-    return _to_response(completa, None)
+    return _to_response(completa, None, session=session)
+
+
+@router.post(
+    "/auditorias/{auditoria_id}/parecer/regenerar",
+    response_model=AuditoriaCompletaResponse,
+)
+def regenerar_parecer(
+    auditoria_id: int,
+    session: Session = Depends(get_session),
+    chat: ChatClient = Depends(get_chat_client),
+) -> AuditoriaCompletaResponse:
+    """Refaz somente o parecer_ia para uma auditoria existente.
+
+    Nao reexecuta o engine deterministico nem altera alertas/indicadores —
+    util quando o parecer foi flagrado como placeholder ou quando a IA
+    volta a ficar disponivel apos um periodo offline.
+    """
+    auditoria = session.get(Auditoria, auditoria_id)
+    if auditoria is None:
+        raise HTTPException(
+            status_code=404, detail=f"Auditoria {auditoria_id} não encontrada."
+        )
+    alertas = list(
+        session.exec(select(Alerta).where(Alerta.auditoria_id == auditoria_id)).all()
+    )
+    completa = AuditoriaCompleta(auditoria=auditoria, alertas=alertas)
+
+    gerador = GeradorParecer(client=chat)
+    result = gerador.gerar(completa.to_dict())
+    auditoria.parecer_ia = result.markdown
+    session.add(auditoria)
+    session.commit()
+    session.refresh(auditoria)
+
+    completa = AuditoriaCompleta(auditoria=auditoria, alertas=alertas)
+    parecer_meta = ParecerMeta(
+        provider=result.provider,
+        model=result.modelo,
+        offline=result.offline,
+        latency_s=round(result.latency_s, 3),
+        prompt_tokens=result.prompt_tokens,
+        completion_tokens=result.completion_tokens,
+    )
+    return _to_response(completa, parecer_meta, session=session)
 
 
 @router.patch(
@@ -169,7 +242,7 @@ def aprovar_auditoria(
         select(Alerta).where(Alerta.auditoria_id == auditoria_id)
     ).all()
     completa = AuditoriaCompleta(auditoria=auditoria, alertas=list(alertas))
-    return _to_response(completa, None)
+    return _to_response(completa, None, session=session)
 
 
 @router.get("/auditorias/{auditoria_id}/pdf")
@@ -227,7 +300,7 @@ def gerar_pdf_auditoria(
 
     parecer_meta = (
         {"provider": "registrado", "modelo": None, "offline": False}
-        if auditoria.parecer_ia
+        if avaliar_parecer(auditoria.parecer_ia).is_ok
         else None
     )
 
@@ -438,8 +511,12 @@ def _to_csv(payload: ConsolidadoResponse) -> str:
 def _to_response(
     resultado: AuditoriaCompleta,
     parecer_meta: ParecerMeta | None,
+    session: Session | None = None,
 ) -> AuditoriaCompletaResponse:
     a = resultado.auditoria
+    qualidade = avaliar_parecer(a.parecer_ia)
+    parecer_publicado = a.parecer_ia if qualidade.is_ok else None
+    versao, total_versoes, is_atual, auditoria_atual_id = _version_meta(session, a)
     return AuditoriaCompletaResponse(
         auditoria=AuditoriaIndicadores(
             id=int(a.id or 0),
@@ -458,10 +535,15 @@ def _to_response(
             diferenca_percentual=a.diferenca_percentual,
             qtd_equipamentos_nao_cadastrados=a.qtd_equipamentos_nao_cadastrados,
             validacao_final=a.validacao_final,
-            parecer_ia=a.parecer_ia,
+            parecer_ia=parecer_publicado,
+            parecer_status=qualidade.status,
             aprovada_em=a.aprovada_em,
             auditor_aprovacao=a.auditor_aprovacao,
             observacao_aprovacao=a.observacao_aprovacao,
+            versao=versao,
+            total_versoes=total_versoes,
+            is_atual=is_atual,
+            auditoria_atual_id=auditoria_atual_id,
         ),
         alertas=[
             AlertaResponse(
@@ -478,3 +560,30 @@ def _to_response(
         ],
         parecer_meta=parecer_meta,
     )
+
+
+def _version_meta(
+    session: Session | None,
+    auditoria: Auditoria,
+) -> tuple[int, int, bool, int | None]:
+    """Calcula versão por NF atual sem persistir coluna nova."""
+    aid = int(auditoria.id or 0)
+    if session is None:
+        return (1, 1, True, aid or None)
+
+    auditorias = list(
+        session.exec(
+            select(Auditoria)
+            .where(Auditoria.nf_atual == auditoria.nf_atual)
+            .order_by(Auditoria.criada_em, Auditoria.id)
+        ).all()
+    )
+    ids = [int(a.id or 0) for a in auditorias]
+    if not ids:
+        return (1, 1, True, aid or None)
+    atual_id = ids[-1]
+    try:
+        versao = ids.index(aid) + 1
+    except ValueError:
+        versao = 1
+    return (versao, len(ids), aid == atual_id, atual_id)

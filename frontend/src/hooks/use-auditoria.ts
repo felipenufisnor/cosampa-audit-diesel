@@ -43,6 +43,23 @@ export function useCriarAuditoria() {
   });
 }
 
+export function useRegenerarParecer(auditoriaId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.regenerarParecer(auditoriaId),
+    onSuccess: (resp) => {
+      qc.setQueryData(["auditorias", resp.auditoria.id], resp);
+      qc.invalidateQueries({ queryKey: ["consolidado"] });
+      toast.success("Parecer regenerado");
+    },
+    onError: (err: unknown) => {
+      const msg =
+        err instanceof ApiError ? err.message : "Falha ao regenerar parecer.";
+      toast.error(msg);
+    },
+  });
+}
+
 export function useAprovarAuditoria(auditoriaId: number) {
   const qc = useQueryClient();
   return useMutation({

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class HealthzResponse(BaseModel):
@@ -19,6 +19,16 @@ class HealthzResponse(BaseModel):
     fallback_model: str | None
     offline: bool
     demo_mode: bool
+    assistant_status: Literal[
+        "available",
+        "degraded_cache",
+        "offline_fixture",
+        "missing_key",
+        "provider_error",
+    ] = "offline_fixture"
+    assistant_reason: str = ""
+    assistant_can_answer_free_text: bool = False
+    assistant_has_cached_answers: bool = False
 
 
 class StatsResponse(BaseModel):
@@ -29,6 +39,8 @@ class StatsResponse(BaseModel):
     total_custo_brl: float
     periodo_inicio: date | None
     periodo_fim: date | None
+    periodo_nfs_inicio: date | None
+    periodo_nfs_fim: date | None
     total_nfs: int
     total_mobilizados: int
     mobilizados_ativos: int
@@ -48,6 +60,7 @@ class NFListItem(BaseModel):
     qtd_litros: float
     ultima_auditoria_id: int | None
     ultima_validacao: str | None
+    qtd_auditorias: int = 0
 
 
 class NFDetail(BaseModel):
@@ -79,12 +92,34 @@ class AuditoriaResumo(BaseModel):
     criada_em: datetime
     validacao_final: str
     diferenca_percentual: float
+    versao: int = 1
+    total_versoes: int = 1
+    is_atual: bool = True
+    auditoria_atual_id: int | None = None
+
+
+class PontoCorteManualRequest(BaseModel):
+    """Fronteira inferior da janela quando nao ha NF anterior disponivel.
+
+    O auditor define manualmente data/hora do corte e os estoques iniciais
+    de tanque e comboio nesse instante. Usado tipicamente para auditar a
+    primeira NF do conjunto. Ver achado AI-06.
+    """
+
+    data_inicio: datetime
+    estoque_tanque_inicial_litros: float = Field(ge=0)
+    estoque_comboio_inicial_litros: float = Field(ge=0)
+    motivo: str = Field(min_length=1, max_length=500)
 
 
 class CriarAuditoriaRequest(BaseModel):
-    """POST /auditorias body."""
+    """POST /auditorias body.
 
-    nf_anterior: str
+    Exatamente um entre `nf_anterior` e `ponto_corte` deve ser fornecido.
+    """
+
+    nf_anterior: str | None = None
+    ponto_corte: PontoCorteManualRequest | None = None
     nf_atual: str
     gerar_parecer: bool = True
     # Modo de criacao:
@@ -94,6 +129,16 @@ class CriarAuditoriaRequest(BaseModel):
     #    nf_atual (e seus alertas) antes de criar a nova. Util para o auditor
     #    refazer um teste sem poluir o historico.
     modo: str = "nova_versao"
+
+    @model_validator(mode="after")
+    def _validar_origem_anterior(self) -> "CriarAuditoriaRequest":
+        tem_nf = self.nf_anterior is not None and self.nf_anterior.strip() != ""
+        tem_corte = self.ponto_corte is not None
+        if tem_nf == tem_corte:
+            raise ValueError(
+                "Forneca exatamente um entre `nf_anterior` e `ponto_corte`."
+            )
+        return self
 
 
 class AprovarAuditoriaRequest(BaseModel):
@@ -136,9 +181,14 @@ class AuditoriaIndicadores(BaseModel):
     qtd_equipamentos_nao_cadastrados: int
     validacao_final: str
     parecer_ia: str | None
+    parecer_status: Literal["ok", "placeholder", "ausente"] = "ausente"
     aprovada_em: datetime | None = None
     auditor_aprovacao: str | None = None
     observacao_aprovacao: str | None = None
+    versao: int = 1
+    total_versoes: int = 1
+    is_atual: bool = True
+    auditoria_atual_id: int | None = None
 
 
 class ParecerMeta(BaseModel):
@@ -189,6 +239,52 @@ class SugerirReconciliacaoResponse(BaseModel):
     sugestoes: list[SugestaoSchema]
     provider: str
     offline: bool
+
+
+class MatchAproximadoSchema(BaseModel):
+    """Candidato sugerido por similaridade textual (fallback determinístico).
+
+    Usado quando a IA não retornou correspondência: oferece ao auditor uma
+    lista curta de mobilizados da mesma obra com maior similaridade de
+    placa/apelido/equipamento, para acelerar a triagem manual.
+    """
+
+    candidato: CandidatoGPSchema
+    similaridade: float = Field(ge=0.0, le=1.0)
+    motivo: str
+
+
+class HistoricoReconciliacaoItemSchema(BaseModel):
+    """Reconciliação aprovada no passado para o mesmo veículo (mesma string normalizada).
+
+    Permite ao auditor reaproveitar decisões anteriores quando o mesmo
+    "veículo não cadastrado" aparece em NFs diferentes.
+    """
+
+    reconciliacao_id: int
+    criada_em: datetime
+    auditor: str
+    confianca: float | None
+    justificativa: str | None
+    mobilizado: CandidatoGPSchema
+    auditoria_id: int | None = None
+
+
+class ContextoReconciliacaoResponse(BaseModel):
+    """GET /reconciliacao/contexto: matches aproximados + histórico.
+
+    Resposta determinística (sem chamada de IA) usada como fallback quando
+    o reconciliador semântico não encontra correspondência confiável. Ver
+    achado AI-09.
+    """
+
+    abastecimento_id: int
+    veiculo_raw: str
+    apelido: str | None
+    nome_obra: str
+    termo_busca_sugerido: str
+    matches_aproximados: list[MatchAproximadoSchema]
+    historico: list[HistoricoReconciliacaoItemSchema]
 
 
 class AprovarReconciliacaoRequest(BaseModel):
@@ -263,11 +359,15 @@ __all__ = [
     "AuditoriaIndicadores",
     "AuditoriaResumo",
     "CandidatoGPSchema",
+    "ContextoReconciliacaoResponse",
     "CriarAuditoriaRequest",
     "HealthzResponse",
+    "HistoricoReconciliacaoItemSchema",
+    "MatchAproximadoSchema",
     "NFDetail",
     "NFListItem",
     "ParecerMeta",
+    "PontoCorteManualRequest",
     "StatsResponse",
     "SugerirReconciliacaoRequest",
     "SugerirReconciliacaoResponse",

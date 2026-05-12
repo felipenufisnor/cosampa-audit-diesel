@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, time
 from typing import Any
 
 from sqlmodel import Session, select
@@ -24,8 +24,39 @@ from .alerts.base import AlertResult, AuditContext
 from .indicators import calcular_indicadores
 
 
+# Prefixo usado em `Auditoria.nf_anterior` quando o auditor define manualmente
+# o ponto de corte (data + estoque inicial) em vez de selecionar uma NF
+# anterior do conjunto. Permite ao frontend distinguir os dois fluxos sem
+# precisar de coluna nova.
+PONTO_CORTE_PREFIX = "CORTE:"
+
+
+@dataclass
+class PontoCorteManual:
+    """Fronteira inferior da janela de auditoria definida pelo auditor.
+
+    Usado quando nao ha NF anterior disponivel (tipicamente para a primeira
+    NF do conjunto). Substitui o Checklist anterior por valores informados
+    manualmente.
+    """
+
+    data_inicio: datetime
+    estoque_tanque_inicial_litros: float
+    estoque_comboio_inicial_litros: float
+    motivo: str
+
+    @property
+    def label(self) -> str:
+        """Identificador legivel salvo em `Auditoria.nf_anterior`."""
+        return f"{PONTO_CORTE_PREFIX}{self.data_inicio.strftime('%Y-%m-%dT%H:%M')}"
+
+
 class ChecklistNaoEncontrado(Exception):
     """Levantada quando uma das NFs solicitadas nao existe no banco."""
+
+
+class ParTemporalInvalido(Exception):
+    """Levantada quando a NF anterior nao precede temporalmente a NF atual."""
 
 
 @dataclass
@@ -83,7 +114,7 @@ class AuditEngine:
         self.session.expire_on_commit = False
 
     def auditar(self, nf_anterior: str, nf_atual: str) -> AuditoriaCompleta:
-        """Executa o pipeline completo de auditoria.
+        """Executa o pipeline completo de auditoria entre duas NFs.
 
         1. Busca os dois Checklists.
         2. Define janela [datetime_fim_descarga_anterior, datetime_fim_descarga_atual).
@@ -93,9 +124,52 @@ class AuditEngine:
         6. Aplica regra de validação §4.4.
         7. Persiste e retorna.
         """
-        ck_ant = self._carregar_checklist(nf_anterior)
-        ck_atu = self._carregar_checklist(nf_atual)
+        ck_ant, ck_atu = self.validar_par_temporal(nf_anterior, nf_atual)
+        return self._executar_pipeline(ck_ant, ck_atu, nf_anterior_label=nf_anterior)
 
+    def auditar_com_ponto_corte(
+        self, ponto_corte: PontoCorteManual, nf_atual: str
+    ) -> AuditoriaCompleta:
+        """Variante de `auditar` para quando nao ha NF anterior disponivel.
+
+        O auditor informa data/hora do corte e os estoques iniciais de tanque
+        e comboio nesse instante. Construimos um Checklist sintetico (apenas
+        em memoria) com `quantidade_nf_litros=0`, fazendo
+        `estoque_final_teorico_anterior = estoque_inicial_anterior` no calculo
+        do §4. O resto do pipeline (alertas, persistencia) e identico.
+        """
+        ck_atu = self._carregar_checklist(nf_atual)
+        if ponto_corte.data_inicio >= ck_atu.datetime_fim_descarga:
+            raise ParTemporalInvalido(
+                "Ponto de corte deve ser anterior ao fim de descarga da NF atual "
+                f"(corte: {ponto_corte.data_inicio:%d/%m/%Y %H:%M}; "
+                f"NF {ck_atu.nota_fiscal}: {ck_atu.datetime_fim_descarga:%d/%m/%Y %H:%M})."
+            )
+        ck_ant = Checklist(
+            numero_chamado=ponto_corte.label,
+            nota_fiscal=ponto_corte.label,
+            nome_obra=ck_atu.nome_obra,
+            cnpj_fornecedor="",
+            data_recebimento=ponto_corte.data_inicio,
+            hora_inicio_descarga=time(0, 0),
+            hora_final_descarga=ponto_corte.data_inicio.time(),
+            datetime_fim_descarga=ponto_corte.data_inicio,
+            quantidade_nf_litros=0.0,
+            volume_conferido_litros=0.0,
+            estoque_antes_tanque_litros=ponto_corte.estoque_tanque_inicial_litros,
+            estoque_antes_comboio_litros=ponto_corte.estoque_comboio_inicial_litros,
+            preco_unitario=ck_atu.preco_unitario,
+            valor_total_nf=0.0,
+        )
+        return self._executar_pipeline(ck_ant, ck_atu, nf_anterior_label=ponto_corte.label)
+
+    def _executar_pipeline(
+        self,
+        ck_ant: Checklist,
+        ck_atu: Checklist,
+        *,
+        nf_anterior_label: str,
+    ) -> AuditoriaCompleta:
         inicio = ck_ant.datetime_fim_descarga
         fim = ck_atu.datetime_fim_descarga
 
@@ -162,8 +236,8 @@ class AuditEngine:
         )
 
         auditoria = Auditoria(
-            nf_anterior=nf_anterior,
-            nf_atual=nf_atual,
+            nf_anterior=nf_anterior_label,
+            nf_atual=ck_atu.nota_fiscal,
             nome_obra=ck_atu.nome_obra,
             criada_em=datetime.now(),
             estoque_inicial_anterior=indicadores.estoque_inicial_anterior,
@@ -201,6 +275,18 @@ class AuditEngine:
             self.session.refresh(a)
 
         return AuditoriaCompleta(auditoria=auditoria, alertas=alertas)
+
+    def validar_par_temporal(self, nf_anterior: str, nf_atual: str) -> tuple[Checklist, Checklist]:
+        """Carrega e valida que a janela da NF anterior termina antes da atual."""
+        ck_ant = self._carregar_checklist(nf_anterior)
+        ck_atu = self._carregar_checklist(nf_atual)
+        if ck_ant.datetime_fim_descarga >= ck_atu.datetime_fim_descarga:
+            raise ParTemporalInvalido(
+                "NF anterior deve ter fim de descarga anterior ao da NF atual "
+                f"(NF {ck_ant.nota_fiscal}: {ck_ant.datetime_fim_descarga:%d/%m/%Y %H:%M}; "
+                f"NF {ck_atu.nota_fiscal}: {ck_atu.datetime_fim_descarga:%d/%m/%Y %H:%M})."
+            )
+        return ck_ant, ck_atu
 
     def _carregar_checklist(self, nf: str) -> Checklist:
         ck = self.session.exec(

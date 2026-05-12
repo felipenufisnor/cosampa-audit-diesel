@@ -17,14 +17,16 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 import { MetricCard } from "@/components/ui/metric-card";
+import type { MetricTone } from "@/components/ui/metric-card";
 import { SearchInput } from "@/components/ui/search-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 
 import { api } from "@/lib/api";
+import { ALERTA_TIPO_BADGE_VARIANT, ALERTA_TIPO_LABEL } from "@/lib/alertas";
 import { useConsolidado } from "@/hooks/use-consolidado";
 import { cn } from "@/lib/utils";
-import { formatBRL, formatDateBR, formatLitros, formatNumero, formatPct } from "@/lib/format";
+import { formatBRL, formatDateBR, formatLitros, formatNomeObra, formatNumero, formatPct } from "@/lib/format";
 import type { NFConsolidadoItem, ValidacaoFinal } from "@/lib/types";
 
 type FiltroStatus = "todas" | "APROVADO" | "INCONSISTENTE" | "NAO_AUDITADA";
@@ -36,19 +38,6 @@ type SortKey =
   | "valor_total"
   | "diferenca_percentual"
   | "qtd_alertas";
-
-const TIPO_LABEL: Record<string, string> = {
-  NAO_CADASTRADO: "Não cadastrado",
-  POS_DESMOB: "Pós-desmob.",
-  OUTLIER: "Outlier",
-  DUPLICIDADE: "Duplicidade",
-};
-
-const SEVERIDADE_VARIANT: Record<string, "danger" | "warn" | "muted"> = {
-  alta: "danger",
-  media: "warn",
-  baixa: "muted",
-};
 
 export function ConsolidadoView() {
   const { data, isLoading, isError } = useConsolidado();
@@ -109,7 +98,9 @@ export function ConsolidadoView() {
         <h2 className="mt-1 text-[26px] font-bold tracking-tight text-zinc-950">
           Visão consolidada
         </h2>
-        <p className="mt-1 text-[16px] text-zinc-500">Período: {periodo}</p>
+        <p className="mt-1 text-[16px] text-zinc-500">
+          Período das NFs recebidas: {periodo}
+        </p>
       </header>
 
       <StatsConsolidadoCards />
@@ -181,7 +172,7 @@ export function ConsolidadoView() {
                     >
                       <td className="td-base text-center font-semibold tabular text-zinc-950">{it.nota_fiscal}</td>
                       <td className="td-base text-center tabular text-zinc-700">{formatDateBR(it.data_recebimento)}</td>
-                      <td className="td-base max-w-[20rem] truncate text-center text-zinc-700" title={it.nome_obra}>{it.nome_obra}</td>
+                      <td className="td-base max-w-[20rem] truncate text-center text-zinc-700" title={formatNomeObra(it.nome_obra)}>{formatNomeObra(it.nome_obra)}</td>
                       <td className="td-base text-center tabular text-zinc-700">{formatLitros(it.qtd_litros, 0)}</td>
                       <td className="td-base text-center tabular text-zinc-700">{formatBRL(it.valor_total)}</td>
                       <td className="td-base text-center tabular">
@@ -193,8 +184,12 @@ export function ConsolidadoView() {
                         <div className="flex flex-wrap items-center justify-center gap-1">
                           {it.alertas.length === 0 && <span className="text-zinc-400">-</span>}
                           {it.alertas.map((a) => (
-                            <Badge key={a.tipo} variant={SEVERIDADE_VARIANT[a.severidade] ?? "muted"} title={`${a.tipo} severidade ${a.severidade}`}>
-                              {TIPO_LABEL[a.tipo] ?? a.tipo} <span className="font-mono">{a.qtd}</span>
+                            <Badge
+                              key={a.tipo}
+                              variant={ALERTA_TIPO_BADGE_VARIANT[a.tipo]}
+                              title={`${ALERTA_TIPO_LABEL[a.tipo]} · severidade ${a.severidade}`}
+                            >
+                              {ALERTA_TIPO_LABEL[a.tipo]} <span className="font-mono">{a.qtd}</span>
                             </Badge>
                           ))}
                         </div>
@@ -296,7 +291,7 @@ function StatsConsolidadoCards() {
     label: string;
     value: string;
     hint?: string;
-    tone: "neutral" | "success" | "danger" | "warn" | "info";
+    tone: MetricTone;
     icon: LucideIcon;
   }[] = data
     ? [
@@ -304,7 +299,7 @@ function StatsConsolidadoCards() {
           label: "Total auditado",
           value: formatBRL(data.total_auditado_brl),
           hint: `${data.items.length} NF${data.items.length === 1 ? "" : "s"} no período`,
-          tone: "neutral",
+          tone: "info",
           icon: ClipboardList,
         },
         {

@@ -6,8 +6,9 @@ import { AlertaItem } from "./alerta-item";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 
+import { ALERTA_TIPO_COUNT_CLASS, ALERTA_TIPO_LABEL } from "@/lib/alertas";
 import { useAuditoriaStore } from "@/stores/auditoria-store";
-import type { Alerta, SeveridadeAlerta } from "@/lib/types";
+import type { Alerta, SeveridadeAlerta, TipoAlerta } from "@/lib/types";
 
 interface Props {
   alertas: Alerta[];
@@ -15,16 +16,17 @@ interface Props {
 }
 
 const ORDEM_SEV: Record<SeveridadeAlerta, number> = { alta: 0, media: 1, baixa: 2 };
+type FiltroTipoAlerta = "TODOS" | TipoAlerta;
 
 const FILTROS: Array<{
-  value: "TODOS" | "NAO_CADASTRADO" | "POS_DESMOB" | "OUTLIER" | "DUPLICIDADE";
+  value: FiltroTipoAlerta;
   label: string;
 }> = [
   { value: "TODOS", label: "Todos" },
-  { value: "NAO_CADASTRADO", label: "Não cadastrado" },
-  { value: "POS_DESMOB", label: "Pós-desmob" },
-  { value: "OUTLIER", label: "Outlier" },
-  { value: "DUPLICIDADE", label: "Duplicidade" },
+  { value: "NAO_CADASTRADO", label: ALERTA_TIPO_LABEL.NAO_CADASTRADO },
+  { value: "POS_DESMOB", label: ALERTA_TIPO_LABEL.POS_DESMOB },
+  { value: "OUTLIER", label: ALERTA_TIPO_LABEL.OUTLIER },
+  { value: "DUPLICIDADE", label: ALERTA_TIPO_LABEL.DUPLICIDADE },
 ];
 
 export function AlertasList({ alertas, onReconciliar }: Props) {
@@ -80,6 +82,8 @@ export function AlertasList({ alertas, onReconciliar }: Props) {
               f.value === "TODOS"
                 ? alertas.length
                 : alertas.filter((a) => a.tipo === f.value).length,
+            countClassName:
+              f.value === "TODOS" ? undefined : ALERTA_TIPO_COUNT_CLASS[f.value],
           }))}
         />
         {visiveis.length === 0 ? (

@@ -1,4 +1,9 @@
+"use client";
+
+import { UserCheck } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@/components/ui/tooltip";
 
 import type { ValidacaoFinal } from "@/lib/types";
 
@@ -16,12 +21,26 @@ export function StatusBadge({ status, aprovadaManualmente, className }: Props) {
         Não auditada
       </Badge>
     );
-  if (status === "APROVADO")
-    return (
+
+  if (status === "APROVADO") {
+    const badge = (
       <Badge variant="success" className={className}>
-        {aprovadaManualmente ? "Aprovada (manual)" : "Aprovada"}
+        {aprovadaManualmente && (
+          <UserCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        )}
+        Aprovada
       </Badge>
     );
+    if (aprovadaManualmente) {
+      return (
+        <Tooltip content="Aprovada manualmente pelo auditor">
+          {badge}
+        </Tooltip>
+      );
+    }
+    return badge;
+  }
+
   return (
     <Badge variant="danger" className={className}>
       Inconsistente

@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useNFs } from "@/hooks/use-nfs";
 import { api } from "@/lib/api";
 import type { NFListItem } from "@/lib/types";
-import { formatBRL, formatDateBR, formatLitros } from "@/lib/format";
+import { formatBRL, formatDateBR, formatLitros, formatNomeObra } from "@/lib/format";
 
 export function NFsTable() {
   const { data, isLoading, isError } = useNFs();
@@ -100,9 +100,9 @@ export function NFsTable() {
                   </td>
                   <td
                     className="max-w-[320px] truncate px-5 py-4 text-center text-zinc-700"
-                    title={nf.nome_obra}
+                    title={formatNomeObra(nf.nome_obra)}
                   >
-                    {nf.nome_obra}
+                    {formatNomeObra(nf.nome_obra)}
                   </td>
                   <td className="px-5 py-4 text-center tabular text-zinc-700">
                     {formatLitros(nf.qtd_litros, 0)}
@@ -121,6 +121,11 @@ export function NFsTable() {
                           Ver
                           <ExternalLink className="h-3 w-3" aria-hidden />
                         </Link>
+                      )}
+                      {nf.qtd_auditorias > 1 && (
+                        <span className="absolute left-0 -bottom-4 text-[11px] font-medium text-amber-700">
+                          Atual v{nf.qtd_auditorias} de {nf.qtd_auditorias}
+                        </span>
                       )}
                     </div>
                   </td>

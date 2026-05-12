@@ -13,6 +13,40 @@ from ..schemas import AuditoriaResumo, NFDetail, NFListItem
 router = APIRouter(tags=["nfs"])
 
 
+def _auditorias_nf_atual(session: Session, nota_fiscal: str) -> list[Auditoria]:
+    return list(
+        session.exec(
+            select(Auditoria)
+            .where(Auditoria.nf_atual == nota_fiscal)
+            .order_by(Auditoria.criada_em, Auditoria.id)
+        ).all()
+    )
+
+
+def _resumo_auditoria(a: Auditoria, auditorias_nf_atual: list[Auditoria]) -> AuditoriaResumo:
+    ids_ordenados = [int(x.id or 0) for x in auditorias_nf_atual]
+    atual_id = ids_ordenados[-1] if ids_ordenados else int(a.id or 0)
+    aid = int(a.id or 0)
+    try:
+        versao = ids_ordenados.index(aid) + 1
+    except ValueError:
+        versao = 1
+    total = len(ids_ordenados) or 1
+    return AuditoriaResumo(
+        id=aid,
+        nf_anterior=a.nf_anterior,
+        nf_atual=a.nf_atual,
+        nome_obra=a.nome_obra,
+        criada_em=a.criada_em,
+        validacao_final=a.validacao_final,
+        diferenca_percentual=a.diferenca_percentual,
+        versao=versao,
+        total_versoes=total,
+        is_atual=aid == atual_id,
+        auditoria_atual_id=atual_id,
+    )
+
+
 @router.get("/nfs", response_model=list[NFListItem])
 def listar_nfs(session: Session = Depends(get_session)) -> list[NFListItem]:
     """Lista todas as NFs disponiveis com a ultima auditoria associada (se houver)."""
@@ -21,11 +55,8 @@ def listar_nfs(session: Session = Depends(get_session)) -> list[NFListItem]:
     ).all()
     items: list[NFListItem] = []
     for c in checklists:
-        ultima = session.exec(
-            select(Auditoria)
-            .where(Auditoria.nf_atual == c.nota_fiscal)
-            .order_by(Auditoria.criada_em.desc())
-        ).first()
+        auditorias = _auditorias_nf_atual(session, c.nota_fiscal)
+        ultima = auditorias[-1] if auditorias else None
         items.append(
             NFListItem(
                 nota_fiscal=c.nota_fiscal,
@@ -35,6 +66,7 @@ def listar_nfs(session: Session = Depends(get_session)) -> list[NFListItem]:
                 qtd_litros=c.quantidade_nf_litros,
                 ultima_auditoria_id=ultima.id if ultima else None,
                 ultima_validacao=ultima.validacao_final if ultima else None,
+                qtd_auditorias=len(auditorias),
             )
         )
     return items
@@ -50,22 +82,10 @@ def listar_auditorias_da_nf(
         select(Checklist).where(Checklist.nota_fiscal == nota_fiscal)
     ).first() is None:
         raise HTTPException(status_code=404, detail=f"NF {nota_fiscal} não encontrada.")
-    auditorias = session.exec(
-        select(Auditoria)
-        .where(Auditoria.nf_atual == nota_fiscal)
-        .order_by(Auditoria.criada_em.desc())
-    ).all()
+    auditorias_asc = _auditorias_nf_atual(session, nota_fiscal)
     return [
-        AuditoriaResumo(
-            id=int(a.id or 0),
-            nf_anterior=a.nf_anterior,
-            nf_atual=a.nf_atual,
-            nome_obra=a.nome_obra,
-            criada_em=a.criada_em,
-            validacao_final=a.validacao_final,
-            diferenca_percentual=a.diferenca_percentual,
-        )
-        for a in auditorias
+        _resumo_auditoria(a, auditorias_asc)
+        for a in reversed(auditorias_asc)
     ]
 
 
@@ -77,13 +97,17 @@ def detalhe_nf(nota_fiscal: str, session: Session = Depends(get_session)) -> NFD
     ).first()
     if c is None:
         raise HTTPException(status_code=404, detail=f"NF {nota_fiscal} não encontrada.")
-    auditorias = session.exec(
+    auditorias = list(session.exec(
         select(Auditoria)
         .where(
             (Auditoria.nf_atual == nota_fiscal) | (Auditoria.nf_anterior == nota_fiscal)
         )
         .order_by(Auditoria.criada_em.desc())
-    ).all()
+    ).all())
+    versoes_por_nf = {
+        a.nf_atual: _auditorias_nf_atual(session, a.nf_atual)
+        for a in auditorias
+    }
     return NFDetail(
         nota_fiscal=c.nota_fiscal,
         numero_chamado=c.numero_chamado,
@@ -99,15 +123,7 @@ def detalhe_nf(nota_fiscal: str, session: Session = Depends(get_session)) -> NFD
         preco_unitario=c.preco_unitario,
         valor_total_nf=c.valor_total_nf,
         auditorias_passadas=[
-            AuditoriaResumo(
-                id=int(a.id or 0),
-                nf_anterior=a.nf_anterior,
-                nf_atual=a.nf_atual,
-                nome_obra=a.nome_obra,
-                criada_em=a.criada_em,
-                validacao_final=a.validacao_final,
-                diferenca_percentual=a.diferenca_percentual,
-            )
+            _resumo_auditoria(a, versoes_por_nf[a.nf_atual])
             for a in auditorias
         ],
     )

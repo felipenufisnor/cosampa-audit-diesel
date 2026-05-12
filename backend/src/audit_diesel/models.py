@@ -108,6 +108,42 @@ class Alerta(SQLModel, table=True):
     impacto_financeiro: float | None = None
 
 
+class MensagemAssistente(SQLModel, table=True):
+    """Mensagem do chat do Assistente de Investigacao (Feature B da v2).
+
+    Persiste o historico por auditoria para que o auditor possa retomar
+    dias depois. Apenas mensagens visiveis sao gravadas (`user` e
+    `assistant`); chamadas intermediarias de tool ficam apenas em memoria
+    durante o loop do orquestrador, sem poluir o historico salvo.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    auditoria_id: int = Field(foreign_key="auditoria.id", index=True)
+    papel: str  # "user" | "assistant"
+    conteudo: str
+    criada_em: datetime
+    tokens_estimados: int | None = None
+
+
+class PadraoDetectado(SQLModel, table=True):
+    """Padrão proativo detectado cross-NF/cross-veiculo (Feature C da v2).
+
+    Gerado pelo job `ai.padroes.analisar_padroes`: features estatisticas em
+    Python coletam candidatos com evidencia, o LLM seleciona/narra os 3-5
+    mais relevantes e o resultado e' persistido aqui para exibicao no topo
+    do dashboard. `dados_json` carrega a evidencia bruta usada na descricao
+    para que o auditor possa inspecionar.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    tipo: str = Field(index=True)
+    titulo: str
+    descricao: str
+    severidade: str  # alta | media | baixa
+    dados_json: str  # JSON serializado da evidencia (lista de ids etc.)
+    criado_em: datetime
+
+
 class ReconciliacaoAprovada(SQLModel, table=True):
     """Vínculo aprovado entre um abastecimento órfão e um mobilizado.
 

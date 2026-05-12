@@ -11,6 +11,7 @@ from . import cache
 from .client import ChatClient, ChatMessage
 from .parecer_deterministico import gerar_parecer_deterministico
 from .parecer_guardrails import validar_parecer
+from .parecer_quality import avaliar_parecer
 from .prompts import parecer as prompts
 from .provider import ProviderInfo
 
@@ -41,17 +42,28 @@ class GeradorParecer:
         nf_atual = str(auditoria_payload.get("auditoria", {}).get("nf_atual") or "")
 
         # Cache hit em DEMO_MODE=true: resposta instantanea, identica a cada
-        # execucao da demo, imune a oscilacao do provider.
+        # execucao da demo, imune a oscilacao do provider. Mas se o cache estiver
+        # contaminado com placeholder, ignoramos e seguimos para LLM/fallback —
+        # vale mais um determinismo honesto do que um template vazio.
         cached = cache.get_cached_parecer(nf_anterior, nf_atual)
         if cached:
-            return ParecerResult(
-                markdown=str(cached.get("markdown") or "").strip(),
-                modelo=cached.get("modelo"),
-                provider=str(cached.get("provider") or "demo_cache"),
-                offline=True,
-                latency_s=0.0,
-                prompt_tokens=int(cached.get("prompt_tokens") or 0),
-                completion_tokens=int(cached.get("completion_tokens") or 0),
+            cached_markdown = str(cached.get("markdown") or "").strip()
+            cache_quality = avaliar_parecer(cached_markdown)
+            if cache_quality.is_ok:
+                return ParecerResult(
+                    markdown=cached_markdown,
+                    modelo=cached.get("modelo"),
+                    provider=str(cached.get("provider") or "demo_cache"),
+                    offline=True,
+                    latency_s=0.0,
+                    prompt_tokens=int(cached.get("prompt_tokens") or 0),
+                    completion_tokens=int(cached.get("completion_tokens") or 0),
+                )
+            log.warning(
+                "parecer.cache_placeholder_ignorado",
+                nf_anterior=nf_anterior,
+                nf_atual=nf_atual,
+                reasons=list(cache_quality.reasons),
             )
 
         user_msg = prompts.montar_user_message(auditoria_payload)
@@ -86,10 +98,23 @@ class GeradorParecer:
         return result
 
     def _ensure_valid_response(self, response: Any, payload: dict[str, Any]) -> Any:
-        """Valida, tenta reparar e degrada para fallback determinístico se necessário."""
+        """Valida, tenta reparar e degrada para fallback determinístico se necessário.
+
+        Alem dos guardrails de conteudo, rejeitamos pareceres flagrados como
+        placeholder (frases-template, nomes de campo vazados) — eles dao
+        aparencia de analise sem entrega-la e destroem a confianca do auditor.
+        """
+        quality = avaliar_parecer(response.content)
         validation = validar_parecer(response.content, payload)
-        if validation.ok:
+        if validation.ok and quality.is_ok:
             return response
+        if not quality.is_ok:
+            log.warning(
+                "parecer.placeholder_detectado",
+                stage="primary",
+                reasons=list(quality.reasons),
+                model=response.model,
+            )
 
         log.warning(
             "llm.guardrail.parecer_invalid",
@@ -99,7 +124,8 @@ class GeradorParecer:
         )
         repaired = self._repair(response.content, payload, validation.errors)
         repaired_validation = validar_parecer(repaired.content, payload)
-        if repaired_validation.ok:
+        repaired_quality = avaliar_parecer(repaired.content)
+        if repaired_validation.ok and repaired_quality.is_ok:
             return repaired
 
         fallback_model = self.client.settings.llm_fallback_model
@@ -120,7 +146,8 @@ class GeradorParecer:
                 model_override=fallback_model,
             )
             fallback_validation = validar_parecer(fallback.content, payload)
-            if fallback_validation.ok:
+            fallback_quality = avaliar_parecer(fallback.content)
+            if fallback_validation.ok and fallback_quality.is_ok:
                 return fallback
             log.warning(
                 "llm.guardrail.parecer_invalid",

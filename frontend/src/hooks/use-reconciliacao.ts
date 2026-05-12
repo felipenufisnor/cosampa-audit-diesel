@@ -14,6 +14,20 @@ export function useSugestoes(auditoriaId: number | null | undefined) {
   });
 }
 
+export function useContextoReconciliacao(
+  abastecimentoId: number | null | undefined,
+  auditoriaId: number | null | undefined,
+  enabled: boolean,
+) {
+  return useQuery({
+    queryKey: ["reconciliacao", "contexto", abastecimentoId, auditoriaId],
+    queryFn: () =>
+      api.contextoReconciliacao(abastecimentoId as number, auditoriaId as number),
+    enabled: Boolean(abastecimentoId && auditoriaId) && enabled,
+    staleTime: 60 * 1000,
+  });
+}
+
 export function useAprovarReconciliacao(auditoriaId: number | null | undefined) {
   const qc = useQueryClient();
   return useMutation({

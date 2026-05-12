@@ -19,3 +19,7 @@ export function useNF(notaFiscal: string | null | undefined) {
     enabled: Boolean(notaFiscal),
   });
 }
+
+export function usePadroes() {
+  return useQuery({ queryKey: ["padroes"], queryFn: api.listarPadroes });
+}
