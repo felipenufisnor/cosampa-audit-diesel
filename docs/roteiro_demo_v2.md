@@ -76,13 +76,13 @@
 (Slide ou tela cheia com os 3 angulos: **Padroes proativos** /
 **Reasoning stream** / **Assistente de investigacao**.)
 
-### 1:00 a 2:00 - Dashboard com Padroes detectados (Feature C — "uau" antes do clique)
+### 1:00 a 2:00 - Padroes detectados (Feature C — "uau" antes do clique)
 
-Va para `/`. Pare na secao **Padroes detectados** logo abaixo do header.
+Na sidebar, clique em **Padroes detectados** ou va para `/padroes`.
 
 > "Antes mesmo de eu abrir uma NF, o sistema ja analisou todo o historico
 > e me entregou ate 5 padroes priorizados. Esses cards nao sao gerados
-> pelo LLM no momento do clique - sao computados em Python por 7
+> pelo LLM no momento do clique - sao computados em Python por
 > heuristicas estatisticas (aumento de consumo vs baseline, veiculos
 > desmobilizados que seguem abastecendo, fornecedores com inconsistencias
 > recorrentes...) e em seguida narrados pelo LLM, com uma camada de
@@ -140,7 +140,7 @@ Espere a resposta. Clique no segundo chip **"Existe algum padrao
 suspeito nesta auditoria?"**.
 
 > "O Assistente pode comparar com outras NFs, cruzar com os padroes
-> detectados do dashboard, e o historico persiste por auditoria - se eu
+> detectados da aba proativa, e o historico persiste por auditoria - se eu
 > voltar amanha, a investigacao continua de onde parei."
 
 ### 6:00 a 7:00 - PDF + consolidado (mantem o que a v1 ja fazia)
@@ -172,7 +172,7 @@ Na sidebar, clique em **Analise de rede**.
 
 > "E este e' o segundo preview - grafo de relacionamentos entre obras,
 > veiculos, fornecedores e operadores. Tres clusters suspeitos
-> pre-detectados, e repare que eles batem com o que vimos no dashboard de
+> pre-detectados, e repare que eles batem com o que vimos na aba de
 > padroes - 04T639 conectando duas obras, OSB8826 dentro do cluster do
 > operador 207. Em produçao, esse grafo se constroi automaticamente a
 > partir do banco e detecta os clusters via algoritmos de comunidade tipo

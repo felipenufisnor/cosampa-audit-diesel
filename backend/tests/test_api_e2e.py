@@ -639,6 +639,37 @@ def test_perguntas_sugeridas_auditoria_inexistente(client):
     assert r.status_code == 404
 
 
+def test_padroes_calcula_snapshot_quando_banco_vazio(client):
+    from audit_diesel.api.deps import _engine
+    from audit_diesel.models import PadraoDetectado
+    from sqlmodel import Session, select
+
+    engine = _engine()
+    with Session(engine) as s:
+        for row in s.exec(select(PadraoDetectado)).all():
+            s.delete(row)
+        s.commit()
+
+    r = client.get("/padroes")
+    assert r.status_code == 200, r.text
+    padroes = r.json()["padroes"]
+    assert len(padroes) == 5
+    assert [p["severidade"] for p in padroes].count("alta") == 3
+    assert [p["severidade"] for p in padroes].count("media") == 2
+    tipos = [p["tipo"] for p in padroes]
+    assert len(set(tipos)) == 5
+    assert "desmobilizado_ativo_agregado" in tipos
+    assert "aumento_consumo" in tipos
+    assert "horario_atipico" in tipos
+    assert "inconsistencias_infleet_agregado" in tipos
+    descricoes = " ".join(p["descricao"] for p in padroes)
+    assert "26 placa(s)" in descricoes
+    assert "12.847L" in descricoes
+    assert "329% acima" in descricoes
+    assert "79 abastecimento(s)" in descricoes
+    assert "152 abastecimento(s) em 46 veículo(s)" in descricoes
+
+
 def test_padroes_informa_auditoria_alvo(client):
     from audit_diesel.api.deps import _engine
     from audit_diesel.models import PadraoDetectado

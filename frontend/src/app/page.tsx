@@ -1,5 +1,4 @@
 import { NFsTable } from "@/components/dashboard/nfs-table";
-import { PadroesDetectados } from "@/components/dashboard/padroes-detectados";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 
 export default function DashboardPage() {
@@ -16,7 +15,6 @@ export default function DashboardPage() {
           Indicadores agregados das NFs recebidas e do consumo de diesel da obra.
         </p>
       </header>
-      <PadroesDetectados />
       <StatsCards />
       <NFsTable />
     </div>

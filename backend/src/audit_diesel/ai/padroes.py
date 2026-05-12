@@ -117,14 +117,72 @@ class _RespostaLLM(BaseModel):
 def coletar_candidatos(session: Session) -> list[CandidatoPadrao]:
     """Roda todas as heuristicas e retorna candidatos com evidencia."""
     candidatos: list[CandidatoPadrao] = []
+    candidatos.extend(_nao_cadastrados_agregado(session))
     candidatos.extend(_aumento_consumo_por_veiculo(session))
     candidatos.extend(_horario_atipico(session))
     candidatos.extend(_nao_cadastrados_recorrentes(session))
     candidatos.extend(_nfs_sequenciais_diferenca_alta(session))
+    candidatos.extend(_desmobilizados_ativos_agregado(session))
     candidatos.extend(_desmobilizados_ativos(session))
+    candidatos.extend(_inconsistencias_infleet_agregado(session))
     candidatos.extend(_inconsistencias_infleet_frequentes(session))
     candidatos.extend(_concentracao_janela_horaria(session))
     return candidatos
+
+
+def _nao_cadastrados_agregado(session: Session) -> list[CandidatoPadrao]:
+    """Volume total de alertas de abastecimentos sem cadastro GP."""
+    alertas = list(session.exec(
+        select(Alerta).where(Alerta.tipo == "NAO_CADASTRADO")
+    ).all())
+    if not alertas:
+        return []
+
+    total_litros = 0.0
+    total_custo = 0.0
+    por_placa: Counter[str] = Counter()
+    abastecimento_ids: list[int] = []
+    for alerta in alertas:
+        try:
+            payload = json.loads(alerta.payload_json) if alerta.payload_json else {}
+        except json.JSONDecodeError:
+            payload = {}
+        placa = str(
+            payload.get("veiculo_normalizado")
+            or payload.get("veiculo")
+            or payload.get("placa")
+            or ""
+        ).strip()
+        if placa:
+            por_placa[placa] += 1
+        total_litros += float(payload.get("quantidade_litros") or 0.0)
+        total_custo += float(alerta.impacto_financeiro or payload.get("custo_total") or 0.0)
+        if alerta.abastecimento_id is not None:
+            abastecimento_ids.append(alerta.abastecimento_id)
+
+    if len(alertas) < 3:
+        return []
+
+    top_placas = por_placa.most_common(5)
+    nomes = ", ".join(f"{placa} ({n})" for placa, n in top_placas[:3])
+    return [CandidatoPadrao(
+        tipo="nao_cadastrado_agregado",
+        titulo_curto="Abastecimentos sem cadastro GP concentrados",
+        descricao_curta=(
+            f"{len(alertas)} alerta(s) de equipamento sem cadastro no GP, "
+            f"somando {_format_int_br(total_litros)}L e {_format_brl(total_custo)}. "
+            f"Placas mais recorrentes: {nomes}."
+        ),
+        severidade_sugerida="alta",
+        evidencia_ids=abastecimento_ids[:80],
+        dados={
+            "total_alertas": len(alertas),
+            "total_litros": round(total_litros, 1),
+            "impacto_financeiro": round(total_custo, 2),
+            "top_placas": [{"placa": placa, "n": n} for placa, n in top_placas],
+            "abastecimento_ids": abastecimento_ids[:80],
+        },
+    )]
 
 
 def _aumento_consumo_por_veiculo(session: Session) -> list[CandidatoPadrao]:
@@ -348,6 +406,111 @@ def _desmobilizados_ativos(session: Session) -> list[CandidatoPadrao]:
     return resultados
 
 
+def _desmobilizados_ativos_agregado(session: Session) -> list[CandidatoPadrao]:
+    """Resumo global de equipamentos desmobilizados que continuam abastecendo."""
+    mobs = list(session.exec(select(Mobilizado)).all())
+    desmob_idx: dict[str, datetime] = {}
+    for m in mobs:
+        if m.data_desmobilizacao and m.placa_ativo_normalizada:
+            existente = desmob_idx.get(m.placa_ativo_normalizada)
+            if not existente or m.data_desmobilizacao > existente:
+                desmob_idx[m.placa_ativo_normalizada] = m.data_desmobilizacao
+    if not desmob_idx:
+        return []
+
+    pos_desmob: dict[str, list[Abastecimento]] = defaultdict(list)
+    for a in session.exec(select(Abastecimento)).all():
+        dt = desmob_idx.get(a.veiculo_normalizado)
+        if dt and a.data > dt:
+            pos_desmob[a.veiculo_normalizado].append(a)
+    placas_relevantes = {placa: itens for placa, itens in pos_desmob.items() if itens}
+    if not placas_relevantes:
+        return []
+
+    total_abastecimentos = sum(len(itens) for itens in placas_relevantes.values())
+    total_litros = sum(
+        float(a.quantidade_litros)
+        for itens in placas_relevantes.values()
+        for a in itens
+    )
+    ids = [
+        a.id
+        for itens in placas_relevantes.values()
+        for a in itens
+        if a.id is not None
+    ]
+    top_placas = sorted(
+        (
+            (placa, len(itens), sum(float(a.quantidade_litros) for a in itens))
+            for placa, itens in placas_relevantes.items()
+        ),
+        key=lambda item: -item[2],
+    )[:5]
+    nomes = ", ".join(f"{placa} ({litros:.0f}L)" for placa, _, litros in top_placas[:3])
+    return [CandidatoPadrao(
+        tipo="desmobilizado_ativo_agregado",
+        titulo_curto="Frota desmobilizada ainda abastece",
+        descricao_curta=(
+            f"{len(placas_relevantes)} placa(s) desmobilizada(s) seguem com "
+            f"{total_abastecimentos} abastecimento(s), totalizando {_format_int_br(total_litros)}L. "
+            f"Maiores volumes: {nomes}."
+        ),
+        severidade_sugerida="alta",
+        evidencia_ids=ids[:80],
+        dados={
+            "n_placas": len(placas_relevantes),
+            "n_abastecimentos": total_abastecimentos,
+            "total_litros": round(total_litros, 1),
+            "top_placas": [
+                {"placa": placa, "n": n, "litros": round(litros, 1)}
+                for placa, n, litros in top_placas
+            ],
+            "abastecimento_ids": ids[:80],
+        },
+    )]
+
+
+def _inconsistencias_infleet_agregado(session: Session) -> list[CandidatoPadrao]:
+    """Resumo global de flags de inconsistência vindas da telemetria Infleet."""
+    abas = list(session.exec(
+        select(Abastecimento).where(Abastecimento.inconsistencias_infleet.is_not(None))  # type: ignore[union-attr]
+    ).all())
+    if len(abas) < 3:
+        return []
+
+    por_veiculo: Counter[str] = Counter(a.veiculo_normalizado for a in abas)
+    top_veiculos = por_veiculo.most_common(5)
+    nomes = ", ".join(f"{placa} ({n})" for placa, n in top_veiculos[:3])
+    ids = [a.id for a in abas if a.id is not None]
+    return [CandidatoPadrao(
+        tipo="inconsistencias_infleet_agregado",
+        titulo_curto="Flags Infleet recorrentes",
+        descricao_curta=(
+            f"{len(abas)} abastecimento(s) em {len(por_veiculo)} veículo(s) "
+            f"vieram com inconsistência da telemetria Infleet. "
+            f"Maiores recorrências: {nomes}."
+        ),
+        severidade_sugerida="media",
+        evidencia_ids=ids[:80],
+        dados={
+            "total_flags": len(abas),
+            "n_veiculos": len(por_veiculo),
+            "top_veiculos": [{"placa": placa, "n": n} for placa, n in top_veiculos],
+            "abastecimento_ids": ids[:80],
+        },
+    )]
+
+
+def _format_int_br(value: float) -> str:
+    return f"{value:,.0f}".replace(",", ".")
+
+
+def _format_brl(value: float) -> str:
+    txt = f"{value:,.2f}"
+    txt = txt.replace(",", "_").replace(".", ",").replace("_", ".")
+    return f"R$ {txt}"
+
+
 def _inconsistencias_infleet_frequentes(session: Session) -> list[CandidatoPadrao]:
     """Veiculos cujos abastecimentos vem com `inconsistencias_infleet` preenchido."""
     abas = list(session.exec(
@@ -439,6 +602,24 @@ class ResultadoAnalisePadroes:
     offline: bool
 
 
+def gerar_padroes_em_memoria(session: Session) -> list[PadraoDetectado]:
+    """Gera um snapshot deterministico para exibicao sem persistir no banco."""
+    selecionados = _selecionar_offline(coletar_candidatos(session))
+    agora = datetime.now()
+    return [
+        PadraoDetectado(
+            id=-(idx + 1),
+            tipo=p["tipo"],
+            titulo=p["titulo"],
+            descricao=p["descricao"],
+            severidade=p["severidade"],
+            dados_json=json.dumps(p.get("dados", {}), ensure_ascii=False, default=str),
+            criado_em=agora,
+        )
+        for idx, p in enumerate(selecionados[:MAX_PADROES])
+    ]
+
+
 def analisar_padroes(
     session: Session,
     chat: ChatClient | None = None,
@@ -468,6 +649,9 @@ def analisar_padroes(
     else:
         try:
             selecionados = _selecionar_via_llm(chat, candidatos)
+            if not _quota_satisfeita(selecionados, candidatos):
+                log.info("padroes.llm_sem_quota_usando_fallback")
+                selecionados = _selecionar_offline(candidatos)
         except (ValidationError, json.JSONDecodeError, RuntimeError) as exc:
             log.warning("padroes.llm_falhou_usando_fallback", error=str(exc))
             selecionados = _selecionar_offline(candidatos)
@@ -547,10 +731,23 @@ def _selecionar_via_llm(
     return selecionados
 
 
+def _quota_satisfeita(
+    selecionados: list[dict[str, Any]],
+    candidatos: list[CandidatoPadrao],
+) -> bool:
+    """Confere se o LLM respeitou a quota possivel de 3 altas e 2 medias."""
+    alvo_alta = min(3, sum(1 for c in candidatos if c.severidade_sugerida == "alta"))
+    alvo_media = min(2, sum(1 for c in candidatos if c.severidade_sugerida == "media"))
+    if len(selecionados) < min(MAX_PADROES, len(candidatos)):
+        return False
+    n_alta = sum(1 for p in selecionados[:MAX_PADROES] if p.get("severidade") == "alta")
+    n_media = sum(1 for p in selecionados[:MAX_PADROES] if p.get("severidade") == "media")
+    return n_alta >= alvo_alta and n_media >= alvo_media
+
+
 def _selecionar_offline(candidatos: list[CandidatoPadrao]) -> list[dict[str, Any]]:
-    """Fallback: ordena por severidade e usa titulo/descricao curtos dos candidatos."""
-    ordem = {"alta": 0, "media": 1, "baixa": 2}
-    ordenados = sorted(candidatos, key=lambda c: ordem.get(c.severidade_sugerida, 9))
+    """Fallback deterministico: prioriza quota, diversidade e evidencia real."""
+    selecionados = _selecionar_candidatos_por_quota(candidatos)
     return [
         {
             "tipo": c.tipo,
@@ -559,8 +756,77 @@ def _selecionar_offline(candidatos: list[CandidatoPadrao]) -> list[dict[str, Any
             "severidade": c.severidade_sugerida,
             "dados": {**c.dados, "evidencia_ids": list(c.evidencia_ids)},
         }
-        for c in ordenados[:MAX_PADROES]
+        for c in selecionados
     ]
+
+
+def _selecionar_candidatos_por_quota(
+    candidatos: list[CandidatoPadrao],
+) -> list[CandidatoPadrao]:
+    """Escolhe ate 5 candidatos preferindo 3 altas e 2 medias, sem repetir tipo."""
+    ordenados = sorted(candidatos, key=_chave_candidato)
+    selecionados: list[CandidatoPadrao] = []
+    usados: set[str] = set()
+
+    def adicionar(severidade: str | None, limite: int, permitir_repetir: bool = False) -> None:
+        for candidato in ordenados:
+            if len(selecionados) >= MAX_PADROES or limite <= 0:
+                return
+            if candidato in selecionados:
+                continue
+            if severidade is not None and candidato.severidade_sugerida != severidade:
+                continue
+            if not permitir_repetir and candidato.tipo in usados:
+                continue
+            selecionados.append(candidato)
+            usados.add(candidato.tipo)
+            limite -= 1
+
+    adicionar("alta", 3)
+    adicionar("media", 2)
+    adicionar(None, MAX_PADROES - len(selecionados))
+    adicionar(None, MAX_PADROES - len(selecionados), permitir_repetir=True)
+    return selecionados[:MAX_PADROES]
+
+
+def _chave_candidato(c: CandidatoPadrao) -> tuple[int, int, float, str]:
+    severidade_ordem = {"alta": 0, "media": 1, "baixa": 2}
+    tipo_ordem = {
+        "nao_cadastrado_agregado": 0,
+        "desmobilizado_ativo_agregado": 1,
+        "aumento_consumo": 2,
+        "horario_atipico": 3,
+        "inconsistencias_infleet_agregado": 4,
+        "inconsistencias_infleet": 5,
+        "desmobilizado_ativo": 6,
+        "nao_cadastrado_recorrente": 7,
+        "diferenca_saidas_alta": 8,
+        "concentracao_horaria": 9,
+    }
+    return (
+        severidade_ordem.get(c.severidade_sugerida, 9),
+        tipo_ordem.get(c.tipo, 99),
+        -_score_candidato(c),
+        c.titulo_curto,
+    )
+
+
+def _score_candidato(c: CandidatoPadrao) -> float:
+    dados = c.dados
+    for key in (
+        "impacto_financeiro",
+        "total_litros",
+        "delta_pct",
+        "total_flags",
+        "total_atipicos",
+        "n_abastecimentos",
+        "n",
+        "total",
+    ):
+        value = dados.get(key)
+        if isinstance(value, int | float):
+            return float(value)
+    return float(len(c.evidencia_ids))
 
 
 def _extrair_json(content: str) -> str:

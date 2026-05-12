@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from sqlmodel import Session, select
 
 from audit_diesel.ai.client import ChatClient
-from audit_diesel.ai.padroes import analisar_padroes
+from audit_diesel.ai.padroes import analisar_padroes, gerar_padroes_em_memoria
 from audit_diesel.models import Abastecimento, Auditoria, Checklist, PadraoDetectado
 
 from ..deps import get_chat_client, get_session
@@ -52,10 +52,12 @@ class RecalcularResponse(BaseModel):
 
 @router.get("", response_model=PadroesResponse)
 def listar_padroes(session: Session = Depends(get_session)) -> PadroesResponse:
-    """Retorna a lista atual de padroes detectados (snapshot persistido)."""
+    """Retorna o snapshot persistido ou calcula padrões reais sob demanda."""
     rows = list(session.exec(
         select(PadraoDetectado).order_by(PadraoDetectado.criado_em.desc())
     ).all())
+    if not rows:
+        rows = gerar_padroes_em_memoria(session)
     itens = [_to_item(r, session) for r in rows]
     atualizado = rows[0].criado_em if rows else None
     return PadroesResponse(padroes=itens, atualizado_em=atualizado)

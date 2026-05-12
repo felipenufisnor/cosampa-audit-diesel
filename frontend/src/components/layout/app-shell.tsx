@@ -52,11 +52,9 @@ const NAV_SECTIONS: NavSection[] = [
     titulo: "Inteligência",
     items: [
       {
-        href: "/#padroes",
+        href: "/padroes",
         label: "Padrões detectados",
         icon: Sparkle,
-        // ativo somente quando pathname for "/" e existir hash padroes
-        match: (p) => p === "/" && typeof window !== "undefined" && window.location.hash === "#padroes",
       },
       { href: "/assistente", label: "Assistente", icon: MessageSquare },
     ],
