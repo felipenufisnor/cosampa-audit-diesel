@@ -15,7 +15,6 @@ import * as React from "react";
 import { X } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
-import { PreviewBanner } from "@/components/layout/preview-banner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -102,8 +101,6 @@ export default function RedePage() {
       <Breadcrumbs
         items={[{ label: "Dashboard", href: "/" }, { label: "Análise de rede" }]}
       />
-
-      <PreviewBanner descricao="Esta tela é uma simulação navegável da Análise de Rede, planejada para a fase 2 da plataforma. As entidades, conexões e clusters mostrados são ilustrativos e não refletem dados reais." />
 
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -223,7 +220,6 @@ export default function RedePage() {
         />
       </div>
 
-      <Rodape />
     </div>
   );
 }
@@ -509,18 +505,5 @@ function Marcadagua() {
         </div>
       ))}
     </div>
-  );
-}
-
-function Rodape() {
-  return (
-    <p className="rounded-xl border border-app-border bg-zinc-50 px-4 py-3 text-xs leading-relaxed text-zinc-600">
-      Esta tela é uma simulação navegável da funcionalidade de Análise de Rede,
-      planejada para a fase 2 da solução. As entidades, conexões e clusters
-      mostrados são ilustrativos. A entrega real desta funcionalidade inclui
-      construção automática do grafo a partir do banco operacional, detecção
-      de clusters via algoritmos de comunidade (Louvain/Leiden) e expansão
-      para múltiplas obras com filtros temporais.
-    </p>
   );
 }

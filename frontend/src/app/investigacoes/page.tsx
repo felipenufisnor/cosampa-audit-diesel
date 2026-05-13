@@ -84,11 +84,8 @@ export default function InvestigacoesPage() {
             Kanban para tratativa de inconsistências.
           </p>
         </div>
-        <Badge
-          variant="warn"
-          className="border-amber-200 bg-amber-50 px-2 text-[11px] font-medium text-amber-700"
-        >
-          PREVIEW
+        <Badge variant="muted" className="text-[12px]">
+          Preview - Disponível em versão futura
         </Badge>
       </header>
 
