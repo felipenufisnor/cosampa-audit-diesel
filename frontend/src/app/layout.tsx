@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "PLATAFORMA DE AUDITORIA E CONTROLE - Arco Metropolitano JP",
+  title: "CONTROLE TÉCNICO DE DIESEL - ARCO METROPOLITANO JP",
   description:
     "Auditoria automatizada de notas fiscais de diesel para o consórcio CLC/Rocha/Cosampa.",
 };

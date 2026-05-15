@@ -18,10 +18,9 @@ def gerar_parecer_deterministico(payload: dict[str, Any]) -> str:
     saidas_reg = float(auditoria.get("saidas_registradas_litros") or 0.0)
     nf_atual = auditoria.get("nf_atual")
 
-    impacto_alta = sum(
+    impacto_total = sum(
         float(a.get("impacto_financeiro") or 0.0)
         for a in alertas
-        if a.get("severidade") == "alta"
     )
 
     if nao_cad >= 5:
@@ -60,8 +59,8 @@ def gerar_parecer_deterministico(payload: dict[str, Any]) -> str:
         f"3. Confirme com o estoquista os valores de tanque e comboio "
         f"informados no checklist da NF {nf_atual} antes de fechar o mês.\n\n"
         f"**Risco financeiro associado**\n"
-        f"R$ {_brl(impacto_alta)} em alertas de alta severidade na janela "
-        f"(custo dos abastecimentos não cadastrados e pós-desmobilização)."
+        f"R$ {_brl(impacto_total)} em alertas com impacto financeiro na janela "
+        f"(não cadastrados, pós-desmobilização, outliers e duplicidades)."
     )
 
 

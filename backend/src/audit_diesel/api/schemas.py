@@ -48,6 +48,10 @@ class StatsResponse(BaseModel):
     abastecimentos_nao_cadastrados: int
     custo_nao_cadastrado_brl: float
     pct_custo_nao_cadastrado: float
+    nfs_auditadas: int = 0
+    nfs_aprovadas: int = 0
+    nfs_inconsistentes: int = 0
+    nfs_nao_auditadas: int = 0
 
 
 class NFListItem(BaseModel):

@@ -13,6 +13,10 @@ from audit_diesel.models import Abastecimento
 from .base import AlertResult, AuditContext
 
 
+def _fmt_litros(v: float) -> str:
+    return f"{v:.1f}".replace(".", ",")
+
+
 class OutlierConsumoAlert:
     """Calcula media/desvio por veiculo na base inteira, sinaliza |z| > limite."""
 
@@ -45,9 +49,9 @@ class OutlierConsumoAlert:
                     severidade="media",
                     titulo="Consumo atípico para o veículo",
                     descricao=(
-                        f"Abastecimento de {ab.quantidade_litros:.1f} L em "
+                        f"Abastecimento de {_fmt_litros(ab.quantidade_litros)} L em "
                         f"{ab.veiculo_raw} (apelido: {ab.apelido or '-'}) tem z-score "
-                        f"{z:.2f} (média histórica {media:.1f} L, desvio {desvio:.1f} L "
+                        f"{z:.2f} (média histórica {_fmt_litros(media)} L, desvio {_fmt_litros(desvio)} L "
                         f"em {n} observações)."
                     ),
                     payload={

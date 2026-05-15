@@ -39,9 +39,10 @@ imperativo: "Solicite à obra...", "Cobre a inserção...", "Confirme o
 cadastro...". Não use "sugiro" ou "recomendo" - é uma instrução.
 
 **Risco financeiro associado**
-Cite o valor em R$ que está em jogo (custo dos abastecimentos não
-cadastrados + abastecimentos pós-desmobilização + qualquer outro alerta
-de alta severidade na auditoria).
+Use `impacto_total_alertas_brl` como total de risco em R$. Detalhe os
+recortes por tipo usando `impacto_por_tipo_brl` — inclua todo tipo com
+impacto > 0, independentemente da severidade (ex.: DUPLICIDADE deve
+aparecer se tiver valor).
 
 Regras:
 - Seja direto. Sem preâmbulo. Sem "olá", sem "espero ter ajudado".

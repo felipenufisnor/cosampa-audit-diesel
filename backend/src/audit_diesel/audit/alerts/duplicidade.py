@@ -7,6 +7,14 @@ from collections import defaultdict
 from .base import AlertResult, AuditContext
 
 
+def _fmt_litros(v: float) -> str:
+    return f"{v:.1f}".replace(".", ",")
+
+
+def _fmt_brl(v: float) -> str:
+    return f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
 class DuplicidadeAlert:
     """Agrupa por (veiculo_normalizado, data.date()); count >= 2 -> 1 alerta."""
 
@@ -33,7 +41,7 @@ class DuplicidadeAlert:
                     descricao=(
                         f"Veículo {itens[0].veiculo_raw} (apelido: "
                         f"{itens[0].apelido or '-'}) tem {len(itens)} abastecimentos em "
-                        f"{dia} totalizando {total_litros:.1f} L (R$ {total_custo:,.2f})."
+                        f"{dia} totalizando {_fmt_litros(total_litros)} L (R$ {_fmt_brl(total_custo)})."
                     ),
                     payload={
                         "veiculo_normalizado": veiculo,
@@ -43,7 +51,7 @@ class DuplicidadeAlert:
                         "custo_total": total_custo,
                         "n_abastecimentos": len(itens),
                     },
-                    impacto_financeiro=None,
+                    impacto_financeiro=total_custo,
                 )
             )
         return resultados

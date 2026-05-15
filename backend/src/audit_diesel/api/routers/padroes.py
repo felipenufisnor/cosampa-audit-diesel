@@ -56,7 +56,7 @@ def listar_padroes(session: Session = Depends(get_session)) -> PadroesResponse:
     rows = list(session.exec(
         select(PadraoDetectado).order_by(PadraoDetectado.criado_em.desc())
     ).all())
-    if not rows:
+    if not _snapshot_persistido_valido(rows):
         rows = gerar_padroes_em_memoria(session)
     itens = [_to_item(r, session) for r in rows]
     atualizado = rows[0].criado_em if rows else None
@@ -77,6 +77,39 @@ def recalcular_padroes(
         modelo=resultado.modelo,
         offline=resultado.offline,
     )
+
+
+def _snapshot_persistido_valido(rows: list[PadraoDetectado]) -> bool:
+    """Valida se o snapshot salvo atende a narrativa proativa da demo."""
+    if len(rows) != 5:
+        return False
+    severidades = [r.severidade for r in rows]
+    if severidades.count("alta") != 3 or severidades.count("media") != 2:
+        return False
+    tipos = [r.tipo.strip() for r in rows]
+    if any(not tipo for tipo in tipos) or len(set(tipos)) != len(tipos):
+        return False
+    for row in rows:
+        if not row.titulo.strip() or not row.descricao.strip():
+            return False
+        if not _dados_json_parseavel(row.dados_json):
+            return False
+    return True
+
+
+def _dados_json_parseavel(dados_json: str) -> bool:
+    try:
+        dados = json.loads(dados_json) if dados_json else {}
+    except json.JSONDecodeError:
+        return False
+    if not isinstance(dados, dict):
+        return False
+    evidencias = (
+        dados.get("evidencia_ids"),
+        dados.get("abastecimento_ids"),
+        dados.get("top_diferencas"),
+    )
+    return any(isinstance(e, list) and len(e) > 0 for e in evidencias)
 
 
 def _to_item(r: PadraoDetectado, session: Session) -> PadraoItem:

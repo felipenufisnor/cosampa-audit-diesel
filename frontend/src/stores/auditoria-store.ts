@@ -7,6 +7,10 @@ interface AuditoriaSession {
   reconciliacaoTargetAbastecimentoId: number | null;
   setReconciliacaoTarget: (id: number | null) => void;
 
+  /** IDs de abastecimentos reconciliados com sucesso na sessão atual. */
+  reconciliadosIds: number[];
+  marcarReconciliado: (id: number) => void;
+
   /** Filtro ativo na lista de alertas da página /auditoria/[id]. */
   alertaFiltroTipo: "TODOS" | "NAO_CADASTRADO" | "POS_DESMOB" | "OUTLIER" | "DUPLICIDADE";
   setAlertaFiltroTipo: (
@@ -20,6 +24,10 @@ interface AuditoriaSession {
 export const useAuditoriaStore = create<AuditoriaSession>((set) => ({
   reconciliacaoTargetAbastecimentoId: null,
   setReconciliacaoTarget: (id) => set({ reconciliacaoTargetAbastecimentoId: id }),
+
+  reconciliadosIds: [],
+  marcarReconciliado: (id) =>
+    set((s) => ({ reconciliadosIds: [...s.reconciliadosIds, id] })),
 
   alertaFiltroTipo: "TODOS",
   setAlertaFiltroTipo: (alertaFiltroTipo) => set({ alertaFiltroTipo }),

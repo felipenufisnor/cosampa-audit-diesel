@@ -62,10 +62,10 @@ export function NFsTable() {
                 <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   VALOR
                 </th>
-                <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
+                <th className="w-[210px] px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   ÚLTIMA AUDITORIA
                 </th>
-                <th className="px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
+                <th className="w-[110px] px-5 py-3.5 text-center text-[13px] font-bold uppercase tracking-[0.08em]">
                   AÇÕES
                 </th>
               </tr>
@@ -110,22 +110,31 @@ export function NFsTable() {
                   <td className="px-5 py-4 text-center tabular text-zinc-700">
                     {formatBRL(nf.valor_total)}
                   </td>
-                  <td className="px-5 py-4 text-center">
-                    <div className="relative flex min-h-7 items-center justify-center">
-                      <StatusBadge status={nf.ultima_validacao} />
-                      {nf.ultima_auditoria_id && (
-                        <Link
-                          className="absolute right-0 inline-flex translate-x-10 items-center gap-1 rounded-full px-2 py-1 text-sm font-semibold text-brand-primary-dark transition-colors hover:bg-brand-primary-light"
-                          href={`/auditoria/${nf.ultima_auditoria_id}`}
-                        >
-                          Ver
-                          <ExternalLink className="h-3 w-3" aria-hidden />
-                        </Link>
-                      )}
+                  <td className="w-[210px] px-5 py-4 text-center">
+                    <div className="mx-auto grid w-[180px] grid-cols-[120px_60px] items-center justify-center">
+                      <div className="flex justify-center">
+                        <StatusBadge status={nf.ultima_validacao} />
+                      </div>
+                      <div className="flex justify-center">
+                        {nf.ultima_auditoria_id ? (
+                          <Link
+                            className="inline-flex translate-x-6 items-center gap-1 rounded-full px-2 py-1 text-sm font-semibold text-brand-primary-dark transition-colors hover:bg-brand-primary-light"
+                            href={`/auditoria/${nf.ultima_auditoria_id}`}
+                          >
+                            Ver
+                            <ExternalLink className="h-3 w-3" aria-hidden />
+                          </Link>
+                        ) : (
+                          <span className="invisible inline-flex px-2 py-1 text-sm font-semibold">
+                            Ver
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-center">
+                  <td className="w-[110px] px-5 py-4 text-center">
                     <Button
+                      className="w-[66px]"
                       size="sm"
                       variant="primary"
                       onClick={() => setAlvo(nf)}

@@ -8,7 +8,6 @@
  * ja preenchida no contexto da auditoria alvo.
  */
 
-import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, BrainCircuit } from "lucide-react";
 
@@ -17,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { usePadroes } from "@/hooks/use-nfs";
-import { formatDateTimeBR } from "@/lib/format";
 import type { Padrao, PadraoSeveridade } from "@/lib/types";
 
 export function PadroesDetectados() {
@@ -49,11 +47,6 @@ export function PadroesDetectados() {
         <div className="flex flex-wrap items-center gap-2">
           {altas > 0 && <Badge variant="danger">{altas} alta</Badge>}
           {medias > 0 && <Badge variant="warn">{medias} média</Badge>}
-          {data.atualizado_em && (
-            <span className="text-xs text-zinc-400">
-              atualizado em {formatDateTimeBR(data.atualizado_em)}
-            </span>
-          )}
         </div>
       </header>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
@@ -74,12 +67,12 @@ function PadraoCard({ padrao }: { padrao: Padrao }) {
   );
   const podeInvestigar = padrao.auditoria_alvo_id !== null;
   return (
-    <Card className={`relative overflow-hidden ${sevStyle.card}`}>
+    <Card className={`relative h-full overflow-hidden ${sevStyle.card}`}>
       <span
         aria-hidden
         className={`absolute inset-y-0 left-0 w-1 ${sevStyle.bar}`}
       />
-      <CardContent className="flex min-h-48 flex-col pl-5">
+      <CardContent className="flex h-full min-h-48 flex-col pl-5">
         <div className="flex items-start justify-between gap-3">
           <p className="text-base font-semibold leading-snug text-zinc-950">
             {padrao.titulo}
@@ -91,21 +84,17 @@ function PadraoCard({ padrao }: { padrao: Padrao }) {
         <p className="mt-2 flex-1 text-sm leading-relaxed text-zinc-600">
           {padrao.descricao}
         </p>
-        <div className="mt-3 flex items-center justify-between">
-          <div>
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+          <div className="flex flex-wrap items-center gap-1.5">
             <Badge variant="neutral">
-              {padrao.tipo.replace(/_/g, " ")}
+              {TIPO_PADRAO_LABEL[padrao.tipo] ?? padrao.tipo.replace(/_/g, " ")}
             </Badge>
-            {padrao.auditoria_alvo_nf && (
-              <p className="mt-0.5 text-[11px] text-zinc-500">
-                Investiga NF {padrao.auditoria_alvo_nf}
-              </p>
-            )}
+            <Badge variant="muted">Acumulado histórico</Badge>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="shrink-0"
+            className="shrink-0 justify-self-start sm:justify-self-end"
             disabled={!podeInvestigar}
             title={
               podeInvestigar
@@ -119,7 +108,9 @@ function PadraoCard({ padrao }: { padrao: Padrao }) {
               );
             }}
           >
-            Investigar
+            {padrao.auditoria_alvo_nf
+              ? `Investigar NF ${padrao.auditoria_alvo_nf}`
+              : "Investigar"}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden />
           </Button>
         </div>
@@ -128,7 +119,7 @@ function PadraoCard({ padrao }: { padrao: Padrao }) {
   );
 }
 
-function PadroesSkeleton() {
+function PadroesSkeleton({ timedOut = false }: { timedOut?: boolean }) {
   return (
     <section className="space-y-5">
       <div className="border-b border-app-border pb-5">
@@ -138,6 +129,11 @@ function PadroesSkeleton() {
           <Skeleton className="mt-2 h-4 w-full max-w-xl" />
         </div>
       </div>
+      <p className="text-sm text-zinc-500">
+        {timedOut
+          ? "O carregamento está demorando mais que o esperado. Verifique sua conexão ou tente recarregar a página."
+          : "Carregando padrões detectados..."}
+      </p>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
         {[0, 1, 2].map((i) => (
           <Skeleton key={i} className="h-28 w-full rounded-2xl" />
@@ -167,6 +163,19 @@ function PadroesEmpty({ message }: { message: string }) {
     </section>
   );
 }
+
+const TIPO_PADRAO_LABEL: Record<string, string> = {
+  horario_atipico: "Horário atípico",
+  nao_cadastrado_agregado: "Não cadastrado (agregado)",
+  nao_cadastrado_recorrente: "Não cadastrado (recorrente)",
+  inconsistencias_infleet_agregado: "Inconsistências Infleet (agregado)",
+  inconsistencias_infleet: "Inconsistências Infleet",
+  aumento_consumo: "Aumento de consumo",
+  diferenca_saidas_alta: "Diferença de saídas",
+  desmobilizado_ativo: "Desmobilizado ativo",
+  desmobilizado_ativo_agregado: "Desmobilizado ativo (agregado)",
+  concentracao_horaria: "Concentração horária",
+};
 
 function sevToStyle(s: PadraoSeveridade): {
   bar: string;

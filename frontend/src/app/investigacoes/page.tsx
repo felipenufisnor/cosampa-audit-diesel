@@ -11,9 +11,10 @@
  */
 
 import * as React from "react";
-import { ChevronRight, Filter, Paperclip, X } from "lucide-react";
+import { ChevronRight, Filter, Inbox, Paperclip, X } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { formatNomeObra } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -165,7 +166,7 @@ function FiltrosBar({
         onChange={(v) =>
           onChange({ ...filtros, prioridade: v as PrioridadeInvestigacao | null })
         }
-        opcoes={["alta", "media", "baixa"]}
+        opcoes={["Alta", "Média", "Baixa"]}
         placeholder="Prioridade"
       />
       <button
@@ -248,9 +249,15 @@ function Coluna({
       </div>
       <div className="space-y-2">
         {cards.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-6 text-center text-xs text-zinc-400">
-            sem cards
-          </p>
+          <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-zinc-200 px-3 py-8 text-center">
+            <Inbox className="h-5 w-5 text-zinc-300" aria-hidden />
+            <p className="text-xs font-medium text-zinc-400">
+              Nenhuma investigação nesta etapa
+            </p>
+            <p className="text-[11px] text-zinc-300">
+              Arraste um card aqui para movê-lo
+            </p>
+          </div>
         ) : (
           cards.map((c) => (
             <CardInvestigacao
@@ -263,6 +270,12 @@ function Coluna({
       </div>
     </div>
   );
+}
+
+function dataAbertaFormatada(diasAtras: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - diasAtras);
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
 function CardInvestigacao({
@@ -290,13 +303,18 @@ function CardInvestigacao({
       <p className="mt-1.5 line-clamp-2 text-sm leading-snug text-zinc-800">
         {inv.resumo}
       </p>
+      {!inv.nf_auditada && (
+        <p className="mt-2 rounded-md bg-amber-50 px-2 py-1 text-[11px] leading-snug text-amber-700">
+          NF não auditada — métricas estimadas a partir de dados brutos do Infleet
+        </p>
+      )}
       <div className="mt-2.5 flex items-center justify-between text-xs">
         <span
           className={[
             "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px]",
-            inv.prioridade === "alta"
+            inv.prioridade === "Alta"
               ? "bg-red-50 text-red-700"
-              : inv.prioridade === "media"
+              : inv.prioridade === "Média"
                 ? "bg-amber-50 text-amber-700"
                 : "bg-zinc-100 text-zinc-700",
           ].join(" ")}
@@ -305,7 +323,12 @@ function CardInvestigacao({
         </span>
         <div className="flex items-center gap-2 text-zinc-500">
           <Avatar iniciais={inv.responsavel.iniciais} />
-          <span className="tabular-nums">{inv.aberta_ha_dias}d</span>
+          <span
+            className="tabular-nums cursor-default underline decoration-dashed decoration-zinc-400 underline-offset-2"
+            title={`Aberta em ${dataAbertaFormatada(inv.aberta_ha_dias)}`}
+          >
+            {inv.aberta_ha_dias}d
+          </span>
         </div>
       </div>
     </article>
@@ -349,7 +372,7 @@ function DetalheDrawer({
               NF {inv.nf} - {inv.tipo}
             </h3>
             <p className="text-xs text-zinc-500">
-              {inv.obra} - {inv.responsavel.nome} - aberta há {inv.aberta_ha_dias}d
+              {formatNomeObra(inv.obra)} - {inv.responsavel.nome} - aberta há {inv.aberta_ha_dias}d
             </p>
           </div>
           <button
@@ -364,6 +387,15 @@ function DetalheDrawer({
 
         <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
           <p className="text-sm leading-relaxed text-zinc-700">{inv.resumo}</p>
+
+          {!inv.nf_auditada && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <p className="font-semibold">NF {inv.nf} ainda não foi formalmente auditada</p>
+              <p className="mt-0.5 text-amber-700">
+                As métricas percentuais (ex.: −7,4%) foram estimadas diretamente sobre os dados brutos do Infleet, sem validação formal. Confirme os valores antes de usar como base para autuação.
+              </p>
+            </div>
+          )}
 
           <section>
             <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -424,9 +456,14 @@ function DetalheDrawer({
           </section>
 
           <section>
-            <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Análise automática sobre as evidências
-            </h4>
+            <div className="mb-2 flex items-baseline gap-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                Análise automática sobre as evidências
+              </h4>
+              <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-400">
+                Escopo: esta investigação
+              </span>
+            </div>
             <p className="rounded-xl border border-brand-primary/20 bg-brand-primary-light/40 px-4 py-3 text-sm leading-relaxed text-zinc-800">
               {inv.analise_automatica}
             </p>

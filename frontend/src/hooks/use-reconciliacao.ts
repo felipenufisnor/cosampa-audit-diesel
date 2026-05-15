@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { api, ApiError } from "@/lib/api";
+import { useAuditoriaStore } from "@/stores/auditoria-store";
 
 export function useSugestoes(auditoriaId: number | null | undefined) {
   return useQuery({
@@ -32,7 +33,8 @@ export function useAprovarReconciliacao(auditoriaId: number | null | undefined) 
   const qc = useQueryClient();
   return useMutation({
     mutationFn: api.aprovarReconciliacao,
-    onSuccess: (resp) => {
+    onSuccess: (resp, variables) => {
+      useAuditoriaStore.getState().marcarReconciliado(variables.abastecimento_id);
       if (resp.auditoria_atualizada) {
         qc.setQueryData(
           ["auditorias", resp.auditoria_atualizada.auditoria.id],
@@ -42,7 +44,7 @@ export function useAprovarReconciliacao(auditoriaId: number | null | undefined) 
       qc.invalidateQueries({ queryKey: ["reconciliacao", "sugestoes", auditoriaId] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["consolidado"] });
-      toast.success("Alerta reconciliado");
+      toast.success("Alerta reconciliado com sucesso");
     },
     onError: (err: unknown) => {
       const msg =

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import {
@@ -45,7 +44,6 @@ function AuditarDialogInner({
   candidatos: NFListItem[];
   onClose: () => void;
 }) {
-  const router = useRouter();
   const mutation = useCriarAuditoria();
   const historico = useAuditoriasDaNf(alvo.nota_fiscal);
   const possuiHistorico = (historico.data?.length ?? 0) > 0;
@@ -290,7 +288,7 @@ function AuditarDialogInner({
           Cancelar
         </Button>
         <Button
-          variant="secondary"
+          variant="primary"
           disabled={
             (semNfAnterior ? !pcFormValido : !anteriorSelecionadaValida) ||
             mutation.isPending
@@ -319,28 +317,8 @@ function AuditarDialogInner({
               modo,
             });
           }}
-          title="Roda a auditoria de forma síncrona, sem narração em tempo real"
         >
-          {mutation.isPending ? "Auditando..." : "Auditar (rápido)"}
-        </Button>
-        <Button
-          disabled={semNfAnterior || !anteriorSelecionadaValida || mutation.isPending}
-          onClick={() => {
-            if (semNfAnterior) return;
-            if (!anteriorNfEfetiva || !anteriorSelecionadaValida) return;
-            const qs = new URLSearchParams({
-              ant: anteriorNfEfetiva,
-              atual: alvo.nota_fiscal,
-            });
-            router.push(`/auditoria/run?${qs.toString()}`);
-          }}
-          title={
-            semNfAnterior
-              ? "Narração em tempo real ainda não suporta ponto de corte manual."
-              : "Mostra cada etapa em tempo real, com a análise automática narrada"
-          }
-        >
-          Auditar com narração
+          {mutation.isPending ? "Auditando..." : "Auditar"}
         </Button>
       </DialogFooter>
     </Dialog>

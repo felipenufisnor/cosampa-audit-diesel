@@ -87,6 +87,10 @@ export interface Stats {
   abastecimentos_nao_cadastrados: number;
   custo_nao_cadastrado_brl: number;
   pct_custo_nao_cadastrado: number;
+  nfs_auditadas: number;
+  nfs_aprovadas: number;
+  nfs_inconsistentes: number;
+  nfs_nao_auditadas: number;
 }
 
 export type ValidacaoFinal = "APROVADO" | "INCONSISTENTE";

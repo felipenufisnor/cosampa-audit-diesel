@@ -99,10 +99,10 @@ export default function RedePage() {
       <Marcadagua />
 
       <Breadcrumbs
-        items={[{ label: "Dashboard", href: "/" }, { label: "Análise de rede" }]}
+        items={[{ label: "Dashboard", href: "/" }, { label: "Análise de Rede" }]}
       />
 
-      <header className="flex flex-wrap items-end justify-between gap-3">
+      <header>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-primary-dark">
             Preview
@@ -110,15 +110,17 @@ export default function RedePage() {
           <h2 className="mt-1 text-[24px] font-bold tracking-tight text-zinc-950">
             Análise de rede
           </h2>
-          <p className="mt-1 text-sm text-zinc-500">
-            Grafo de relacionamentos entre obras, veículos, fornecedores e
-            operadores. Clusters destacados foram pré-identificados pelo
-            sistema como potencialmente suspeitos.
-          </p>
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+            <p className="min-w-0 flex-1 text-sm text-zinc-500">
+              Grafo de relacionamentos entre obras, veículos, fornecedores e
+              operadores. Clusters destacados pelo sistema como potencialmente
+              suspeitos.
+            </p>
+            <Badge variant="muted" className="text-[12px]">
+              Preview - Disponível em versão futura
+            </Badge>
+          </div>
         </div>
-        <Badge variant="muted" className="text-[12px]">
-          Preview - Disponível em versão futura
-        </Badge>
       </header>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">

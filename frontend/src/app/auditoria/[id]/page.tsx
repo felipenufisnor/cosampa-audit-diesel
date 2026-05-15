@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { use } from "react";
-import { CheckCircle2, FileDown, Loader2, MessageSquare } from "lucide-react";
+import { ArrowRight, CheckCircle2, FileDown, Loader2, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ import { useAuditoria, useRegenerarParecer } from "@/hooks/use-auditoria";
 import { useNF } from "@/hooks/use-nfs";
 import { useAuditoriaStore } from "@/stores/auditoria-store";
 import { api, ApiError } from "@/lib/api";
+import { formatNomeObra } from "@/lib/format";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -195,7 +196,7 @@ function Header({
           {ind.is_atual ? "Auditoria atual" : "Auditoria histórica"} v{versao} de {totalVersoes}
         </p>
         <p className="mt-1 max-w-2xl truncate text-sm text-zinc-500">
-          {ind.nome_obra}
+          {formatNomeObra(ind.nome_obra)}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -239,7 +240,6 @@ function Header({
         <StatusBadge
           status={ind.validacao_final}
           aprovadaManualmente={aprovadaManualmente}
-          className="h-9 min-w-[190px] justify-center px-4 text-sm"
         />
       </div>
       <AprovarDialog
@@ -269,6 +269,7 @@ function AuditoriaVersionNotice({
         <Link href={`/auditoria/${ind.auditoria_atual_id}`}>
           <Button variant="secondary" size="sm">
             Abrir versão atual
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
           </Button>
         </Link>
       </CardContent>

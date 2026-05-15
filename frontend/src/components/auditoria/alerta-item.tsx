@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAuditoriaStore } from "@/stores/auditoria-store";
 import {
   formatBRL,
   formatDateBR,
@@ -30,6 +31,10 @@ interface Props {
 
 export function AlertaItem({ alerta, onReconciliar }: Props) {
   const [expand, setExpand] = React.useState(false);
+  const reconciliadosIds = useAuditoriaStore((s) => s.reconciliadosIds);
+  const reconciliado =
+    alerta.abastecimento_id != null &&
+    reconciliadosIds.includes(alerta.abastecimento_id);
   return (
     <div className="rounded-xl border border-app-border bg-white shadow-sm transition-colors hover:border-zinc-300">
       <div className="flex items-start justify-between gap-3 px-3 py-2.5">
@@ -53,14 +58,26 @@ export function AlertaItem({ alerta, onReconciliar }: Props) {
           )}
           <div className="flex items-center gap-1">
             {alerta.tipo === "NAO_CADASTRADO" && alerta.abastecimento_id && onReconciliar && (
-              <Button
-                size="sm"
-                variant="primary"
-                className="bg-brand-sidebar text-brand-primary-dark hover:bg-brand-sidebar/90 focus-visible:ring-brand-sidebar/35"
-                onClick={() => onReconciliar(alerta.abastecimento_id as number)}
-              >
-                Reconciliar
-              </Button>
+              reconciliado ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled
+                  className="gap-1 text-green-700 disabled:opacity-100 cursor-default"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                  Reconciliado
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="primary"
+                  className="bg-brand-sidebar text-brand-primary-dark hover:bg-brand-sidebar/90 focus-visible:ring-brand-sidebar/35"
+                  onClick={() => onReconciliar(alerta.abastecimento_id as number)}
+                >
+                  Reconciliar
+                </Button>
+              )
             )}
             <Button
               size="sm"

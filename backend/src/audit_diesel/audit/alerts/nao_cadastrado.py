@@ -24,7 +24,7 @@ class NaoCadastradoAlert:
                     descricao=(
                         f"Veículo {ab.veiculo_raw} (apelido: {ab.apelido or '-'}) "
                         f"abastecido em {ab.data:%d/%m/%Y %H:%M} mas sem cadastro "
-                        f"correspondente no Gestão de Projetos."
+                        f"correspondente no GP."
                     ),
                     payload={
                         "veiculo_raw": ab.veiculo_raw,

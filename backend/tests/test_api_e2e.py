@@ -6,7 +6,6 @@ import asyncio
 import json
 import os
 from datetime import datetime
-from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -639,20 +638,17 @@ def test_perguntas_sugeridas_auditoria_inexistente(client):
     assert r.status_code == 404
 
 
-def test_padroes_calcula_snapshot_quando_banco_vazio(client):
-    from audit_diesel.api.deps import _engine
+def _limpar_padroes_persistidos(session):
+    from sqlmodel import select
+
     from audit_diesel.models import PadraoDetectado
-    from sqlmodel import Session, select
 
-    engine = _engine()
-    with Session(engine) as s:
-        for row in s.exec(select(PadraoDetectado)).all():
-            s.delete(row)
-        s.commit()
+    for row in session.exec(select(PadraoDetectado)).all():
+        session.delete(row)
+    session.commit()
 
-    r = client.get("/padroes")
-    assert r.status_code == 200, r.text
-    padroes = r.json()["padroes"]
+
+def _assert_snapshot_demo_real(padroes):
     assert len(padroes) == 5
     assert [p["severidade"] for p in padroes].count("alta") == 3
     assert [p["severidade"] for p in padroes].count("media") == 2
@@ -670,10 +666,112 @@ def test_padroes_calcula_snapshot_quando_banco_vazio(client):
     assert "152 abastecimento(s) em 46 veículo(s)" in descricoes
 
 
-def test_padroes_informa_auditoria_alvo(client):
+def _popular_snapshot_persistido_valido(session, *padroes):
+    from audit_diesel.models import PadraoDetectado
+
+    rows = list(padroes)
+    usados = {p.tipo for p in rows}
+    fillers = [
+        ("nao_cadastrado_agregado", "alta"),
+        ("desmobilizado_ativo_agregado", "alta"),
+        ("aumento_consumo", "alta"),
+        ("horario_atipico", "media"),
+        ("inconsistencias_infleet_agregado", "media"),
+    ]
+    for tipo, severidade in fillers:
+        if len(rows) >= 5:
+            break
+        if tipo in usados:
+            continue
+        n_alta = sum(1 for p in rows if p.severidade == "alta")
+        n_media = sum(1 for p in rows if p.severidade == "media")
+        if severidade == "alta" and n_alta >= 3:
+            continue
+        if severidade == "media" and n_media >= 2:
+            continue
+        rows.append(
+            PadraoDetectado(
+                tipo=tipo,
+                titulo=f"Snapshot {tipo}",
+                descricao="Evidencia parseavel para snapshot persistido.",
+                severidade=severidade,
+                dados_json=json.dumps({"evidencia_ids": [len(rows) + 1]}),
+                criado_em=datetime.now(),
+            )
+        )
+        usados.add(tipo)
+
+    assert len(rows) == 5
+    assert sum(1 for p in rows if p.severidade == "alta") == 3
+    assert sum(1 for p in rows if p.severidade == "media") == 2
+    for row in rows:
+        session.add(row)
+    session.commit()
+
+
+def test_padroes_calcula_snapshot_quando_banco_vazio(client):
+    from sqlmodel import Session
+
+    from audit_diesel.api.deps import _engine
+
+    engine = _engine()
+    with Session(engine) as s:
+        _limpar_padroes_persistidos(s)
+
+    r = client.get("/padroes")
+    assert r.status_code == 200, r.text
+    _assert_snapshot_demo_real(r.json()["padroes"])
+
+
+def test_padroes_ignora_snapshot_invalido_e_recalcula_em_memoria(client):
+    from sqlmodel import Session
+
     from audit_diesel.api.deps import _engine
     from audit_diesel.models import PadraoDetectado
+
+    engine = _engine()
+    with Session(engine) as s:
+        _limpar_padroes_persistidos(s)
+        s.add(
+            PadraoDetectado(
+                tipo="horario_atipico",
+                titulo="Padrao sem alvo teste",
+                descricao="Padrao sem evidencia suficiente.",
+                severidade="media",
+                dados_json=json.dumps({"total_atipicos": 3}),
+                criado_em=datetime.now(),
+            )
+        )
+        s.add(
+            PadraoDetectado(
+                tipo="diferenca_saidas_alta",
+                titulo="Padrao alvo teste",
+                descricao="Padrao com auditoria alvo explicita.",
+                severidade="alta",
+                dados_json=json.dumps({"top_diferencas": []}),
+                criado_em=datetime.now(),
+            )
+        )
+        s.commit()
+
+    try:
+        r = client.get("/padroes")
+        assert r.status_code == 200, r.text
+        padroes = r.json()["padroes"]
+        _assert_snapshot_demo_real(padroes)
+        titulos = {p["titulo"] for p in padroes}
+        assert "Padrao sem alvo teste" not in titulos
+        assert "Padrao alvo teste" not in titulos
+    finally:
+        with Session(engine) as s:
+            _limpar_padroes_persistidos(s)
+
+
+def test_padroes_informa_auditoria_alvo(client):
     from sqlmodel import Session
+
+    from audit_diesel.api.deps import _engine
+    from audit_diesel.models import PadraoDetectado
 
     aud = client.post(
         "/auditorias",
@@ -682,7 +780,9 @@ def test_padroes_informa_auditoria_alvo(client):
 
     engine = _engine()
     with Session(engine) as s:
-        s.add(
+        _limpar_padroes_persistidos(s)
+        _popular_snapshot_persistido_valido(
+            s,
             PadraoDetectado(
                 tipo="diferenca_saidas_alta",
                 titulo="Padrao alvo teste",
@@ -696,41 +796,50 @@ def test_padroes_informa_auditoria_alvo(client):
                     }
                 ),
                 criado_em=datetime.now(),
-            )
+            ),
         )
-        s.commit()
 
-    r = client.get("/padroes")
-    assert r.status_code == 200, r.text
-    padrao = next(p for p in r.json()["padroes"] if p["titulo"] == "Padrao alvo teste")
-    assert padrao["auditoria_alvo_id"] == aud["id"]
-    assert padrao["auditoria_alvo_nf"] == aud["nf_atual"]
+    try:
+        r = client.get("/padroes")
+        assert r.status_code == 200, r.text
+        padrao = next(p for p in r.json()["padroes"] if p["titulo"] == "Padrao alvo teste")
+        assert padrao["auditoria_alvo_id"] == aud["id"]
+        assert padrao["auditoria_alvo_nf"] == aud["nf_atual"]
+    finally:
+        with Session(engine) as s:
+            _limpar_padroes_persistidos(s)
 
 
-def test_padroes_sem_evidencia_nao_inventa_alvo(client):
+def test_padroes_sem_alvo_nao_inventa_alvo(client):
+    from sqlmodel import Session
+
     from audit_diesel.api.deps import _engine
     from audit_diesel.models import PadraoDetectado
-    from sqlmodel import Session
 
     engine = _engine()
     with Session(engine) as s:
-        s.add(
+        _limpar_padroes_persistidos(s)
+        _popular_snapshot_persistido_valido(
+            s,
             PadraoDetectado(
                 tipo="horario_atipico",
                 titulo="Padrao sem alvo teste",
-                descricao="Padrao sem evidencia suficiente.",
+                descricao="Padrao com evidencia sem auditoria correspondente.",
                 severidade="media",
-                dados_json=json.dumps({"total_atipicos": 3}),
+                dados_json=json.dumps({"evidencia_ids": [999999]}),
                 criado_em=datetime.now(),
-            )
+            ),
         )
-        s.commit()
 
-    r = client.get("/padroes")
-    assert r.status_code == 200, r.text
-    padrao = next(p for p in r.json()["padroes"] if p["titulo"] == "Padrao sem alvo teste")
-    assert padrao["auditoria_alvo_id"] is None
-    assert padrao["auditoria_alvo_nf"] is None
+    try:
+        r = client.get("/padroes")
+        assert r.status_code == 200, r.text
+        padrao = next(p for p in r.json()["padroes"] if p["titulo"] == "Padrao sem alvo teste")
+        assert padrao["auditoria_alvo_id"] is None
+        assert padrao["auditoria_alvo_nf"] is None
+    finally:
+        with Session(engine) as s:
+            _limpar_padroes_persistidos(s)
 
 
 def test_resposta_offline_nao_vaza_flag_tecnica(client):

@@ -36,7 +36,8 @@ export function ParecerIA({
         <div>
           <CardTitle className="text-brand-primary-dark">Parecer técnico - IA</CardTitle>
           <p className="mt-1 text-sm text-zinc-600">
-            Síntese gerada automaticamente a partir dos indicadores e alertas desta auditoria.
+            Síntese gerada automaticamente a partir dos indicadores e alertas desta auditoria.{" "}
+            <span className="font-medium text-zinc-700">Valores financeiros referentes exclusivamente à janela desta NF.</span>
           </p>
         </div>
         {meta?.offline && (
@@ -56,16 +57,13 @@ export function ParecerIA({
           />
         )}
       </CardContent>
-      <CardFooter>
-        <div className="flex items-center justify-between w-full">
-          <span>Gerado em {formatDateTimeBR(criadaEm)}</span>
-          {isOk && meta && (
-            <span className="tabular text-zinc-400">
-              {meta.provider} · {meta.model ?? "?"} · {Math.round(meta.latency_s * 1000)}ms · {meta.prompt_tokens + meta.completion_tokens} tok
-            </span>
-          )}
-        </div>
-      </CardFooter>
+      {isOk && (
+        <CardFooter>
+          <div className="w-full whitespace-nowrap">
+            <span>Gerado em {formatDateTimeBR(criadaEm)}</span>
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 }

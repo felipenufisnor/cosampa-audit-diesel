@@ -53,7 +53,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       {
         href: "/padroes",
-        label: "Padrões detectados",
+        label: "Padrões Detectados",
         icon: Sparkle,
       },
       { href: "/assistente", label: "Assistente", icon: MessageSquare },
@@ -64,12 +64,10 @@ const NAV_SECTIONS: NavSection[] = [
     preview: true,
     items: [
       { href: "/investigacoes", label: "Investigações", icon: TableProperties },
-      { href: "/rede", label: "Análise de rede", icon: Network },
+      { href: "/rede", label: "Análise de Rede", icon: Network },
     ],
   },
 ];
-
-const APP_TITLE = "PLATAFORMA DE AUDITORIA E CONTROLE - Arco Metropolitano JP";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -85,10 +83,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-app-bg md:grid md:grid-cols-[240px_1fr]">
+    <div className="min-h-screen bg-app-bg md:grid md:grid-cols-[280px_1fr]">
       <SidebarConteudo
         pathname={pathname}
-        className="hidden md:flex md:flex-col bg-brand-primary-light/55 text-brand-primary-dark"
+        className="hidden md:flex md:flex-col bg-brand-primary text-white"
       />
 
       {drawerAberto && (
@@ -100,32 +98,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-brand-primary-light/55 text-brand-primary-dark shadow-2xl transition-transform duration-200 md:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-brand-primary text-white shadow-2xl transition-transform duration-200 md:hidden",
           drawerAberto ? "translate-x-0" : "-translate-x-full",
         )}
         aria-hidden={!drawerAberto}
         aria-label="Menu lateral"
       >
-        <div className="flex items-center justify-between border-b border-brand-primary-dark/15 px-4 py-4">
+        <div className="flex items-center justify-between border-b border-white/15 px-4 py-4">
           <div className="flex flex-col gap-1.5 min-w-0">
-            <CosampaLogo width={140} height={28} />
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-brand-primary-dark">
-              Auditoria e Controle
+            <CosampaLogo width={185} height={36} tone="white" />
+            <p className="text-[13px] font-semibold uppercase tracking-[0.07em] text-white/75">
+              PLATAFORMA DE AUDITORIA
             </p>
           </div>
           <button
             type="button"
             onClick={() => setDrawerAberto(false)}
             aria-label="Fechar menu"
-            className="rounded-md p-1.5 text-brand-primary-dark hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary-dark/35"
+            className="rounded-md p-1.5 text-white hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
         <NavLista pathname={pathname} />
+        <SidebarUserFooter />
       </aside>
 
-      <div className="flex flex-col min-h-screen">
+      <div className="flex min-w-0 flex-col min-h-screen">
         <header className="min-h-16 border-b border-app-border bg-brand-primary-light/55 px-4 py-3 shadow-[0_1px_0_rgba(15,23,42,0.03)] backdrop-blur md:px-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <button
@@ -143,8 +142,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="hidden sm:block md:hidden shrink-0"
             />
             <div className="min-w-0 flex-1">
-              <h1 className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-primary-dark/70">
-                {APP_TITLE}
+              <h1 className="truncate text-sm text-brand-primary-dark/50">
+                <span className="font-medium">Controle Técnico de Diesel</span>
+                <span className="mx-1.5 text-brand-primary-dark/45">{">"}</span>
+                <strong className="font-bold text-brand-primary-dark">
+                  Arco Metropolitano JP
+                </strong>
               </h1>
             </div>
           </div>
@@ -254,23 +257,21 @@ function SidebarConteudo({
 }) {
   return (
     <aside className={className} aria-label="Navegação principal">
-      <div className="border-b border-brand-primary-dark/15 px-5 py-5">
-        <CosampaLogo width={158} height={34} />
-        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-primary-dark/70">
-          Controle técnico
-        </p>
-        <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-primary-dark/70">
-          Auditoria de diesel
+      <div className="border-b border-white/15 px-5 py-5">
+        <CosampaLogo width={210} height={40} tone="white" />
+        <p className="mt-4 text-[13px] font-semibold uppercase tracking-[0.07em] text-white/75">
+          PLATAFORMA DE AUDITORIA
         </p>
       </div>
       <NavLista pathname={pathname} />
+      <SidebarUserFooter />
     </aside>
   );
 }
 
 function NavLista({ pathname }: { pathname: string }) {
   return (
-    <nav className="px-3 py-3 space-y-5" aria-label="Itens de navegação">
+    <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5" aria-label="Itens de navegação">
       {NAV_SECTIONS.map((sec) => (
         <NavSecao key={sec.titulo} secao={sec} pathname={pathname} />
       ))}
@@ -285,16 +286,10 @@ function NavSecao({
   secao: NavSection;
   pathname: string;
 }) {
-  const tituloCor = secao.preview
-    ? "text-zinc-500"
-    : "text-brand-primary-dark/60";
   return (
     <div>
       <p
-        className={cn(
-          "mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.14em]",
-          tituloCor,
-        )}
+        className="mb-1.5 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-white/65"
       >
         {secao.titulo}
       </p>
@@ -330,26 +325,26 @@ function NavLink({
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary-dark/35",
+        "flex min-w-0 items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-[15px] leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45",
         preview
           ? active
-            ? "bg-white/55 text-zinc-700 font-medium"
-            : "text-zinc-600 hover:bg-white/25 hover:text-zinc-800"
+            ? "bg-white/20 text-white font-semibold shadow-sm"
+            : "text-white/80 hover:bg-white/10 hover:text-white"
           : active
-            ? "bg-white/75 text-brand-primary-dark font-semibold shadow-sm"
-            : "text-brand-primary-dark/75 hover:bg-white/25 hover:text-brand-primary-dark",
+            ? "bg-white/20 text-white font-semibold shadow-sm"
+            : "text-white/80 hover:bg-white/10 hover:text-white",
       )}
     >
       <Icon
         className={cn(
-          "h-4 w-4",
-          preview ? "text-zinc-500" : undefined,
+          "h-[18px] w-[18px] shrink-0",
+          preview ? "text-white/70" : "text-white/80",
         )}
         aria-hidden
       />
-      <span className="flex-1">{item.label}</span>
+      <span className="min-w-0 flex-1 whitespace-nowrap">{item.label}</span>
       {preview && (
-        <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-amber-700">
+        <span className="shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-white/80">
           Preview
         </span>
       )}
@@ -357,14 +352,36 @@ function NavLink({
   );
 }
 
+function SidebarUserFooter() {
+  return (
+    <div className="mt-auto border-t border-white/15 px-5 py-4">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-brand-primary shadow-sm">
+          FM
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white">
+            Felipe Martins
+          </p>
+          <p className="truncate text-xs font-medium text-white/70">
+            Administrador
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CosampaLogo({
   width,
   height,
   className,
+  tone = "default",
 }: {
   width: number;
   height: number;
   className?: string;
+  tone?: "default" | "white";
 }) {
   return (
     <Image
@@ -373,7 +390,11 @@ function CosampaLogo({
       width={width}
       height={height}
       priority
-      className={cn("object-contain", className)}
+      className={cn(
+        "object-contain",
+        tone === "white" && "brightness-0 invert",
+        className,
+      )}
       style={{ width, height }}
     />
   );

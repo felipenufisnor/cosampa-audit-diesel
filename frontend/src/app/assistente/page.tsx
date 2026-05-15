@@ -74,12 +74,6 @@ function AssistentePageInner() {
             página.
           </p>
         </div>
-        {auditoria && (
-          <Button onClick={() => setDrawerAberto(true)}>
-            <MessageSquare className="h-4 w-4" aria-hidden />
-            Abrir conversa
-          </Button>
-        )}
       </header>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(320px,420px)_1fr]">

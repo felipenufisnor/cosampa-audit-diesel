@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, func, select
 
-from audit_diesel.models import Abastecimento, Checklist, Mobilizado
+from audit_diesel.models import Abastecimento, Auditoria, Checklist, Mobilizado
 
 from ..deps import get_session
 from ..schemas import StatsResponse
@@ -39,6 +39,23 @@ def stats(session: Session = Depends(get_session)) -> StatsResponse:
     custo_nao_cad = sum(a.custo_total for a in nao_cad)
     pct = (custo_nao_cad / total_custo * 100.0) if total_custo else 0.0
 
+    # Contagem de NFs por status de auditoria
+    nfs_checklist = {ck.nota_fiscal for ck in session.exec(select(Checklist)).all()}
+    auditorias_por_nf: dict[str, str] = {}
+    for a in session.exec(select(Auditoria).order_by(Auditoria.criada_em.desc())).all():
+        auditorias_por_nf.setdefault(a.nf_atual, a.validacao_final)
+    nfs_aprovadas = 0
+    nfs_inconsistentes = 0
+    nfs_nao_auditadas = 0
+    for nf in nfs_checklist:
+        status = auditorias_por_nf.get(nf)
+        if status is None:
+            nfs_nao_auditadas += 1
+        elif status == "APROVADO":
+            nfs_aprovadas += 1
+        else:
+            nfs_inconsistentes += 1
+
     return StatsResponse(
         total_abastecimentos=int(total_ab or 0),
         total_litros=round(float(total_litros), 2),
@@ -54,4 +71,8 @@ def stats(session: Session = Depends(get_session)) -> StatsResponse:
         abastecimentos_nao_cadastrados=len(nao_cad),
         custo_nao_cadastrado_brl=round(custo_nao_cad, 2),
         pct_custo_nao_cadastrado=round(pct, 2),
+        nfs_auditadas=nfs_aprovadas + nfs_inconsistentes,
+        nfs_aprovadas=nfs_aprovadas,
+        nfs_inconsistentes=nfs_inconsistentes,
+        nfs_nao_auditadas=nfs_nao_auditadas,
     )

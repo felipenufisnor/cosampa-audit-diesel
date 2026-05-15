@@ -15,6 +15,7 @@
 
 import * as React from "react";
 import { AlertTriangle, Send, Sparkle, X } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -333,15 +334,42 @@ export function AssistenteDrawer({
 function MessageBubble({ msg }: { msg: ChatMessage }) {
   const isUser = msg.kind === "user";
   return (
-    <div className="rounded-xl border border-app-border bg-white px-3.5 py-2.5">
+    <div
+      className={
+        isUser
+          ? "rounded-xl border border-app-border bg-white px-3.5 py-2.5"
+          : "rounded-xl border border-brand-primary-medium/20 bg-brand-primary-light/55 px-3.5 py-2.5"
+      }
+    >
       <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
         {isUser ? "Você" : "Assistente"}
       </p>
-      <p className="mt-1 whitespace-pre-wrap text-[14.5px] leading-relaxed text-zinc-800">
-        {msg.texto || (msg.streaming ? (
-          <span className="text-zinc-400">Pensando...</span>
-        ) : null)}
-      </p>
+      {isUser ? (
+        <p className="mt-1 whitespace-pre-wrap text-[14.5px] leading-relaxed text-zinc-800">
+          {msg.texto}
+        </p>
+      ) : msg.texto ? (
+        <div className="mt-1 text-[14.5px] leading-relaxed text-zinc-800">
+          <ReactMarkdown
+            components={{
+              p: ({ children }) => <p className="my-1">{children}</p>,
+              strong: ({ children }) => <strong className="font-semibold text-zinc-900">{children}</strong>,
+              em: ({ children }) => <em className="italic">{children}</em>,
+              ul: ({ children }) => <ul className="my-1 list-disc pl-5">{children}</ul>,
+              ol: ({ children }) => <ol className="my-1 list-decimal pl-5">{children}</ol>,
+              li: ({ children }) => <li className="my-0.5">{children}</li>,
+              h1: ({ children }) => <h1 className="mb-1 mt-2 text-base font-bold">{children}</h1>,
+              h2: ({ children }) => <h2 className="mb-1 mt-2 text-[15px] font-bold">{children}</h2>,
+              h3: ({ children }) => <h3 className="mb-0.5 mt-1.5 text-[14.5px] font-semibold">{children}</h3>,
+              code: ({ children }) => <code className="rounded bg-white/75 px-1 py-0.5 font-mono text-[13px] text-brand-primary-dark ring-1 ring-brand-primary-medium/15">{children}</code>,
+            }}
+          >
+            {msg.texto}
+          </ReactMarkdown>
+        </div>
+      ) : msg.streaming ? (
+        <span className="mt-1 text-[14.5px] text-zinc-400">Pensando...</span>
+      ) : null}
     </div>
   );
 }

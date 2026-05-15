@@ -9,7 +9,7 @@ import type { MetricTone } from "@/components/ui/metric-card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { useStats } from "@/hooks/use-nfs";
-import { formatBRL, formatDateBR, formatLitros, formatNumero } from "@/lib/format";
+import { formatBRL, formatLitros, formatNumero } from "@/lib/format";
 
 interface StatTile {
   label: string;
@@ -17,7 +17,6 @@ interface StatTile {
   hint?: string;
   tone: MetricTone;
   icon: LucideIcon;
-  tooltip?: string;
 }
 
 export function StatsCards() {
@@ -25,20 +24,6 @@ export function StatsCards() {
 
   let tiles: StatTile[] = [];
   if (data) {
-    const periodoAb =
-      data.periodo_inicio && data.periodo_fim
-        ? `${formatDateBR(data.periodo_inicio)} a ${formatDateBR(data.periodo_fim)}`
-        : null;
-    const periodoNfs =
-      data.periodo_nfs_inicio && data.periodo_nfs_fim
-        ? `${formatDateBR(data.periodo_nfs_inicio)} a ${formatDateBR(data.periodo_nfs_fim)}`
-        : null;
-    const tooltipAb = periodoAb
-      ? `Janela coberta pelos registros de abastecimento do Infleet (${periodoAb}). Pode diferir do período das NFs.`
-      : "Janela coberta pelos registros de abastecimento do Infleet.";
-    const tooltipNfs = periodoNfs
-      ? `Janela coberta pelas datas de recebimento das NFs (${periodoNfs}). Pode diferir do período de abastecimentos.`
-      : "Janela coberta pelas datas de recebimento das NFs.";
     tiles = [
       {
         label: "Total abastecido",
@@ -46,7 +31,6 @@ export function StatsCards() {
         hint: `${formatNumero(data.total_abastecimentos)} abastecimentos · ${formatBRL(data.total_custo_brl)}`,
         tone: "info",
         icon: Fuel,
-        tooltip: tooltipAb,
       },
       {
         label: "Custo com equipamentos não cadastrados",
@@ -54,15 +38,13 @@ export function StatsCards() {
         hint: `${formatBRL(data.custo_nao_cadastrado_brl)} em ${formatNumero(data.abastecimentos_nao_cadastrados)} abastecimentos`,
         tone: "danger",
         icon: AlertTriangle,
-        tooltip: tooltipAb,
       },
       {
-        label: "NFs no período",
+        label: "NFs recebidas no período",
         value: formatNumero(data.total_nfs),
-        hint: periodoNfs ?? "-",
-        tone: "info",
+        hint: `${formatNumero(data.nfs_auditadas)} auditada${data.nfs_auditadas !== 1 ? "s" : ""} · ${formatNumero(data.nfs_nao_auditadas)} não auditada${data.nfs_nao_auditadas !== 1 ? "s" : ""}`,
+        tone: data.nfs_nao_auditadas > 0 ? "warn" : "success",
         icon: FileText,
-        tooltip: tooltipNfs,
       },
       {
         label: "Equipamentos cadastrados",
@@ -70,8 +52,6 @@ export function StatsCards() {
         hint: `${formatNumero(data.total_mobilizados)} no total · ${formatNumero(data.veiculos_distintos_infleet)} veículos no Infleet`,
         tone: "neutral",
         icon: Truck,
-        tooltip:
-          "Ativos: equipamentos com situação MOBILIZADO. Total: todo o cadastro. Veículos no Infleet: placas distintas que apareceram em algum abastecimento.",
       },
     ];
   }
@@ -105,7 +85,6 @@ export function StatsCards() {
                 hint={t.hint}
                 icon={t.icon}
                 tone={t.tone}
-                tooltip={t.tooltip}
               />
             ))}
     </div>

@@ -21,7 +21,7 @@ export type TipoInconsistencia =
   | "Diferença de saídas"
   | "Duplicidade";
 
-export type PrioridadeInvestigacao = "alta" | "media" | "baixa";
+export type PrioridadeInvestigacao = "Alta" | "Média" | "Baixa";
 
 export interface EventoTimeline {
   data: string; // dd/mm hh:mm
@@ -48,6 +48,8 @@ export interface Investigacao {
   timeline: EventoTimeline[];
   evidencias: Evidencia[];
   analise_automatica: string;
+  /** false quando a NF ainda não passou por auditoria formal — métricas derivadas de dados brutos do Infleet */
+  nf_auditada: boolean;
 }
 
 export const INVESTIGACOES_MOCK: Investigacao[] = [
@@ -58,7 +60,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8187",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Não cadastrado",
-    prioridade: "alta",
+    prioridade: "Alta",
     responsavel: { nome: "Camila Souza", iniciais: "CS" },
     aberta_ha_dias: 3,
     resumo:
@@ -74,6 +76,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     ],
     analise_automatica:
       "Probabilidade de fraude: baixa. Padrão consistente com gap de cadastro: 27 das 36 placas seguem o padrão 00X000 típico de cadastro por ativo não realizado. Sugestão: cobrar formalmente a obra pelo cadastro retroativo no GP.",
+    nf_auditada: true,
   },
   {
     id: "INV-2026-043",
@@ -81,7 +84,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8278",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Outlier de consumo",
-    prioridade: "media",
+    prioridade: "Média",
     responsavel: { nome: "Diego Pacheco", iniciais: "DP" },
     aberta_ha_dias: 2,
     resumo:
@@ -93,6 +96,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     evidencias: [],
     analise_automatica:
       "Contexto operacional plausível: há um pico semelhante de outras placas da mesma frota no mesmo período, indicando possível mudança de frente de obra. Recomendado confirmar com o coordenador antes de escalar.",
+    nf_auditada: true,
   },
   {
     id: "INV-2026-044",
@@ -100,7 +104,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8328",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Diferença de saídas",
-    prioridade: "alta",
+    prioridade: "Alta",
     responsavel: { nome: "Renata Lima", iniciais: "RL" },
     aberta_ha_dias: 1,
     resumo: "Diferença de saídas em -7.4% acima do limite de 2% do escopo.",
@@ -111,6 +115,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     evidencias: [{ nome: "indicadores_nf_8328.pdf", tipo: "pdf", tamanho_kb: 88 }],
     analise_automatica:
       "Hipótese principal: omissão de registros no Infleet. Há 4 dias consecutivos no período sem qualquer abastecimento registrado, atípico para a frota mobilizada. Recomendado confrontar com o checklist físico no GLPI.",
+    nf_auditada: false,
   },
 
   // --- AGUARDANDO OBRA (2) -------------------------------------------------
@@ -120,7 +125,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8108",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Pós-desmobilização",
-    prioridade: "alta",
+    prioridade: "Alta",
     responsavel: { nome: "Camila Souza", iniciais: "CS" },
     aberta_ha_dias: 8,
     resumo: "Veículo 04T639 com 18 abastecimentos após a data de desmobilização.",
@@ -132,6 +137,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     evidencias: [{ nome: "checklist_fisico_8108.pdf", tipo: "pdf", tamanho_kb: 215 }],
     analise_automatica:
       "Severidade alta sustentada. Possível uso indevido do tanque comboio ou cadastro de desmobilização desatualizado no GP. Sem evidência da obra até 17/04, escalonar.",
+    nf_auditada: true,
   },
   {
     id: "INV-2026-040",
@@ -139,7 +145,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8187",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Duplicidade",
-    prioridade: "media",
+    prioridade: "Média",
     responsavel: { nome: "Diego Pacheco", iniciais: "DP" },
     aberta_ha_dias: 5,
     resumo: "Dois abastecimentos com mesmo veículo e mesmo valor em janela de 12 minutos.",
@@ -150,6 +156,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     evidencias: [],
     analise_automatica:
       "Padrão típico de duplo lançamento operacional. Recomendar invalidação de um dos registros e revisão do procedimento de campo.",
+    nf_auditada: true,
   },
 
   // --- EM ANALISE (1) ------------------------------------------------------
@@ -159,7 +166,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8108",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Não cadastrado",
-    prioridade: "media",
+    prioridade: "Média",
     responsavel: { nome: "Renata Lima", iniciais: "RL" },
     aberta_ha_dias: 12,
     resumo: "Lote de 9 placas com cadastro divergente entre GP e Infleet.",
@@ -174,6 +181,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     ],
     analise_automatica:
       "7 das 9 placas batem com o cadastro do GP após remoção de hífen. Restam 2 placas indexadas por chassi no Infleet; conferir com o coordenador de frota.",
+    nf_auditada: true,
   },
 
   // --- CONCLUIDAS (4) ------------------------------------------------------
@@ -183,7 +191,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8108",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Outlier de consumo",
-    prioridade: "baixa",
+    prioridade: "Baixa",
     responsavel: { nome: "Diego Pacheco", iniciais: "DP" },
     aberta_ha_dias: 15,
     resumo: "Outlier explicado por mobilização temporária de retroescavadeira.",
@@ -195,6 +203,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     evidencias: [],
     analise_automatica:
       "Encerrada sem irregularidade. Contexto operacional confirmado por evidência da obra.",
+    nf_auditada: true,
   },
   {
     id: "INV-2026-028",
@@ -202,7 +211,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8108",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Duplicidade",
-    prioridade: "media",
+    prioridade: "Média",
     responsavel: { nome: "Camila Souza", iniciais: "CS" },
     aberta_ha_dias: 18,
     resumo: "Duplicidade real corrigida com invalidação no Infleet.",
@@ -213,6 +222,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     ],
     evidencias: [{ nome: "comprovante_invalidacao.pdf", tipo: "pdf", tamanho_kb: 64 }],
     analise_automatica: "Corrigida com sucesso. Sugerido reforço de procedimento.",
+    nf_auditada: true,
   },
   {
     id: "INV-2026-026",
@@ -220,7 +230,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8108",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Diferença de saídas",
-    prioridade: "media",
+    prioridade: "Média",
     responsavel: { nome: "Renata Lima", iniciais: "RL" },
     aberta_ha_dias: 22,
     resumo: "Saldo final reconciliado com checklist físico.",
@@ -232,6 +242,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     evidencias: [{ nome: "checklist_fisico_anterior.pdf", tipo: "pdf", tamanho_kb: 198 }],
     analise_automatica:
       "Diferença explicada por erro de digitação do estoque inicial. Procedimento revisado.",
+    nf_auditada: true,
   },
   {
     id: "INV-2026-022",
@@ -239,7 +250,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     nf: "8108",
     obra: "CONSÓRCIO ARCO JP",
     tipo: "Não cadastrado",
-    prioridade: "alta",
+    prioridade: "Alta",
     responsavel: { nome: "Camila Souza", iniciais: "CS" },
     aberta_ha_dias: 27,
     resumo: "12 cadastros pendentes incluídos no GP retroativamente.",
@@ -251,6 +262,7 @@ export const INVESTIGACOES_MOCK: Investigacao[] = [
     evidencias: [{ nome: "evidencia_cadastros_gp.xlsx", tipo: "xlsx", tamanho_kb: 56 }],
     analise_automatica:
       "Falha procedimental confirmada. Aderência futura será monitorada via Padrões detectados.",
+    nf_auditada: true,
   },
 ];
 
