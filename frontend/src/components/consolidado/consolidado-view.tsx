@@ -312,7 +312,7 @@ function StatsConsolidadoCards() {
         {
           label: "Alertas gerados",
           value: formatNumero(data.total_alertas),
-          hint: "Alta + Média + Baixa severidade",
+          hint: "Total de alertas por nível de criticidade",
           tone: data.total_alertas > 0 ? "warn" : "success",
           icon: AlertTriangle,
         },
@@ -339,7 +339,7 @@ function StatsConsolidadoCards() {
         {
           label: "Reconciliações pendentes",
           value: formatNumero(data.qtd_reconciliacoes_pendentes),
-          hint: "Equipamentos não cadastrados ainda não tratados",
+          hint: "Equipamentos aguardando análise",
           tone: data.qtd_reconciliacoes_pendentes > 0 ? "warn" : "success",
           icon: Activity,
         },

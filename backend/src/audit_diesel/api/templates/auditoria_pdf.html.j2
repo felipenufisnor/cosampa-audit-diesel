@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Auditoria de Diesel &mdash; NF {{ auditoria.nf_atual }}</title>
+  <title>Auditoria de Diesel - NF {{ auditoria.nf_atual }}</title>
   <style>{{ inline_css | safe }}</style>
 </head>
 <body>
@@ -10,11 +10,11 @@
 {# Header e footer "rodando": ambos sao replicados em todas as paginas. #}
 {% include "_header.html.j2" %}
 <div class="running-footer">
-  <span class="gen-date">Gerado em {{ gerado_em_str }}</span>
-  <span class="hash">SHA256:&nbsp;{{ integrity_hash }}</span>
+  <div class="gen-date">Gerado em {{ gerado_em_str }}</div>
+  <div class="hash">SHA256:&nbsp;{{ integrity_hash }}</div>
 </div>
 
-<h1>Auditoria de Diesel &mdash; NF {{ auditoria.nf_atual }}</h1>
+<h1>Auditoria de Diesel - NF {{ auditoria.nf_atual }}</h1>
 <p class="muted small">
   Documento gerado automaticamente pela ferramenta audit-diesel a partir das
   fontes Checklist (GLPI), Mobilizados (Gestão de Projetos) e Infleet

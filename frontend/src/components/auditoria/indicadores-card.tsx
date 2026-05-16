@@ -30,7 +30,7 @@ export function IndicadoresCard({ ind }: Props) {
       <CardHeader>
         <CardTitle>Indicadores do §4 (auditoria do diesel)</CardTitle>
         <p className="text-sm text-zinc-500">
-          Replica a aba &laquo;Auditoria do Diesel&raquo; da planilha. Valores em litros e em R$.
+          Valores em litros e em R$.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">

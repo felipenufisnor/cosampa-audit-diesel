@@ -6,9 +6,11 @@ import asyncio
 import json
 import os
 from datetime import datetime
+from io import BytesIO
 
 import pytest
 from fastapi.testclient import TestClient
+from pypdf import PdfReader
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -94,6 +96,30 @@ def test_criar_auditoria_e2e(client):
     assert "**Resultado**" in a["parecer_ia"]
     assert body["parecer_meta"]["offline"] is True
     assert len(body["alertas"]) > 0
+
+
+def test_pdf_auditoria_layout_metadata(client):
+    aud = client.post(
+        "/auditorias",
+        json={"nf_anterior": "8108", "nf_atual": "8187", "gerar_parecer": False},
+    ).json()
+    aud_id = aud["auditoria"]["id"]
+
+    r = client.get(f"/auditorias/{aud_id}/pdf")
+    assert r.status_code == 200, r.text
+    assert r.headers["content-type"] == "application/pdf"
+
+    reader = PdfReader(BytesIO(r.content))
+    text = "\n".join(page.extract_text() or "" for page in reader.pages)
+    assert "Setor de Auditoria e Controle" not in text
+    assert "COPAMSA · Setor de Auditoria e Controle" not in text
+    assert "Auditoria de Diesel · NF 8187" not in text
+    assert "Auditoria de Diesel - NF 8187" in text
+    assert "Auditoria de Diesel — NF 8187" not in text
+    assert "Gerado em" in text
+    assert "SHA256:" in text
+    assert "Pagina 1 de" in text
+    assert "Pagina\n" not in text
 
 
 def test_sugerir_e_aprovar_reconciliacao(client):
@@ -439,9 +465,10 @@ def test_metadados_versao_em_auditorias_duplicadas(client):
 
 def test_parecer_placeholder_eh_sanitizado_no_get(client):
     """Parecer template persistido no banco deve sair como null + status placeholder."""
+    from sqlmodel import Session, select
+
     from audit_diesel.api.deps import _engine
     from audit_diesel.models import Auditoria
-    from sqlmodel import Session, select
 
     aud = client.post(
         "/auditorias",
@@ -486,9 +513,10 @@ def test_parecer_valido_passa_no_get(client):
 
 def test_regenerar_parecer_substitui_placeholder(client):
     """Endpoint dedicado limpa parecer template e nao mexe em alertas/indicadores."""
+    from sqlmodel import Session, select
+
     from audit_diesel.api.deps import _engine
     from audit_diesel.models import Alerta, Auditoria
-    from sqlmodel import Session, select
 
     aud = client.post(
         "/auditorias",
@@ -583,10 +611,11 @@ def test_cache_assistente_por_janela_sobrevive_novo_id(client):
 def test_assistente_online_falha_cai_para_cache_janela(client):
     from types import SimpleNamespace
 
+    from sqlmodel import Session
+
     from audit_diesel.ai.assistente import salvar_cache_chip, stream_pergunta
     from audit_diesel.ai.provider import ProviderInfo
     from audit_diesel.api.deps import _engine
-    from sqlmodel import Session
 
     class FailingOnlineChat:
         provider = SimpleNamespace(

@@ -26,7 +26,10 @@ export function FilterTabs<T extends string>({
 }: FilterTabsProps<T>) {
   return (
     <div
-      className="inline-flex flex-wrap items-center gap-1 rounded-xl border border-app-border bg-zinc-50 p-1"
+      className={cn(
+        "inline-flex flex-wrap items-center rounded-xl border border-app-border bg-zinc-50 p-1",
+        compact ? "w-full justify-between gap-1" : "gap-1",
+      )}
       role="group"
       aria-label={label}
     >
@@ -39,10 +42,10 @@ export function FilterTabs<T extends string>({
             aria-pressed={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/25",
+              "inline-flex items-center rounded-lg font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/25",
               compact
-                ? "px-2.5 py-1 text-[11px] uppercase tracking-[0.06em]"
-                : "px-3 py-1.5 text-sm",
+                ? "gap-1 px-2 py-0.5 text-[10.5px] uppercase tracking-[0.045em]"
+                : "gap-1.5 px-3 py-1.5 text-sm",
               active
                 ? "bg-brand-primary-light text-brand-primary-dark shadow-sm"
                 : "text-zinc-600 hover:bg-white hover:text-zinc-950",
@@ -53,6 +56,7 @@ export function FilterTabs<T extends string>({
               <span
                 className={cn(
                   "tabular rounded-full border px-1.5 py-0.5 text-xs",
+                  compact && "py-px text-[11px]",
                   active
                     ? "border-transparent bg-white/70 text-brand-primary-dark"
                     : "border-zinc-200 bg-white text-zinc-500",

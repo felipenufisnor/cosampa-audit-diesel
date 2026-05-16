@@ -80,7 +80,7 @@ export function MetricCard({
           {value}
         </p>
         {hint && (
-          <p className="mt-3 min-h-12 text-center text-[16px] leading-6 text-zinc-500">
+          <p className="mt-3 min-h-12 whitespace-pre-line text-center text-[16px] leading-6 text-zinc-500">
             {hint}
           </p>
         )}

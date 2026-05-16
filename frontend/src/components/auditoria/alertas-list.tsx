@@ -171,7 +171,7 @@ export function AlertasList({ alertas, onReconciliar }: Props) {
         <div>
           <CardTitle>Alertas detectados ({alertas.length})</CardTitle>
           <p className="mt-1 text-sm text-zinc-500">
-            Disparados por checagens determinísticas no engine; reconciliação usa IA.
+            Disparados por checagens determinísticas, reconciliação usa IA.
           </p>
         </div>
         <div className="flex items-center gap-2">

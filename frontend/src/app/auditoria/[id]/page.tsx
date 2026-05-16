@@ -155,8 +155,6 @@ function Header({
   const [aprovarOpen, setAprovarOpen] = React.useState(false);
   const podeAprovar = ind.validacao_final === "INCONSISTENTE";
   const aprovadaManualmente = Boolean(ind.aprovada_em);
-  const versao = ind.versao ?? 1;
-  const totalVersoes = ind.total_versoes ?? versao;
 
   const [gerandoPdf, setGerandoPdf] = React.useState(false);
 
@@ -192,9 +190,6 @@ function Header({
         <h2 className="mt-1 text-3xl font-bold tabular tracking-tight text-zinc-950">
           NF {ind.nf_atual}
         </h2>
-        <p className="mt-1 text-sm font-medium text-zinc-700">
-          {ind.is_atual ? "Auditoria atual" : "Auditoria histórica"} v{versao} de {totalVersoes}
-        </p>
         <p className="mt-1 max-w-2xl truncate text-sm text-zinc-500">
           {formatNomeObra(ind.nome_obra)}
         </p>

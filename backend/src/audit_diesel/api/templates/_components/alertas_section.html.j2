@@ -4,9 +4,9 @@
 <table class="alertas-table">
   <thead>
     <tr>
-      <th style="width: 14%;">Severidade</th>
+      <th style="width: 14%;" class="severity-col">Severidade</th>
       <th>Descricao</th>
-      <th style="width: 18%;" class="right">Impacto (R$)</th>
+      <th style="width: 18%;" class="impact-col">Impacto (R$)</th>
     </tr>
   </thead>
   <tbody>
@@ -16,12 +16,12 @@
       </tr>
       {% for a in items %}
       <tr>
-        <td class="sev-{{ a.severidade }}">{{ a.severidade | upper }}</td>
+        <td class="severity-col sev-{{ a.severidade }}">{{ a.severidade | upper }}</td>
         <td>
           <div><strong>{{ a.titulo }}</strong></div>
           <div class="small muted">{{ a.descricao }}</div>
         </td>
-        <td class="right tabular">{{ fmt_brl(a.impacto_financeiro) if a.impacto_financeiro is not none else '—' }}</td>
+        <td class="impact-col tabular">{{ fmt_brl(a.impacto_financeiro) if a.impacto_financeiro is not none else '—' }}</td>
       </tr>
       {% endfor %}
     {% endfor %}

@@ -1,30 +1,47 @@
 /* CSS específico do PDF (WeasyPrint).
    Decisões:
-   - Tipografia DejaVu (Serif para corpo, Sans para cabeçalhos) garante
-     suporte a português sem dependência de fontes externas.
+   - Tipografia Inter self-hosted, igual ao frontend, com fallback local
+     para ambientes sem suporte a WOFF2.
    - Margens A4 padrão de relatório oficial: 20mm laterais, 18mm topo,
      22mm base (rodapé com paginação + hash).
    - Cores em escala de cinza com toques discretos de severidade. Tudo
      pensado para impressão monocromática legível.
 */
 
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/InterVariable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/InterVariable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 @page {
   size: A4 portrait;
   margin: 18mm 20mm 24mm 20mm;
 
-  @top-center {
+  @top-left {
     content: element(header-running);
-  }
-
-  @bottom-center {
-    content: "Pagina " counter(page) " de " counter(pages);
-    font-family: "DejaVu Sans", sans-serif;
-    font-size: 8pt;
-    color: #555;
   }
 
   @bottom-left {
     content: element(footer-running);
+  }
+
+  @bottom-right {
+    content: "Pagina " counter(page) " de " counter(pages);
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    font-size: 8pt;
+    color: #555;
+    white-space: nowrap;
   }
 }
 
@@ -34,33 +51,39 @@
    nao expoe o conteudo como texto extraivel. */
 .running-footer {
   position: running(footer-running);
-  font-family: "DejaVu Sans", sans-serif;
+  display: block;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-size: 7.5pt;
   color: #555;
+  line-height: 1.25;
 }
 .running-footer .hash {
-  font-family: "DejaVu Sans Mono", "Courier New", monospace;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-size: 7pt;
   color: #777;
-  margin-left: 4mm;
-  letter-spacing: 0.3pt;
+  margin-top: 0.5mm;
+  letter-spacing: 0.1pt;
 }
 
 html {
-  font-family: "DejaVu Serif", Georgia, serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-size: 10pt;
   color: #1a1a1a;
   line-height: 1.45;
+  font-feature-settings: "tnum";
 }
 
 h1, h2, h3, h4 {
-  font-family: "DejaVu Sans", Helvetica, Arial, sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   color: #0e0e0e;
   margin: 0 0 4mm 0;
   font-weight: 700;
 }
 
-h1 { font-size: 16pt; }
+h1 {
+  font-size: 16pt;
+  text-align: center;
+}
 h2 { font-size: 12pt; margin-top: 6mm; }
 h3 { font-size: 10.5pt; margin-top: 4mm; }
 p  { margin: 0 0 2mm 0; }
@@ -75,21 +98,36 @@ p  { margin: 0 0 2mm 0; }
 .running-header {
   position: running(header-running);
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
+  gap: 7mm;
+  width: 170mm;
   border-bottom: 0.5pt solid #999;
-  padding-bottom: 2mm;
-  font-family: "DejaVu Sans", sans-serif;
+  padding-bottom: 2.2mm;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-size: 9pt;
   color: #333;
 }
-.running-header .left { font-weight: 700; }
-.running-header .right { color: #555; }
+.running-header .header-logo {
+  display: block;
+  width: 42mm;
+  height: auto;
+}
+.running-header .header-title {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+  text-align: center;
+}
+.running-header .org {
+  font-weight: 700;
+  color: #242424;
+}
+.running-header .report {
+  margin-top: 0.8mm;
+  color: #555;
+}
 
-/* Os spans .gen-date / .integrity-hash sao usados pelo footer rodando.
-   Mantemos visiveis apenas dentro do .running-footer; a versao "raiz" no
-   topo do <body> fica oculta para nao poluir a primeira pagina. */
-.gen-date.hidden, .integrity-hash.hidden { display: none; }
+/* Metadados tecnicos do PDF replicados no rodape de cada pagina. */
 
 /* --- Bloco de identificacao --- */
 .id-table {
@@ -103,7 +141,7 @@ p  { margin: 0 0 2mm 0; }
   font-size: 9.5pt;
 }
 .id-table td.label {
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   color: #555;
   width: 32%;
   font-size: 8.5pt;
@@ -130,13 +168,13 @@ p  { margin: 0 0 2mm 0; }
 }
 .indicadores thead th {
   background-color: #efefef;
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-size: 8.5pt;
   text-transform: uppercase;
   letter-spacing: 0.5pt;
 }
 .indicadores .label-cell {
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   color: #444;
   font-size: 8.5pt;
   width: 50%;
@@ -152,7 +190,7 @@ p  { margin: 0 0 2mm 0; }
 .indicadores .row-final td {
   background-color: #1a1a1a;
   color: #fff;
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-weight: 700;
   font-size: 11pt;
   letter-spacing: 0.4pt;
@@ -165,7 +203,7 @@ p  { margin: 0 0 2mm 0; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 .validacao-box .titulo {
   font-size: 9pt;
@@ -196,10 +234,18 @@ p  { margin: 0 0 2mm 0; }
 }
 .alertas-table thead th {
   background-color: #efefef;
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-size: 8.2pt;
   text-transform: uppercase;
   letter-spacing: 0.5pt;
+}
+.alertas-table .severity-col {
+  text-align: center;
+  vertical-align: middle;
+}
+.alertas-table .impact-col {
+  text-align: center;
+  vertical-align: middle;
 }
 .sev-alta    { color: #7a1717; font-weight: 700; }
 .sev-media   { color: #8b5a00; font-weight: 700; }
@@ -207,7 +253,7 @@ p  { margin: 0 0 2mm 0; }
 
 .tipo-grupo {
   background-color: #f6f6f6;
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-size: 8.5pt;
   font-weight: 700;
   text-transform: uppercase;
@@ -236,7 +282,7 @@ p  { margin: 0 0 2mm 0; }
   margin-top: 2mm;
   font-size: 8pt;
   color: #666;
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   border-top: 0.4pt solid #ccc;
   padding-top: 1.5mm;
 }
@@ -250,7 +296,7 @@ p  { margin: 0 0 2mm 0; }
   font-size: 8.8pt;
 }
 .recon-list .quem {
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-weight: 700;
   font-size: 8.5pt;
 }
@@ -262,7 +308,7 @@ p  { margin: 0 0 2mm 0; }
 
 /* --- Misc --- */
 .section-title {
-  font-family: "DejaVu Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   font-size: 10.5pt;
   text-transform: uppercase;
   letter-spacing: 0.7pt;
