@@ -235,6 +235,7 @@ function Header({
         <StatusBadge
           status={ind.validacao_final}
           aprovadaManualmente={aprovadaManualmente}
+          className="h-9 px-4 text-sm rounded-lg"
         />
       </div>
       <AprovarDialog

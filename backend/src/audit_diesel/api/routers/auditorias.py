@@ -12,6 +12,7 @@ from sqlmodel import Session, select
 from audit_diesel.ai.client import ChatClient
 from audit_diesel.ai.parecer import GeradorParecer
 from audit_diesel.ai.parecer_quality import avaliar_parecer
+from audit_diesel.audit.alert_dedup import deduplicar_nao_cadastrados
 from audit_diesel.audit.engine import (
     AuditEngine,
     AuditoriaCompleta,
@@ -182,7 +183,7 @@ def regenerar_parecer(
         raise HTTPException(
             status_code=404, detail=f"Auditoria {auditoria_id} não encontrada."
         )
-    alertas = list(
+    alertas = deduplicar_nao_cadastrados(
         session.exec(select(Alerta).where(Alerta.auditoria_id == auditoria_id)).all()
     )
     completa = AuditoriaCompleta(auditoria=auditoria, alertas=alertas)
@@ -265,7 +266,7 @@ def gerar_pdf_auditoria(
             detail=f"Checklist da NF {auditoria.nf_atual} não localizado.",
         )
 
-    alertas = list(
+    alertas = deduplicar_nao_cadastrados(
         session.exec(select(Alerta).where(Alerta.auditoria_id == auditoria_id)).all()
     )
 
@@ -369,7 +370,7 @@ def _build_consolidado(session: Session) -> ConsolidadoResponse:
         auditorias_por_nf_atual.setdefault(a.nf_atual, a)
 
     alertas_por_auditoria: dict[int, list[Alerta]] = {}
-    for al in session.exec(select(Alerta)).all():
+    for al in deduplicar_nao_cadastrados(session.exec(select(Alerta)).all()):
         alertas_por_auditoria.setdefault(al.auditoria_id, []).append(al)
 
     items: list[NFConsolidadoItem] = []
@@ -514,6 +515,10 @@ def _to_response(
     session: Session | None = None,
 ) -> AuditoriaCompletaResponse:
     a = resultado.auditoria
+    alertas_publicos = deduplicar_nao_cadastrados(resultado.alertas)
+    qtd_nao_cadastrados = sum(
+        1 for al in alertas_publicos if al.tipo == "NAO_CADASTRADO"
+    )
     qualidade = avaliar_parecer(a.parecer_ia)
     parecer_publicado = a.parecer_ia if qualidade.is_ok else None
     versao, total_versoes, is_atual, auditoria_atual_id = _version_meta(session, a)
@@ -533,7 +538,7 @@ def _to_response(
             saida_teorica_litros=a.saida_teorica_litros,
             diferenca_litros=a.diferenca_litros,
             diferenca_percentual=a.diferenca_percentual,
-            qtd_equipamentos_nao_cadastrados=a.qtd_equipamentos_nao_cadastrados,
+            qtd_equipamentos_nao_cadastrados=qtd_nao_cadastrados,
             validacao_final=a.validacao_final,
             parecer_ia=parecer_publicado,
             parecer_status=qualidade.status,
@@ -556,7 +561,7 @@ def _to_response(
                 impacto_financeiro=al.impacto_financeiro,
                 payload=json.loads(al.payload_json) if al.payload_json else {},
             )
-            for al in resultado.alertas
+            for al in alertas_publicos
         ],
         parecer_meta=parecer_meta,
     )

@@ -22,6 +22,7 @@ import structlog
 from pydantic import BaseModel, Field, ValidationError
 from sqlmodel import Session, select
 
+from audit_diesel.audit.alert_dedup import deduplicar_nao_cadastrados
 from audit_diesel.models import Abastecimento, Alerta, Auditoria, Mobilizado
 
 from . import cache
@@ -110,11 +111,13 @@ class ReconciliadorSemantico:
         if cached:
             return _sugestoes_from_cached(cached)
 
-        alertas = self.session.exec(
-            select(Alerta)
-            .where(Alerta.auditoria_id == auditoria_id)
-            .where(Alerta.tipo == "NAO_CADASTRADO")
-        ).all()
+        alertas = deduplicar_nao_cadastrados(
+            self.session.exec(
+                select(Alerta)
+                .where(Alerta.auditoria_id == auditoria_id)
+                .where(Alerta.tipo == "NAO_CADASTRADO")
+            ).all()
+        )
         if not alertas:
             return []
 

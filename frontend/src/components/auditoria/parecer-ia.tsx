@@ -1,6 +1,6 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,10 @@ export function ParecerIA({
     <Card className="sticky top-4 border-brand-primary/25 bg-white">
       <CardHeader className="border-brand-primary/15 bg-brand-primary-light/55">
         <div>
-          <CardTitle className="text-brand-primary-dark">Parecer técnico - IA</CardTitle>
+          <CardTitle className="flex items-center gap-1.5 text-brand-primary-dark">
+            Recomendação Técnica - IA
+            <Sparkles className="ml-2 h-5 w-5 shrink-0 text-brand-primary/50" aria-hidden />
+          </CardTitle>
           <p className="mt-1 text-sm text-zinc-600">
             Síntese gerada automaticamente a partir dos indicadores e alertas desta auditoria.{" "}
             <span className="font-medium text-zinc-700">Valores financeiros referentes exclusivamente à janela desta NF.</span>

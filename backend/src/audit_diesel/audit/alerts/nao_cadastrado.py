@@ -12,10 +12,17 @@ class NaoCadastradoAlert:
 
     def detectar(self, contexto: AuditContext) -> list[AlertResult]:
         cadastrados = {m.placa_ativo_normalizada for m in contexto.mobilizados if m.placa_ativo_normalizada}
-        resultados: list[AlertResult] = []
+        representantes = {}
         for ab in contexto.abastecimentos_janela:
             if ab.veiculo_normalizado in cadastrados:
                 continue
+            key = ab.veiculo_normalizado or ab.veiculo_raw
+            atual = representantes.get(key)
+            if atual is None or ab.custo_total > atual.custo_total:
+                representantes[key] = ab
+
+        resultados: list[AlertResult] = []
+        for ab in representantes.values():
             resultados.append(
                 AlertResult(
                     tipo=self.tipo,

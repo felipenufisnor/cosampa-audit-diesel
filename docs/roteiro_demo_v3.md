@@ -67,24 +67,24 @@ Comece no **Dashboard** (`/`).
 
 > "A auditoria de diesel hoje exige que o engenheiro cruze planilhas,
 > cadastro do GP, registros do Infleet, checklist, chamados e evidencias
-> operacionais. A POC transforma esse processo em uma esteira de agentes.
+> operacionais. Essa DEMO transforma esse processo em uma esteira de agentes.
 >
-> O primeiro agente e deterministico: ele calcula os indicadores do escopo,
+> O primeiro agente é deterministico: ele calcula os indicadores do escopo,
 > compara NF anterior e NF atual, valida a diferenca de saidas e dispara
 > alertas tecnicos. Em cima dele entram os agentes de IA: um prioriza
 > padroes, outro narra a auditoria em tempo real, outro conversa com o
 > auditor usando ferramentas de consulta, e outro reconcilia cadastros
 > divergentes.
 >
-> O ponto principal nao e trocar o engenheiro pela IA. E dar ao engenheiro
+> O ponto principal nao é trocar o engenheiro pela IA. E dar ao engenheiro
 > um copiloto que faz a triagem pesada, aponta onde olhar e deixa trilha
-> tecnica para decisao e responsabilizacao."
+> tecnica para decisao."
 
 Aponte rapidamente para os cards do dashboard e para a tabela de NFs.
 
 > "A demo principal usa dados reais da obra-piloto: NF anterior 8108 e NF
 > atual 8187. O resultado dessa janela e inconsistente: diferenca de +0,39%,
-> 36 equipamentos sem cadastro no GP e R$ 32.924,16 em alertas de alta
+> 18 equipamentos sem cadastro no GP e R$ 18.342,00 em alertas de alta
 > severidade."
 
 ### 1:00 a 2:15 - Padroes proativos: IA antes do clique

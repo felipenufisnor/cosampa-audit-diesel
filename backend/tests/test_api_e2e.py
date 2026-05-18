@@ -193,6 +193,29 @@ def test_contexto_reconciliacao_404_em_id_invalido(client):
     assert r.status_code == 404
 
 
+def test_api_e_consolidado_expoem_nao_cadastrados_deduplicados(client):
+    aud = client.post(
+        "/auditorias",
+        json={
+            "nf_anterior": "8108",
+            "nf_atual": "8187",
+            "gerar_parecer": False,
+            "modo": "sobrescrever_ultima",
+        },
+    ).json()
+    alertas = aud["alertas"]
+    nao_cad = [a for a in alertas if a["tipo"] == "NAO_CADASTRADO"]
+    veiculos = [a["payload"]["veiculo_normalizado"] for a in nao_cad]
+
+    assert len(veiculos) == len(set(veiculos))
+    assert aud["auditoria"]["qtd_equipamentos_nao_cadastrados"] == len(nao_cad)
+
+    consolidado = client.get("/auditorias/consolidado").json()
+    item = next(i for i in consolidado["items"] if i["auditoria_id"] == aud["auditoria"]["id"])
+    assert item["qtd_alertas"] == len(alertas)
+    assert item["qtd_alertas_alta"] == sum(1 for a in alertas if a["severidade"] == "alta")
+
+
 def test_openapi_doc(client):
     r = client.get("/openapi.json")
     assert r.status_code == 200

@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 
 import pytest
 
+from audit_diesel.audit.alert_dedup import deduplicar_nao_cadastrados
 from audit_diesel.audit.alerts import (
     DuplicidadeAlert,
     NaoCadastradoAlert,
@@ -13,7 +15,7 @@ from audit_diesel.audit.alerts import (
     PosDesmobilizacaoAlert,
 )
 from audit_diesel.audit.alerts.base import AuditContext
-from audit_diesel.models import Abastecimento, Mobilizado
+from audit_diesel.models import Abastecimento, Alerta
 
 
 def _build_context(session, ck_ant, ck_atu, abastecimentos, mobilizados):
@@ -48,6 +50,47 @@ class TestNaoCadastradoAlert:
             session, ck_ant, ck_atu, [abastecimento_padrao], [mobilizado_padrao]
         )
         assert NaoCadastradoAlert().detectar(ctx) == []
+
+    def test_deduplica_mesmo_veiculo_e_mantem_maior_custo(self, session, checklist_par):
+        ck_ant, ck_atu = checklist_par
+        menor = Abastecimento(
+            id=101,
+            data=datetime(2026, 3, 4, 10, 0),
+            veiculo_raw="OSB8826",
+            veiculo_normalizado="OSB8826",
+            apelido="34.002",
+            quantidade_litros=100,
+            custo_total=650.0,
+            valor_litro=6.5,
+        )
+        maior = Abastecimento(
+            id=102,
+            data=datetime(2026, 3, 5, 10, 0),
+            veiculo_raw="OSB8826",
+            veiculo_normalizado="OSB8826",
+            apelido="34.002",
+            quantidade_litros=200,
+            custo_total=1300.0,
+            valor_litro=6.5,
+        )
+        outro = Abastecimento(
+            id=103,
+            data=datetime(2026, 3, 6, 10, 0),
+            veiculo_raw="OIP6397",
+            veiculo_normalizado="OIP6397",
+            apelido="35.001",
+            quantidade_litros=150,
+            custo_total=975.0,
+            valor_litro=6.5,
+        )
+        ctx = _build_context(session, ck_ant, ck_atu, [menor, maior, outro], [])
+
+        alertas = NaoCadastradoAlert().detectar(ctx)
+
+        assert len(alertas) == 2
+        osb = next(a for a in alertas if a.payload["veiculo_normalizado"] == "OSB8826")
+        assert osb.abastecimento_id == 102
+        assert osb.impacto_financeiro == 1300.0
 
 
 class TestPosDesmobilizacaoAlert:
@@ -191,3 +234,45 @@ class TestDuplicidadeAlert:
 def test_alertas_tem_tipo_definido(alert_cls, attr):
     assert hasattr(alert_cls(), attr)
     assert getattr(alert_cls(), attr) != ""
+
+
+def test_deduplica_alertas_persistidos_por_veiculo_e_maior_impacto():
+    alertas = [
+        Alerta(
+            id=1,
+            auditoria_id=10,
+            tipo="NAO_CADASTRADO",
+            severidade="alta",
+            abastecimento_id=101,
+            titulo="Equipamento não cadastrado no GP",
+            descricao="menor",
+            payload_json=json.dumps({"veiculo_normalizado": "OSB8826"}),
+            impacto_financeiro=650.0,
+        ),
+        Alerta(
+            id=2,
+            auditoria_id=10,
+            tipo="NAO_CADASTRADO",
+            severidade="alta",
+            abastecimento_id=102,
+            titulo="Equipamento não cadastrado no GP",
+            descricao="maior",
+            payload_json=json.dumps({"veiculo_normalizado": "OSB8826"}),
+            impacto_financeiro=1300.0,
+        ),
+        Alerta(
+            id=3,
+            auditoria_id=10,
+            tipo="DUPLICIDADE",
+            severidade="baixa",
+            abastecimento_id=None,
+            titulo="Possível duplicidade",
+            descricao="mantem outros tipos",
+            payload_json="{}",
+            impacto_financeiro=None,
+        ),
+    ]
+
+    dedup = deduplicar_nao_cadastrados(alertas)
+
+    assert [a.id for a in dedup] == [2, 3]

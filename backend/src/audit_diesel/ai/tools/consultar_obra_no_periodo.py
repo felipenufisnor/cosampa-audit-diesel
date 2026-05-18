@@ -7,6 +7,7 @@ from typing import Any
 
 from sqlmodel import Session, select
 
+from audit_diesel.audit.alert_dedup import deduplicar_nao_cadastrados
 from audit_diesel.models import Abastecimento, Alerta, Auditoria
 
 
@@ -39,9 +40,15 @@ def consultar_obra_no_periodo(
         .where(Auditoria.criada_em <= dt_fim)
     ).all())
     ids = [a.id for a in audits if a.id is not None]
-    alertas = list(session.exec(
-        select(Alerta).where(Alerta.auditoria_id.in_(ids))  # type: ignore[attr-defined]
-    ).all()) if ids else []
+    alertas = (
+        deduplicar_nao_cadastrados(
+            session.exec(
+                select(Alerta).where(Alerta.auditoria_id.in_(ids))  # type: ignore[attr-defined]
+            ).all()
+        )
+        if ids
+        else []
+    )
 
     return {
         "obra": obra,
@@ -59,7 +66,11 @@ def consultar_obra_no_periodo(
                 "nf_anterior": a.nf_anterior,
                 "diferenca_percentual": round(float(a.diferenca_percentual or 0.0) * 100, 2),
                 "validacao_final": a.validacao_final,
-                "qtd_equipamentos_nao_cadastrados": int(a.qtd_equipamentos_nao_cadastrados or 0),
+                "qtd_equipamentos_nao_cadastrados": sum(
+                    1
+                    for al in alertas
+                    if al.auditoria_id == a.id and al.tipo == "NAO_CADASTRADO"
+                ),
             }
             for a in audits
         ],

@@ -19,10 +19,10 @@ from audit_diesel.models import (
     ReconciliacaoAprovada,
 )
 
+from .alert_dedup import deduplicar_nao_cadastrados
 from .alerts import ALERTAS_PADRAO
 from .alerts.base import AlertResult, AuditContext
 from .indicators import calcular_indicadores
-
 
 # Prefixo usado em `Auditoria.nf_anterior` quando o auditor define manualmente
 # o ponto de corte (data + estoque inicial) em vez de selecionar uma NF
@@ -65,6 +65,9 @@ class AuditoriaCompleta:
 
     auditoria: Auditoria
     alertas: list[Alerta]
+
+    def __post_init__(self) -> None:
+        self.alertas = deduplicar_nao_cadastrados(self.alertas)
 
     def to_dict(self) -> dict[str, Any]:
         """Serializa para dict (consumido pela CLI no modo --json)."""
